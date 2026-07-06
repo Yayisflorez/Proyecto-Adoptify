@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Heart, PawPrint, MapPin, Calendar, Phone, MessageCircle, Share2, ArrowLeft, Star, CheckCircle, XCircle, AlertCircle, FileText, Send, X, Home } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AnimalProfile() {
   const { id } = useParams();

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, PawPrint, Heart, Users, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
-import logo from "../assets/logo.png";
-import loginDog from "../assets/loginDog.jpg";
-import { useAuth } from "../context/AuthContext";
+import logo from "../../assets/logo.png";
+import loginDog from "../../assets/loginDog.jpg";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();

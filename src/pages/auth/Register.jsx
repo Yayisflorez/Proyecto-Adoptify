@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, PawPrint, Heart, User, Mail, Lock, ArrowRight, Users, Eye, EyeOff, CheckCircle, XCircle, Phone, FileText } from "lucide-react";
-import logo from "../assets/logo.png";
-import loginDog from "../assets/loginDog.jpg";
-import { useAuth } from "../context/AuthContext";
+import logo from "../../assets/logo.png";
+import loginDog from "../../assets/loginDog.jpg";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();

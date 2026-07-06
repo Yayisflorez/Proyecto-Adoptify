@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Heart, PawPrint, Users, Search, ShoppingBag, MessageCircle, Home as HomeIcon, HandHeart, ArrowRight, ChevronRight, ShoppingCart, Star, ArrowUp, MessageSquare, ThumbsUp, Share2, User } from "lucide-react";
-import mascotaImg from "../assets/Mascotas.jpg";
-import daycareImg from "../assets/daycare.png";
+import { Heart, PawPrint, Users, Search, ShoppingBag, MessageCircle, Home as HomeIcon, HandHeart, ArrowRight, ChevronRight, ShoppingCart, Star, ArrowUp, MessageSquare, ThumbsUp, Share2, User, Bell, Calendar, MapPin, TrendingUp } from "lucide-react";
+import mascotaImg from "../../assets/Mascotas.jpg";
 
-export default function Home() {
+export default function Dashboard() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState("");
 
@@ -12,7 +11,6 @@ export default function Home() {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 500);
 
-      // Detect active section
       const sections = ['forum', 'how-it-works', 'animals', 'store'];
       const scrollPosition = window.scrollY + 200;
 
@@ -52,25 +50,25 @@ export default function Home() {
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-rose-100 text-rose-700 rounded-full text-sm font-medium mb-6">
                 <Heart className="w-4 h-4" />
-                <span>Conectando corazones con patitas</span>
+                <span>Bienvenido de nuevo</span>
               </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 font-display tracking-tight leading-tight">
-                Adopta, Ama y
+                Encuentra a tu
                 <span className="block bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">
-                  Cambia una vida
+                  compañero ideal
                 </span>
               </h1>
               <p className="text-xl text-gray-600 mb-8 max-w-xl">
-                En Adoptify conectamos personas con animales que buscan un hogar lleno de amor. Tu compañero ideal te espera.
+                Explora mascotas, refugios, tienda y comunidad. Tu nuevo amigo está a un clic de distancia.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/login" className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-300 transition-all duration-300 hover:scale-105">
+                <Link to="/animals" className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-300 transition-all duration-300 hover:scale-105">
                   <PawPrint className="w-5 h-5 mr-2" />
-                  Quiero Adoptar
+                  Explorar Mascotas
                 </Link>
-                <Link to="/login" className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border-2 border-gray-200 hover:border-rose-300 hover:text-rose-600 transition-all duration-300">
-                  <ShoppingBag className="w-5 h-5 mr-2" />
-                  Ir a la Tienda
+                <Link to="/shelters" className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border-2 border-gray-200 hover:border-rose-300 hover:text-rose-600 transition-all duration-300">
+                  <HomeIcon className="w-5 h-5 mr-2" />
+                  Ver Refugios
                 </Link>
               </div>
 
@@ -81,21 +79,21 @@ export default function Home() {
                     <PawPrint className="w-5 h-5 text-rose-500" />
                     <div className="text-2xl font-bold text-gray-900 font-display">1,245</div>
                   </div>
-                  <div className="text-sm text-gray-600">Mascotas adoptadas</div>
+                  <div className="text-sm text-gray-600">Mascotas disponibles</div>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Heart className="w-5 h-5 text-amber-500" />
                     <div className="text-2xl font-bold text-gray-900 font-display">3,982</div>
                   </div>
-                  <div className="text-sm text-gray-600">Familias felices</div>
+                  <div className="text-sm text-gray-600">Adopciones exitosas</div>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Users className="w-5 h-5 text-rose-500" />
                     <div className="text-2xl font-bold text-gray-900 font-display">5,210</div>
                   </div>
-                  <div className="text-sm text-gray-600">Miembros</div>
+                  <div className="text-sm text-gray-600">Miembros activos</div>
                 </div>
               </div>
             </div>
@@ -107,11 +105,11 @@ export default function Home() {
               />
               <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-white" />
+                  <Bell className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900">¡Únete ahora!</div>
-                  <div className="text-sm text-gray-600">Es gratis</div>
+                  <div className="font-bold text-gray-900">¡Nuevas mascotas!</div>
+                  <div className="text-sm text-gray-600">3 disponibles hoy</div>
                 </div>
               </div>
             </div>
@@ -119,37 +117,37 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Quick Actions */}
       <section className="py-16 bg-gradient-to-br from-rose-100/50 to-amber-100/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Link to="/login" className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
+            <Link to="/animals" className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
               <div className="w-14 h-14 bg-rose-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-rose-200 transition-colors">
                 <Search className="w-7 h-7 text-rose-600" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Explorar mascotas</h3>
               <p className="text-sm text-gray-600">Encuentra a tu nuevo mejor amigo</p>
             </Link>
-            <Link to="/login" className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
+            <Link to="/shelters" className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
               <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-200 transition-colors">
-                <ShoppingBag className="w-7 h-7 text-amber-600" />
+                <HomeIcon className="w-7 h-7 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Refugios</h3>
+              <p className="text-sm text-gray-600">Conoce los refugios asociados</p>
+            </Link>
+            <Link to="/store" className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
+              <div className="w-14 h-14 bg-rose-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-rose-200 transition-colors">
+                <ShoppingBag className="w-7 h-7 text-rose-600" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Tienda Online</h3>
               <p className="text-sm text-gray-600">Todo lo que tu mascota necesita</p>
             </Link>
-            <Link to="/login" className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
-              <div className="w-14 h-14 bg-rose-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-rose-200 transition-colors">
-                <MessageCircle className="w-7 h-7 text-rose-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Únete al Foro</h3>
-              <p className="text-sm text-gray-600">Comparte, pregunta y aprende</p>
-            </Link>
-            <Link to="/login" className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
+            <Link to="/forum" className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
               <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-200 transition-colors">
-                <HandHeart className="w-7 h-7 text-amber-600" />
+                <MessageCircle className="w-7 h-7 text-amber-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Ayuda y colabora</h3>
-              <p className="text-sm text-gray-600">Tu apoyo hace la diferencia</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Comunidad</h3>
+              <p className="text-sm text-gray-600">Comparte, pregunta y aprende</p>
             </Link>
           </div>
         </div>
@@ -168,12 +166,11 @@ export default function Home() {
               En Adoptify es más fácil de lo que imaginas
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              En Adoptify te acompañamos en cada proceso hasta que encuentres a tu compañero ideal.
+              Te acompañamos en cada proceso hasta que encuentres a tu compañero ideal.
             </p>
           </div>
           
           <div className="relative">
-            {/* Connecting Line */}
             <div className="hidden lg:block absolute top-24 left-0 right-0 h-1 bg-gradient-to-r from-rose-300 via-amber-300 to-amber-300 rounded-full" />
             
             <div className="grid md:grid-cols-5 gap-8 items-start">
@@ -212,25 +209,26 @@ export default function Home() {
               </h2>
               <p className="text-gray-600">Conoce a algunos de nuestros amigos disponibles</p>
             </div>
-            <Link to="/login" className="text-rose-600 hover:text-rose-700 font-semibold text-lg flex items-center">
+            <Link to="/animals" className="text-rose-600 hover:text-rose-700 font-semibold text-lg flex items-center">
               Ver todos los animales <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: "Max", shelter: "Refugio 'Hogar de huellas'" },
-              { name: "Thor", shelter: "Refugio 'Patitas de amor'" },
-              { name: "Matias", shelter: "Fundación 'Amigo fiel'" },
-              { name: "Leo", shelter: "Refugio 'Nueva vida'" }
+              { name: "Max", shelter: "Refugio 'Hogar de huellas'", age: "2 años", breed: "Golden Retriever" },
+              { name: "Thor", shelter: "Refugio 'Patitas de amor'", age: "3 años", breed: "Husky Siberiano" },
+              { name: "Matias", shelter: "Fundación 'Amigo fiel'", age: "1 año", breed: "Beagle" },
+              { name: "Leo", shelter: "Refugio 'Nueva vida'", age: "4 años", breed: "Pastor Alemán" }
             ].map((pet, index) => (
               <div key={index} className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-to-br from-rose-200 to-amber-200 flex items-center justify-center">
                   <PawPrint className="w-16 h-16 text-rose-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2 font-display">{pet.name}</h3>
-                <p className="text-sm text-gray-600 mb-4">{pet.shelter}</p>
-                <Link to="/login" className="inline-block px-6 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-full hover:from-rose-600 hover:to-amber-600 transition-all">
+                <p className="text-sm text-gray-600 mb-1">{pet.breed}</p>
+                <p className="text-xs text-gray-500 mb-4">{pet.age} • {pet.shelter}</p>
+                <Link to="/animals" className="inline-block px-6 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-full hover:from-rose-600 hover:to-amber-600 transition-all">
                   Ver más
                 </Link>
               </div>
@@ -249,7 +247,7 @@ export default function Home() {
               </h2>
               <p className="text-gray-600">Todo lo que tu mascota necesita en un solo lugar</p>
             </div>
-            <Link to="/login" className="text-rose-600 hover:text-rose-700 font-semibold text-lg flex items-center">
+            <Link to="/store" className="text-rose-600 hover:text-rose-700 font-semibold text-lg flex items-center">
               Ver tienda completa <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
           </div>
@@ -267,38 +265,13 @@ export default function Home() {
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{product.name}</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold text-rose-600 font-display">{product.price}</span>
-                  <Link to="/login" className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-full hover:from-rose-600 hover:to-amber-600 transition-all">
+                  <Link to="/store" className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-full hover:from-rose-600 hover:to-amber-600 transition-all">
                     <ShoppingCart className="w-4 h-4 mr-2" />
                     Agregar
                   </Link>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Help CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-rose-500 to-amber-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-                <PawPrint className="w-10 h-10 text-white" />
-              </div>
-              <div>
-                <h3 className="text-3xl font-bold text-white mb-2 font-display">
-                  Tu ayuda hace la diferencia
-                </h3>
-                <p className="text-rose-100 text-lg">
-                  Además de adoptar, puedes apoyar a los animales compartiendo o donando.
-                </p>
-              </div>
-            </div>
-            <Link to="/login" className="inline-flex items-center px-8 py-4 bg-white text-rose-600 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              Quiero ayudar
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Link>
           </div>
         </div>
       </section>
@@ -365,7 +338,7 @@ export default function Home() {
                 { title: "Mejor alimento para cachorros de raza grande", author: "Carlos R.", replies: 15, time: "hace 5 horas" },
                 { title: "Experiencia con adopción de gatos adultos", author: "Ana L.", replies: 31, time: "hace 1 día" }
               ].map((topic, index) => (
-                <Link key={index} to="/login" className="block p-4 rounded-xl bg-gradient-to-r from-rose-50 to-amber-50 hover:from-rose-100 hover:to-amber-100 transition-all duration-300 cursor-pointer">
+                <Link key={index} to="/forum" className="block p-4 rounded-xl bg-gradient-to-r from-rose-50 to-amber-50 hover:from-rose-100 hover:to-amber-100 transition-all duration-300 cursor-pointer">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 mb-1">{topic.title}</h4>
@@ -386,7 +359,7 @@ export default function Home() {
                 </Link>
               ))}
             </div>
-            <Link to="/login" className="mt-6 inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all">
+            <Link to="/forum" className="mt-6 inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all">
               Ver todos los temas
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
