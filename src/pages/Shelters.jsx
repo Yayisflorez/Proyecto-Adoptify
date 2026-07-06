@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, MapPin, Phone, Mail, Star, Heart, Users, PawPrint, ArrowRight, Filter, ChevronDown } from "lucide-react";
+import { Search, MapPin, Phone, Mail, Star, Heart, Users, PawPrint, ArrowRight, Filter, ChevronDown, Home } from "lucide-react";
 
 export default function Shelters() {
   const [searchTerm, setSearchTerm] = useState("");

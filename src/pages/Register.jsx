@@ -41,7 +41,7 @@ export default function Register() {
 
   // Validar documento (solo números)
   const validateDocumentNumber = (number) => {
-    return /^\d+$/.test(number) && number.length >= 5;
+    return /^\d+$/.test(number) && number.length >= 10;
   };
 
   // Validar teléfono
@@ -89,14 +89,14 @@ export default function Register() {
         if (!value.trim()) {
           error = "El número de documento es obligatorio";
         } else if (!validateDocumentNumber(value)) {
-          error = "Debe contener solo números y mínimo 5 dígitos";
+          error = "Debe contener solo números y mínimo 10 dígitos";
         }
         break;
       case "phone":
         if (!value.trim()) {
           error = "El teléfono es obligatorio";
         } else if (!validatePhone(value)) {
-          error = "Formato inválido (ej: +57 300 123 4567)";
+          error = "Formato inválido (ej: 300 123 4567)";
         }
         break;
       case "email":
@@ -241,21 +241,21 @@ export default function Register() {
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
         
         {/* Left Panel - Form */}
-        <div className="w-full md:w-1/2 p-12 flex flex-col justify-center overflow-y-auto">
+        <div className="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-center">
           <div className="w-full max-w-sm mx-auto space-y-4">
             
             {/* Logo */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4">
               <img
                 src={logo}
                 alt="Adoptify Logo"
-                className="w-60 h-auto"
+                className="w-48 h-auto"
               />
             </div>
 
             {/* Title */}
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight font-display mb-2">
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight font-display mb-2">
                 Crea tu cuenta
               </h2>
               <p className="text-sm text-gray-600">
@@ -266,236 +266,252 @@ export default function Register() {
               </p>
             </div>
 
-            {/* Form */}
+            {/* Form Container with Scroll */}
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Name */}
-              <div className="space-y-1.5">
-                <label htmlFor="firstName" className="text-sm font-semibold text-gray-700">
-                  Nombres
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                  <input
-                    id="firstName"
-                    type="text"
-                    placeholder="Juan"
-                    value={firstName}
-                    onChange={(e) => handleFieldChange("firstName", e.target.value)}
-                    className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
-                      errors.firstName ? 'border-red-500 focus:ring-red-500' : firstName && !errors.firstName ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                    }`}
-                  />
-                  {errors.firstName ? (
-                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                  ) : firstName ? (
-                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                  ) : null}
-                </div>
-                {errors.firstName && <p className="text-xs text-red-600">{errors.firstName}</p>}
-              </div>
+              <div className="max-h-[calc(100vh-320px)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-rose-300 scrollbar-track-gray-100 space-y-3">
+                {/* Document Type and Number */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label htmlFor="documentType" className="text-sm font-semibold text-gray-700">
+                      Tipo de Documento
+                    </label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                      <select
+                        id="documentType"
+                        value={documentType}
+                        onChange={(e) => handleFieldChange("documentType", e.target.value)}
+                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 ${
+                          errors.documentType ? 'border-red-500 focus:ring-red-500' : documentType && !errors.documentType ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                        }`}
+                      >
+                        <option value="">Seleccionar...</option>
+                        <option value="CC">Cédula de Ciudadanía</option>
+                        <option value="CE">Cédula de Extranjería</option>
+                        <option value="TI">Tarjeta de Identidad</option>
+                        <option value="PP">Pasaporte</option>
+                      </select>
+                      {errors.documentType ? (
+                        <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                      ) : documentType ? (
+                        <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                      ) : null}
+                    </div>
+                    {errors.documentType && <p className="text-xs text-red-600">{errors.documentType}</p>}
+                  </div>
 
-              {/* Last Name */}
-              <div className="space-y-1.5">
-                <label htmlFor="lastName" className="text-sm font-semibold text-gray-700">
-                  Apellidos
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                  <input
-                    id="lastName"
-                    type="text"
-                    placeholder="Pérez"
-                    value={lastName}
-                    onChange={(e) => handleFieldChange("lastName", e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
-                  />
-                  {errors.lastName ? (
-                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                  ) : lastName ? (
-                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                  ) : null}
+                  <div className="space-y-1.5">
+                    <label htmlFor="documentNumber" className="text-sm font-semibold text-gray-700">
+                      Número de Documento
+                    </label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                      <input
+                        id="documentNumber"
+                        type="text"
+                        placeholder="123456789"
+                        value={documentNumber}
+                        onChange={(e) => handleFieldChange("documentNumber", e.target.value)}
+                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                          errors.documentNumber ? 'border-red-500 focus:ring-red-500' : documentNumber && !errors.documentNumber ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                        }`}
+                      />
+                      {errors.documentNumber ? (
+                        <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                      ) : documentNumber ? (
+                        <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                      ) : null}
+                    </div>
+                    {errors.documentNumber && <p className="text-xs text-red-600">{errors.documentNumber}</p>}
+                  </div>
                 </div>
-                {errors.lastName && <p className="text-xs text-red-600">{errors.lastName}</p>}
-              </div>
 
-              {/* Document Type */}
-              <div className="space-y-1.5">
-                <label htmlFor="documentType" className="text-sm font-semibold text-gray-700">
-                  Tipo de Documento
-                </label>
-                <div className="relative">
-                  <FileText className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                  <select
-                    id="documentType"
-                    value={documentType}
-                    onChange={(e) => handleFieldChange("documentType", e.target.value)}
-                    className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 ${
-                      errors.documentType ? 'border-red-500 focus:ring-red-500' : documentType && !errors.documentType ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                    }`}
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="CC">Cédula de Ciudadanía</option>
-                    <option value="CE">Cédula de Extranjería</option>
-                    <option value="TI">Tarjeta de Identidad</option>
-                    <option value="PP">Pasaporte</option>
-                  </select>
-                  {errors.documentType ? (
-                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                  ) : documentType ? (
-                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                  ) : null}
+                {/* Name and Last Name */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label htmlFor="firstName" className="text-sm font-semibold text-gray-700">
+                      Nombres
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                      <input
+                        id="firstName"
+                        type="text"
+                        placeholder="Juan"
+                        value={firstName}
+                        onChange={(e) => handleFieldChange("firstName", e.target.value)}
+                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                          errors.firstName ? 'border-red-500 focus:ring-red-500' : firstName && !errors.firstName ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                        }`}
+                      />
+                      {errors.firstName ? (
+                        <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                      ) : firstName ? (
+                        <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                      ) : null}
+                    </div>
+                    {errors.firstName && <p className="text-xs text-red-600">{errors.firstName}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="lastName" className="text-sm font-semibold text-gray-700">
+                      Apellidos
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                      <input
+                        id="lastName"
+                        type="text"
+                        placeholder="Pérez"
+                        value={lastName}
+                        onChange={(e) => handleFieldChange("lastName", e.target.value)}
+                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                          errors.lastName ? 'border-red-500 focus:ring-red-500' : lastName && !errors.lastName ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                        }`}
+                      />
+                      {errors.lastName ? (
+                        <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                      ) : lastName ? (
+                        <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                      ) : null}
+                    </div>
+                    {errors.lastName && <p className="text-xs text-red-600">{errors.lastName}</p>}
+                  </div>
                 </div>
-                {errors.documentType && <p className="text-xs text-red-600">{errors.documentType}</p>}
-              </div>
 
-              {/* Document Number */}
-              <div className="space-y-1.5">
-                <label htmlFor="documentNumber" className="text-sm font-semibold text-gray-700">
-                  Número de Documento
-                </label>
-                <div className="relative">
-                  <FileText className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                  <input
-                    id="documentNumber"
-                    type="text"
-                    placeholder="123456789"
-                    value={documentNumber}
-                    onChange={(e) => handleFieldChange("documentNumber", e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
-                  />
-                  {errors.documentNumber ? (
-                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                  ) : documentNumber ? (
-                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                  ) : null}
-                </div>
-                {errors.documentNumber && <p className="text-xs text-red-600">{errors.documentNumber}</p>}
-              </div>
-
-              {/* Phone */}
-              <div className="space-y-1.5">
-                <label htmlFor="phone" className="text-sm font-semibold text-gray-700">
-                  Teléfono
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                  <input
-                    id="phone"
-                    type="tel"
-                    placeholder="+57 300 123 4567"
-                    value={phone}
-                    onChange={(e) => handleFieldChange("phone", e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
-                  />
-                  {errors.phone ? (
-                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                  ) : phone ? (
-                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                  ) : null}
-                </div>
-                {errors.phone && <p className="text-xs text-red-600">{errors.phone}</p>}
-              </div>
-
-              {/* Email */}
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="text-sm font-semibold text-gray-700">
-                  Correo Electrónico
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="ejemplo@correo.com"
-                    value={email}
-                    onChange={(e) => handleFieldChange("email", e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
-                  />
-                  {errors.email ? (
-                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                  ) : email ? (
-                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                  ) : null}
-                </div>
-                {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
-              </div>
-
-              {/* Password Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Phone */}
                 <div className="space-y-1.5">
-                  <label htmlFor="password" className="text-sm font-semibold text-gray-700">
-                    Contraseña
+                  <label htmlFor="phone" className="text-sm font-semibold text-gray-700">
+                    Teléfono
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                    <Phone className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
                     <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => handleFieldChange("password", e.target.value)}
-                      className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
+                      id="phone"
+                      type="tel"
+                      placeholder="300 123 4567"
+                      value={phone}
+                      onChange={(e) => handleFieldChange("phone", e.target.value)}
+                      className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                        errors.phone ? 'border-red-500 focus:ring-red-500' : phone && !errors.phone ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                      }`}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                    {errors.phone ? (
+                      <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                    ) : phone ? (
+                      <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                    ) : null}
                   </div>
-                  {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
+                  {errors.phone && <p className="text-xs text-red-600">{errors.phone}</p>}
                 </div>
 
+                {/* Email */}
                 <div className="space-y-1.5">
-                  <label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700">
-                    Confirmar
+                  <label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                    Correo Electrónico
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                    <Mail className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
                     <input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => handleFieldChange("confirmPassword", e.target.value)}
-                      className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
+                      id="email"
+                      type="email"
+                      placeholder="ejemplo@correo.com"
+                      value={email}
+                      onChange={(e) => handleFieldChange("email", e.target.value)}
+                      className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                        errors.email ? 'border-red-500 focus:ring-red-500' : email && !errors.email ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                      }`}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                    {errors.email ? (
+                      <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                    ) : email ? (
+                      <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                    ) : null}
                   </div>
-                  {errors.confirmPassword && <p className="text-xs text-red-600">{errors.confirmPassword}</p>}
+                  {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
                 </div>
+
+                {/* Password Fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                      <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => handleFieldChange("password", e.target.value)}
+                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                          errors.password ? 'border-red-500 focus:ring-red-500' : password && !errors.password ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700">
+                      Confirmar
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                      <input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => handleFieldChange("confirmPassword", e.target.value)}
+                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                          errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : confirmPassword && !errors.confirmPassword ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && <p className="text-xs text-red-600">{errors.confirmPassword}</p>}
+                  </div>
+                </div>
+
+                {/* Terms */}
+                <div className="flex items-start">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    checked={terms}
+                    onChange={(e) => handleFieldChange("terms", e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
+                  />
+                  <label htmlFor="terms" className="ml-2 text-sm text-gray-600 leading-normal">
+                    Acepto los{" "}
+                    <a href="#" className="font-semibold text-rose-600 hover:underline">
+                      Términos
+                    </a>{" "}
+                    y{" "}
+                    <a href="#" className="font-semibold text-rose-600 hover:underline">
+                      Privacidad
+                    </a>
+                  </label>
+                </div>
+                {errors.terms && <p className="text-xs text-red-600">{errors.terms}</p>}
               </div>
 
-              {/* Terms */}
-              <div className="flex items-start">
-                <input
-                  id="terms"
-                  type="checkbox"
-                  checked={terms}
-                  onChange={(e) => handleFieldChange("terms", e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
-                />
-                <label htmlFor="terms" className="ml-2 text-sm text-gray-600 leading-normal">
-                  Acepto los{" "}
-                  <a href="#" className="font-semibold text-rose-600 hover:underline">
-                    Términos
-                  </a>{" "}
-                  y{" "}
-                  <a href="#" className="font-semibold text-rose-600 hover:underline">
-                    Privacidad
-                  </a>
-                </label>
-              </div>
-              {errors.terms && <p className="text-xs text-red-600">{errors.terms}</p>}
-
-              {/* Submit Button */}
+              {/* Submit Button - Outside scroll */}
               <button
                 type="submit"
                 disabled={isLoading}
