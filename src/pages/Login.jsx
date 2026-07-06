@@ -1,31 +1,113 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, PawPrint, Heart, Users, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, PawPrint, Heart, Users, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 import logo from "../assets/logo.png";
 import loginDog from "../assets/loginDog.jpg";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Validar formato de email
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Validar contraseña (mayúscula, minúscula, número, especial)
+  const validatePassword = (password) => {
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    return hasUppercase && hasLowercase && hasNumber && hasSpecial;
+  };
+
+  // Validar campo individual
+  const validateField = (field, value) => {
+    let error = "";
+    
+    switch (field) {
+      case "email":
+        if (!value.trim()) {
+          error = "El correo es obligatorio";
+        } else if (!validateEmail(value)) {
+          error = "Formato de correo inválido";
+        }
+        break;
+      case "password":
+        if (!value) {
+          error = "La contraseña es obligatoria";
+        } else if (!validatePassword(value)) {
+          error = "Debe tener mayúscula, minúscula, número y carácter especial";
+        }
+        break;
+    }
+    
+    return error;
+  };
+
+  // Manejar cambio de campo con validación
+  const handleFieldChange = (field, value) => {
+    const setter = {
+      email: setEmail,
+      password: setPassword
+    }[field];
+    
+    setter(value);
+    
+    const error = validateField(field, value);
+    setErrors(prev => ({
+      ...prev,
+      [field]: error
+    }));
+  };
+
+  // Validar todos los campos
+  const validateAll = () => {
+    const newErrors = {
+      email: validateField("email", email),
+      password: validateField("password", password)
+    };
+    
+    setErrors(newErrors);
+    return Object.values(newErrors).every(error => !error);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError("");
-
-    if (!email || !password) {
-      setError("Por favor, completa todos los campos.");
+    
+    if (!validateAll()) {
       return;
     }
 
     setIsLoading(true);
+
     setTimeout(() => {
       setIsLoading(false);
-      alert("¡Inicio de sesión exitoso!");
-      navigate("/");
+      setSuccess(true);
+      
+      // Simular login con datos del usuario
+      const userData = {
+        name: "María García",
+        email: email,
+        phone: "+57 300 123 4567",
+        location: "Bogotá, Colombia"
+      };
+      
+      login(userData);
+      
+      // Redirigir a dashboard después de mostrar éxito
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     }, 1200);
   };
 
@@ -40,6 +122,20 @@ export default function Login() {
         <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-gradient-to-br from-rose-200 to-rose-300 rounded-full blur-2xl animate-float-5" />
         <div className="absolute top-1/3 right-1/3 w-28 h-28 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full blur-2xl animate-float-6" />
       </div>
+
+      {/* Success Message */}
+      {success && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-2 font-display">¡Inicio de sesión exitoso!</h3>
+            <p className="text-gray-600 mb-4">Redirigiendo al dashboard...</p>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-gradient-to-r from-rose-500 to-amber-500 h-2 rounded-full animate-[loading_2s_ease-in-out]" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Back to Home Button */}
       <Link 
@@ -88,7 +184,7 @@ export default function Login() {
 
         {/* Right Panel - Form */}
         <div className="w-full md:w-1/2 p-12 flex flex-col justify-center">
-          <div className="w-full max-w-sm mx-auto space-y-8">
+          <div className="w-full max-w-sm mx-auto space-y-6">
             
             {/* Logo */}
             <div className="flex justify-center mb-6">
@@ -110,26 +206,30 @@ export default function Login() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {error && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-600 text-center font-medium">
-                  {error}
-                </div>
-              )}
-
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div className="space-y-1.5">
                 <label htmlFor="email" className="text-sm font-semibold text-gray-700 block">
                   Correo electrónico
                 </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="ejemplo@correo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
-                />
+                <div className="relative">
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="ejemplo@correo.com"
+                    value={email}
+                    onChange={(e) => handleFieldChange("email", e.target.value)}
+                    className={`w-full px-4 py-3 pr-10 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                      errors.email ? 'border-red-500 focus:ring-red-500' : email && !errors.email ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                    }`}
+                  />
+                  {errors.email ? (
+                    <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
+                  ) : email ? (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                  ) : null}
+                </div>
+                {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
               </div>
 
               {/* Password */}
@@ -143,17 +243,23 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
+                    onChange={(e) => handleFieldChange("password", e.target.value)}
+                    className="w-full px-4 py-3 pr-12 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
+                  {errors.password ? (
+                    <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
+                  ) : password ? (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                  ) : null}
                 </div>
+                {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
               </div>
 
               {/* Forgot password */}
@@ -167,7 +273,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-300 transition-all duration-300 flex items-center justify-center cursor-pointer"
+                className="w-full py-3.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-300 transition-all duration-300 flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

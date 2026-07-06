@@ -1,52 +1,204 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, PawPrint, Heart, User, Mail, Lock, ArrowRight, Users, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, PawPrint, Heart, User, Mail, Lock, ArrowRight, Users, Eye, EyeOff, CheckCircle, XCircle, Phone, FileText } from "lucide-react";
 import logo from "../assets/logo.png";
 import loginDog from "../assets/loginDog.jpg";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [role, setRole] = useState("adopter");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [documentType, setDocumentType] = useState("");
+  const [documentNumber, setDocumentNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [terms, setTerms] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Validar formato de email
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Validar contraseña (mayúscula, minúscula, número, especial)
+  const validatePassword = (password) => {
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    return hasUppercase && hasLowercase && hasNumber && hasSpecial;
+  };
+
+  // Validar documento (solo números)
+  const validateDocumentNumber = (number) => {
+    return /^\d+$/.test(number) && number.length >= 5;
+  };
+
+  // Validar teléfono
+  const validatePhone = (phone) => {
+    return /^\+?\d{10,15}$/.test(phone.replace(/\s/g, ''));
+  };
+
+  // Validar espacios (no al inicio/final, no dobles)
+  const validateSpaces = (value) => {
+    return value === value.trim() && !/\s{2,}/.test(value);
+  };
+
+  // Validar si email ya está registrado (simulado)
+  const isEmailRegistered = (email) => {
+    const registeredEmails = localStorage.getItem("registeredEmails");
+    const emails = registeredEmails ? JSON.parse(registeredEmails) : [];
+    return emails.includes(email.toLowerCase());
+  };
+
+  // Validar campo individual
+  const validateField = (field, value) => {
+    let error = "";
+    
+    switch (field) {
+      case "firstName":
+        if (!value.trim()) {
+          error = "El nombre es obligatorio";
+        } else if (!validateSpaces(value)) {
+          error = "No se permiten espacios al inicio/final ni espacios dobles";
+        }
+        break;
+      case "lastName":
+        if (!value.trim()) {
+          error = "Los apellidos son obligatorios";
+        } else if (!validateSpaces(value)) {
+          error = "No se permiten espacios al inicio/final ni espacios dobles";
+        }
+        break;
+      case "documentType":
+        if (!value) {
+          error = "El tipo de documento es obligatorio";
+        }
+        break;
+      case "documentNumber":
+        if (!value.trim()) {
+          error = "El número de documento es obligatorio";
+        } else if (!validateDocumentNumber(value)) {
+          error = "Debe contener solo números y mínimo 5 dígitos";
+        }
+        break;
+      case "phone":
+        if (!value.trim()) {
+          error = "El teléfono es obligatorio";
+        } else if (!validatePhone(value)) {
+          error = "Formato inválido (ej: +57 300 123 4567)";
+        }
+        break;
+      case "email":
+        if (!value.trim()) {
+          error = "El correo es obligatorio";
+        } else if (!validateEmail(value)) {
+          error = "Formato de correo inválido";
+        } else if (isEmailRegistered(value)) {
+          error = "Este correo ya está registrado";
+        } else if (!validateSpaces(value)) {
+          error = "No se permiten espacios al inicio/final ni espacios dobles";
+        }
+        break;
+      case "password":
+        if (!value) {
+          error = "La contraseña es obligatoria";
+        } else if (!validatePassword(value)) {
+          error = "Debe tener mayúscula, minúscula, número y carácter especial";
+        }
+        break;
+      case "confirmPassword":
+        if (!value) {
+          error = "Confirmar contraseña es obligatorio";
+        } else if (value !== password) {
+          error = "Las contraseñas no coinciden";
+        }
+        break;
+      case "terms":
+        if (!value) {
+          error = "Debes aceptar los términos y condiciones";
+        }
+        break;
+    }
+    
+    return error;
+  };
+
+  // Manejar cambio de campo con validación
+  const handleFieldChange = (field, value) => {
+    const setter = {
+      firstName: setFirstName,
+      lastName: setLastName,
+      documentType: setDocumentType,
+      documentNumber: setDocumentNumber,
+      phone: setPhone,
+      email: setEmail,
+      password: setPassword,
+      confirmPassword: setConfirmPassword,
+      terms: setTerms
+    }[field];
+    
+    setter(value);
+    
+    const error = validateField(field, value);
+    setErrors(prev => ({
+      ...prev,
+      [field]: error
+    }));
+  };
+
+  // Validar todos los campos
+  const validateAll = () => {
+    const newErrors = {
+      firstName: validateField("firstName", firstName),
+      lastName: validateField("lastName", lastName),
+      documentType: validateField("documentType", documentType),
+      documentNumber: validateField("documentNumber", documentNumber),
+      phone: validateField("phone", phone),
+      email: validateField("email", email),
+      password: validateField("password", password),
+      confirmPassword: validateField("confirmPassword", confirmPassword),
+      terms: validateField("terms", terms)
+    };
+    
+    setErrors(newErrors);
+    return Object.values(newErrors).every(error => !error);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError("");
-
-    if (!name || !email || !password || !confirmPassword) {
-      setError("Por favor, completa todos los campos.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-
-    if (!terms) {
-      setError("Debes aceptar los Términos de Servicio y la Política de Privacidad.");
+    
+    if (!validateAll()) {
       return;
     }
 
     setIsLoading(true);
 
+    // Simular registro
     setTimeout(() => {
       setIsLoading(false);
-      alert(`¡Registro exitoso como ${role === "adopter" ? "Adoptante" : "Refugio/Fundación"}!`);
-      navigate("/login");
+      setSuccess(true);
+      
+      // Guardar email como registrado
+      const registeredEmails = localStorage.getItem("registeredEmails");
+      const emails = registeredEmails ? JSON.parse(registeredEmails) : [];
+      emails.push(email.toLowerCase());
+      localStorage.setItem("registeredEmails", JSON.stringify(emails));
+      
+      // Redirigir a login después de mostrar éxito
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     }, 1500);
   };
 
@@ -62,6 +214,20 @@ export default function Register() {
         <div className="absolute top-1/3 right-1/3 w-28 h-28 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full blur-2xl animate-float-6" />
       </div>
 
+      {/* Success Message */}
+      {success && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-2 font-display">¡Cuenta creada exitosamente!</h3>
+            <p className="text-gray-600 mb-4">Redirigiendo al inicio de sesión...</p>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-gradient-to-r from-rose-500 to-amber-500 h-2 rounded-full animate-[loading_2s_ease-in-out]" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Back to Home Button */}
       <Link 
         to="/" 
@@ -76,7 +242,7 @@ export default function Register() {
         
         {/* Left Panel - Form */}
         <div className="w-full md:w-1/2 p-12 flex flex-col justify-center overflow-y-auto">
-          <div className="w-full max-w-sm mx-auto space-y-6">
+          <div className="w-full max-w-sm mx-auto space-y-4">
             
             {/* Logo */}
             <div className="flex justify-center mb-6">
@@ -101,29 +267,133 @@ export default function Register() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-600 text-center font-medium">
-                  {error}
-                </div>
-              )}
-
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* Name */}
               <div className="space-y-1.5">
-                <label htmlFor="name" className="text-sm font-semibold text-gray-700">
-                  {role === "adopter" ? "Nombre Completo" : "Nombre de la Fundación"}
+                <label htmlFor="firstName" className="text-sm font-semibold text-gray-700">
+                  Nombres
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
                   <input
-                    id="name"
+                    id="firstName"
                     type="text"
-                    placeholder={role === "adopter" ? "Juan Pérez" : "Fundación Patitas de Amor"}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
+                    placeholder="Juan"
+                    value={firstName}
+                    onChange={(e) => handleFieldChange("firstName", e.target.value)}
+                    className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
+                      errors.firstName ? 'border-red-500 focus:ring-red-500' : firstName && !errors.firstName ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                    }`}
                   />
+                  {errors.firstName ? (
+                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                  ) : firstName ? (
+                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                  ) : null}
                 </div>
+                {errors.firstName && <p className="text-xs text-red-600">{errors.firstName}</p>}
+              </div>
+
+              {/* Last Name */}
+              <div className="space-y-1.5">
+                <label htmlFor="lastName" className="text-sm font-semibold text-gray-700">
+                  Apellidos
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                  <input
+                    id="lastName"
+                    type="text"
+                    placeholder="Pérez"
+                    value={lastName}
+                    onChange={(e) => handleFieldChange("lastName", e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
+                  />
+                  {errors.lastName ? (
+                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                  ) : lastName ? (
+                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                  ) : null}
+                </div>
+                {errors.lastName && <p className="text-xs text-red-600">{errors.lastName}</p>}
+              </div>
+
+              {/* Document Type */}
+              <div className="space-y-1.5">
+                <label htmlFor="documentType" className="text-sm font-semibold text-gray-700">
+                  Tipo de Documento
+                </label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                  <select
+                    id="documentType"
+                    value={documentType}
+                    onChange={(e) => handleFieldChange("documentType", e.target.value)}
+                    className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 ${
+                      errors.documentType ? 'border-red-500 focus:ring-red-500' : documentType && !errors.documentType ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
+                    }`}
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="CC">Cédula de Ciudadanía</option>
+                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="TI">Tarjeta de Identidad</option>
+                    <option value="PP">Pasaporte</option>
+                  </select>
+                  {errors.documentType ? (
+                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                  ) : documentType ? (
+                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                  ) : null}
+                </div>
+                {errors.documentType && <p className="text-xs text-red-600">{errors.documentType}</p>}
+              </div>
+
+              {/* Document Number */}
+              <div className="space-y-1.5">
+                <label htmlFor="documentNumber" className="text-sm font-semibold text-gray-700">
+                  Número de Documento
+                </label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                  <input
+                    id="documentNumber"
+                    type="text"
+                    placeholder="123456789"
+                    value={documentNumber}
+                    onChange={(e) => handleFieldChange("documentNumber", e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
+                  />
+                  {errors.documentNumber ? (
+                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                  ) : documentNumber ? (
+                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                  ) : null}
+                </div>
+                {errors.documentNumber && <p className="text-xs text-red-600">{errors.documentNumber}</p>}
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-1.5">
+                <label htmlFor="phone" className="text-sm font-semibold text-gray-700">
+                  Teléfono
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                  <input
+                    id="phone"
+                    type="tel"
+                    placeholder="+57 300 123 4567"
+                    value={phone}
+                    onChange={(e) => handleFieldChange("phone", e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
+                  />
+                  {errors.phone ? (
+                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                  ) : phone ? (
+                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                  ) : null}
+                </div>
+                {errors.phone && <p className="text-xs text-red-600">{errors.phone}</p>}
               </div>
 
               {/* Email */}
@@ -138,14 +408,20 @@ export default function Register() {
                     type="email"
                     placeholder="ejemplo@correo.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
+                    onChange={(e) => handleFieldChange("email", e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
                   />
+                  {errors.email ? (
+                    <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
+                  ) : email ? (
+                    <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                  ) : null}
                 </div>
+                {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
               </div>
 
               {/* Password Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label htmlFor="password" className="text-sm font-semibold text-gray-700">
                     Contraseña
@@ -157,8 +433,8 @@ export default function Register() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
+                      onChange={(e) => handleFieldChange("password", e.target.value)}
+                      className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
                     />
                     <button
                       type="button"
@@ -168,6 +444,7 @@ export default function Register() {
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
+                  {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
                 </div>
 
                 <div className="space-y-1.5">
@@ -181,8 +458,8 @@ export default function Register() {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all text-gray-700 placeholder-gray-400"
+                      onChange={(e) => handleFieldChange("confirmPassword", e.target.value)}
+                      className="w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400"
                     />
                     <button
                       type="button"
@@ -192,6 +469,7 @@ export default function Register() {
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
+                  {errors.confirmPassword && <p className="text-xs text-red-600">{errors.confirmPassword}</p>}
                 </div>
               </div>
 
@@ -201,7 +479,7 @@ export default function Register() {
                   id="terms"
                   type="checkbox"
                   checked={terms}
-                  onChange={(e) => setTerms(e.target.checked)}
+                  onChange={(e) => handleFieldChange("terms", e.target.checked)}
                   className="mt-1 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
                 />
                 <label htmlFor="terms" className="ml-2 text-sm text-gray-600 leading-normal">
@@ -215,14 +493,13 @@ export default function Register() {
                   </a>
                 </label>
               </div>
+              {errors.terms && <p className="text-xs text-red-600">{errors.terms}</p>}
 
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-3.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-300 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                  isLoading ? "opacity-75 cursor-not-allowed" : ""
-                }`}
+                className="w-full py-3.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-300 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
