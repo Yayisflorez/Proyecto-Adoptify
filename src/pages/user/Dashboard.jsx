@@ -103,15 +103,6 @@ export default function Dashboard() {
                 alt="Perro y gato juntos"
                 className="rounded-3xl shadow-2xl w-full object-cover"
               />
-              <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full flex items-center justify-center">
-                  <Bell className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="font-bold text-gray-900">¡Nuevas mascotas!</div>
-                  <div className="text-sm text-gray-600">3 disponibles hoy</div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

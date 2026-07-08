@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings } from "lucide-react";
+import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings, Bell, ShoppingCart } from "lucide-react";
 import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
 
@@ -208,69 +208,84 @@ export default function Navbar() {
           {/* Auth Buttons / User Menu */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all"
-                >
-                  <User className="w-5 h-5" />
-                  <span className="font-medium">Mi Cuenta</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+              <>
+                {/* Notifications */}
+                <button className="relative p-2 text-gray-600 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
                 </button>
 
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="font-semibold text-gray-900">{user?.name || "Usuario"}</p>
-                      <p className="text-sm text-gray-600">{user?.email || ""}</p>
-                    </div>
-                    <Link
-                      to="/profile"
-                      onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
-                    >
-                      <User className="w-4 h-4 text-gray-600" />
-                      <span className="text-gray-700">Mi Perfil</span>
-                    </Link>
-                    <Link
-                      to="/adoption-history"
-                      onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
-                    >
-                      <PawPrint className="w-4 h-4 text-gray-600" />
-                      <span className="text-gray-700">Historial de Adopciones</span>
-                    </Link>
-                    <Link
-                      to="/favorites"
-                      onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
-                    >
-                      <Heart className="w-4 h-4 text-gray-600" />
-                      <span className="text-gray-700">Mis Favoritos</span>
-                    </Link>
-                    <Link
-                      to="/settings"
-                      onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
-                    >
-                      <Settings className="w-4 h-4 text-gray-600" />
-                      <span className="text-gray-700">Configuración</span>
-                    </Link>
-                    <div className="border-t border-gray-100 mt-2 pt-2">
-                      <button
-                        onClick={() => {
-                          logout();
-                          setShowUserMenu(false);
-                        }}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-red-600 w-full"
+                {/* Cart */}
+                <Link to="/cart" className="relative p-2 text-gray-600 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
+                  <ShoppingCart className="w-5 h-5" />
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </Link>
+
+                {/* User Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all"
+                  >
+                    <User className="w-5 h-5" />
+                    <span className="font-medium">Mi Cuenta</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="font-semibold text-gray-900">{user?.name || "Usuario"}</p>
+                        <p className="text-sm text-gray-600">{user?.email || ""}</p>
+                      </div>
+                      <Link
+                        to="/profile"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
                       >
-                        <LogOut className="w-4 h-4" />
-                        <span>Cerrar Sesión</span>
-                      </button>
+                        <User className="w-4 h-4 text-gray-600" />
+                        <span className="text-gray-700">Mi Perfil</span>
+                      </Link>
+                      <Link
+                        to="/adoption-history"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
+                      >
+                        <PawPrint className="w-4 h-4 text-gray-600" />
+                        <span className="text-gray-700">Historial de Adopciones</span>
+                      </Link>
+                      <Link
+                        to="/favorites"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
+                      >
+                        <Heart className="w-4 h-4 text-gray-600" />
+                        <span className="text-gray-700">Mis Favoritos</span>
+                      </Link>
+                      <Link
+                        to="/settings"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
+                      >
+                        <Settings className="w-4 h-4 text-gray-600" />
+                        <span className="text-gray-700">Configuración</span>
+                      </Link>
+                      <div className="border-t border-gray-100 mt-2 pt-2">
+                        <button
+                          onClick={() => {
+                            logout();
+                            setShowUserMenu(false);
+                          }}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-red-600 w-full"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Cerrar Sesión</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              </>
             ) : (
               <>
                 <Link
@@ -366,6 +381,16 @@ export default function Navbar() {
                 Foro
               </Link>
               <div className="pt-4 pb-2 border-t border-gray-100 flex flex-col gap-2">
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <button className="relative p-2 text-gray-600 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
+                    <Bell className="w-5 h-5" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
+                  </button>
+                  <Link to="/cart" onClick={() => setIsOpen(false)} className="relative p-2 text-gray-600 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
+                    <ShoppingCart className="w-5 h-5" />
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                  </Link>
+                </div>
                 <Link
                   to="/profile"
                   onClick={() => setIsOpen(false)}

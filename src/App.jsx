@@ -11,6 +11,7 @@ import Dashboard from "./pages/user/Dashboard";
 import Animals from "./pages/animals/Animals";
 import AnimalProfile from "./pages/animals/AnimalProfile";
 import Shelters from "./pages/shelters/Shelters";
+import ShelterDetails from "./pages/shelters/ShelterDetails";
 import Store from "./pages/marketplace/Store";
 import Forum from "./pages/community/Forum";
 import UserProfile from "./pages/user/UserProfile";
@@ -35,6 +36,7 @@ function AppContent() {
           <Route path="/animals" element={<ProtectedRoute><Animals /></ProtectedRoute>} />
           <Route path="/animal/:id" element={<ProtectedRoute><AnimalProfile /></ProtectedRoute>} />
           <Route path="/shelters" element={<ProtectedRoute><Shelters /></ProtectedRoute>} />
+          <Route path="/shelter/:id" element={<ShelterDetails />} />
           <Route path="/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
           <Route path="/forum" element={<ProtectedRoute><Forum /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
