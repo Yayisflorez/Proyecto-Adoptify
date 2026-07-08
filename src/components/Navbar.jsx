@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings, Bell, ShoppingCart } from "lucide-react";
 import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../context/I18nContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useI18n();
 
   const isActive = (path) => location.pathname === path;
   const isAuthenticated = !!user;
@@ -28,6 +31,13 @@ export default function Navbar() {
   };
 
   const isHomePage = location.pathname === '/';
+
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+    setIsOpen(false);
+    navigate("/");
+  };
 
   useEffect(() => {
     if (!isHomePage) return;
@@ -78,7 +88,7 @@ export default function Navbar() {
                   }`}
                 >
                   <HomeIcon className="w-4 h-4" />
-                  Inicio
+                  {t("nav.inicio")}
                 </Link>
                 <Link
                   to="/animals"
@@ -87,7 +97,7 @@ export default function Navbar() {
                   }`}
                 >
                   <PawPrint className="w-4 h-4" />
-                  Animales
+                  {t("nav.animales")}
                 </Link>
                 <Link
                   to="/shelters"
@@ -96,7 +106,7 @@ export default function Navbar() {
                   }`}
                 >
                   <HomeIcon className="w-4 h-4" />
-                  Refugios
+                  {t("nav.refugios")}
                 </Link>
                 <Link
                   to="/store"
@@ -105,7 +115,7 @@ export default function Navbar() {
                   }`}
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  Tienda
+                  {t("nav.tienda")}
                 </Link>
                 <Link
                   to="/forum"
@@ -114,7 +124,7 @@ export default function Navbar() {
                   }`}
                 >
                   <MessageSquare className="w-4 h-4" />
-                  Foro
+                  {t("nav.foro")}
                 </Link>
               </>
             ) : (
@@ -126,7 +136,7 @@ export default function Navbar() {
                       isActive("/") ? "text-rose-500 font-semibold" : "text-gray-600"
                     }`}
                   >
-                    Inicio
+                    {t("nav.inicio")}
                   </button>
                 ) : (
                   <Link
@@ -135,7 +145,7 @@ export default function Navbar() {
                       isActive("/") ? "text-rose-500 font-semibold" : "text-gray-600"
                     }`}
                   >
-                    Inicio
+                    {t("nav.inicio")}
                   </Link>
                 )}
                 {isHomePage ? (
@@ -146,7 +156,7 @@ export default function Navbar() {
                         isSectionActive('how-it-works') ? "text-rose-500 font-semibold" : "text-gray-600"
                       }`}
                     >
-                      Cómo funciona
+                      {t("nav.como_funciona")}
                     </button>
                     <button
                       onClick={() => handleScroll('animals')}
@@ -154,7 +164,7 @@ export default function Navbar() {
                         isSectionActive('animals') ? "text-rose-500 font-semibold" : "text-gray-600"
                       }`}
                     >
-                      Animales
+                      {t("nav.animales")}
                     </button>
                     <button
                       onClick={() => handleScroll('store')}
@@ -162,7 +172,7 @@ export default function Navbar() {
                         isSectionActive('store') ? "text-rose-500 font-semibold" : "text-gray-600"
                       }`}
                     >
-                      Tienda
+                      {t("nav.tienda")}
                     </button>
                     <button
                       onClick={() => handleScroll('forum')}
@@ -170,7 +180,7 @@ export default function Navbar() {
                         isSectionActive('forum') ? "text-rose-500 font-semibold" : "text-gray-600"
                       }`}
                     >
-                      Foro
+                      {t("nav.foro")}
                     </button>
                   </>
                 ) : (
@@ -179,25 +189,25 @@ export default function Navbar() {
                       to="/#how-it-works"
                       className="text-sm font-medium transition-colors hover:text-rose-500 text-gray-600"
                     >
-                      Cómo funciona
+                      {t("nav.como_funciona")}
                     </Link>
                     <Link
                       to="/#animals"
                       className="text-sm font-medium transition-colors hover:text-rose-500 text-gray-600"
                     >
-                      Animales
+                      {t("nav.animales")}
                     </Link>
                     <Link
                       to="/#store"
                       className="text-sm font-medium transition-colors hover:text-rose-500 text-gray-600"
                     >
-                      Tienda
+                      {t("nav.tienda")}
                     </Link>
                     <Link
                       to="/#forum"
                       className="text-sm font-medium transition-colors hover:text-rose-500 text-gray-600"
                     >
-                      Foro
+                      {t("nav.foro")}
                     </Link>
                   </>
                 )}
@@ -228,7 +238,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all"
                   >
                     <User className="w-5 h-5" />
-                    <span className="font-medium">Mi Cuenta</span>
+                    <span className="font-medium">{t("nav.mi_cuenta")}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                   </button>
 
@@ -244,7 +254,7 @@ export default function Navbar() {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
                       >
                         <User className="w-4 h-4 text-gray-600" />
-                        <span className="text-gray-700">Mi Perfil</span>
+                        <span className="text-gray-700">{t("nav.mi_perfil")}</span>
                       </Link>
                       <Link
                         to="/adoption-history"
@@ -252,7 +262,7 @@ export default function Navbar() {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
                       >
                         <PawPrint className="w-4 h-4 text-gray-600" />
-                        <span className="text-gray-700">Historial de Adopciones</span>
+                        <span className="text-gray-700">{t("nav.historial_adopciones")}</span>
                       </Link>
                       <Link
                         to="/favorites"
@@ -260,7 +270,7 @@ export default function Navbar() {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
                       >
                         <Heart className="w-4 h-4 text-gray-600" />
-                        <span className="text-gray-700">Mis Favoritos</span>
+                        <span className="text-gray-700">{t("nav.mis_favoritos")}</span>
                       </Link>
                       <Link
                         to="/settings"
@@ -268,18 +278,15 @@ export default function Navbar() {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-rose-50 transition-colors"
                       >
                         <Settings className="w-4 h-4 text-gray-600" />
-                        <span className="text-gray-700">Configuración</span>
+                        <span className="text-gray-700">{t("nav.configuracion")}</span>
                       </Link>
                       <div className="border-t border-gray-100 mt-2 pt-2">
                         <button
-                          onClick={() => {
-                            logout();
-                            setShowUserMenu(false);
-                          }}
+                          onClick={handleLogout}
                           className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-red-600 w-full"
                         >
                           <LogOut className="w-4 h-4" />
-                          <span>Cerrar Sesión</span>
+                          <span>{t("nav.cerrar_sesion")}</span>
                         </button>
                       </div>
                     </div>
@@ -294,7 +301,7 @@ export default function Navbar() {
                     isActive("/login") ? "text-rose-600 font-semibold" : "text-gray-600"
                   }`}
                 >
-                  Iniciar Sesión
+                  {t("nav.iniciar_sesion")}
                 </Link>
                 <Link
                   to="/register"
@@ -302,7 +309,7 @@ export default function Navbar() {
                 >
                   <span className="relative px-5 py-1.5 transition-all ease-in duration-75 bg-transparent rounded-xl flex items-center gap-1.5 font-semibold">
                     <Sparkles className="w-4 h-4 text-amber-200" />
-                    Registrarse
+                    {t("nav.registrarse")}
                   </span>
                 </Link>
               </>
@@ -338,7 +345,7 @@ export default function Navbar() {
                 }`}
               >
                 <HomeIcon className="w-4 h-4" />
-                Inicio
+                {t("nav.inicio")}
               </Link>
               <Link
                 to="/animals"
@@ -348,7 +355,7 @@ export default function Navbar() {
                 }`}
               >
                 <PawPrint className="w-4 h-4" />
-                Animales
+                {t("nav.animales")}
               </Link>
               <Link
                 to="/shelters"
@@ -358,7 +365,7 @@ export default function Navbar() {
                 }`}
               >
                 <HomeIcon className="w-4 h-4" />
-                Refugios
+                {t("nav.refugios")}
               </Link>
               <Link
                 to="/store"
@@ -368,7 +375,7 @@ export default function Navbar() {
                 }`}
               >
                 <ShoppingBag className="w-4 h-4" />
-                Tienda
+                {t("nav.tienda")}
               </Link>
               <Link
                 to="/forum"
@@ -378,7 +385,7 @@ export default function Navbar() {
                 }`}
               >
                 <MessageSquare className="w-4 h-4" />
-                Foro
+                {t("nav.foro")}
               </Link>
               <div className="pt-4 pb-2 border-t border-gray-100 flex flex-col gap-2">
                 <div className="flex items-center gap-3 px-3 py-2">
@@ -397,7 +404,7 @@ export default function Navbar() {
                   className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
                 >
                   <User className="w-4 h-4" />
-                  Mi Perfil
+                  {t("nav.mi_perfil")}
                 </Link>
                 <Link
                   to="/adoption-history"
@@ -405,7 +412,7 @@ export default function Navbar() {
                   className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
                 >
                   <PawPrint className="w-4 h-4" />
-                  Historial de Adopciones
+                  {t("nav.historial_adopciones")}
                 </Link>
                 <Link
                   to="/favorites"
@@ -413,7 +420,7 @@ export default function Navbar() {
                   className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
                 >
                   <Heart className="w-4 h-4" />
-                  Mis Favoritos
+                  {t("nav.mis_favoritos")}
                 </Link>
                 <Link
                   to="/settings"
@@ -421,17 +428,18 @@ export default function Navbar() {
                   className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
                 >
                   <Settings className="w-4 h-4" />
-                  Configuración
+                  {t("nav.configuracion")}
                 </Link>
                 <button
                   onClick={() => {
                     logout();
                     setIsOpen(false);
+                    navigate("/");
                   }}
                   className="flex items-center gap-3 px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50 rounded-lg w-full"
                 >
                   <LogOut className="w-4 h-4" />
-                  Cerrar Sesión
+                  {t("nav.cerrar_sesion")}
                 </button>
               </div>
             </>
@@ -444,7 +452,7 @@ export default function Navbar() {
                     isActive("/") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                   }`}
                 >
-                  Inicio
+                  {t("nav.inicio")}
                 </button>
               ) : (
                 <Link
@@ -454,7 +462,7 @@ export default function Navbar() {
                     isActive("/") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                   }`}
                 >
-                  Inicio
+                  {t("nav.inicio")}
                 </Link>
               )}
               {isHomePage ? (
@@ -465,7 +473,7 @@ export default function Navbar() {
                       isSectionActive('how-it-works') ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                     }`}
                   >
-                    Cómo funciona
+                    {t("nav.como_funciona")}
                   </button>
                   <button
                     onClick={() => handleScroll('animals')}
@@ -473,7 +481,7 @@ export default function Navbar() {
                       isSectionActive('animals') ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                     }`}
                   >
-                    Animales
+                    {t("nav.animales")}
                   </button>
                   <button
                     onClick={() => handleScroll('store')}
@@ -481,7 +489,7 @@ export default function Navbar() {
                       isSectionActive('store') ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                     }`}
                   >
-                    Tienda
+                    {t("nav.tienda")}
                   </button>
                   <button
                     onClick={() => handleScroll('forum')}
@@ -489,7 +497,7 @@ export default function Navbar() {
                       isSectionActive('forum') ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                     }`}
                   >
-                    Foro
+                    {t("nav.foro")}
                   </button>
                 </>
               ) : (
@@ -499,28 +507,28 @@ export default function Navbar() {
                     onClick={() => setIsOpen(false)}
                     className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                   >
-                    Cómo funciona
+                    {t("nav.como_funciona")}
                   </Link>
                   <Link
                     to="/#animals"
                     onClick={() => setIsOpen(false)}
                     className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                   >
-                    Animales
+                    {t("nav.animales")}
                   </Link>
                   <Link
                     to="/#store"
                     onClick={() => setIsOpen(false)}
                     className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                   >
-                    Tienda
+                    {t("nav.tienda")}
                   </Link>
                   <Link
                     to="/#forum"
                     onClick={() => setIsOpen(false)}
                     className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500"
                   >
-                    Foro
+                    {t("nav.foro")}
                   </Link>
                 </>
               )}
@@ -530,14 +538,14 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className="text-center px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
                 >
-                  Iniciar Sesión
+                  {t("nav.iniciar_sesion")}
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setIsOpen(false)}
                   className="text-center px-4 py-2 text-base font-medium text-white bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 rounded-lg shadow-sm"
                 >
-                  Registrarse
+                  {t("nav.registrarse")}
                 </Link>
               </div>
             </>

@@ -2,15 +2,155 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Plus Jakarta Sans", "Outfit", sans-serif;
   --font-display: "Outfit", sans-serif;
   --font-slab: "Arvo", "Crete Round", serif;
+  --color-dark-bg: #0f0f13;
+  --color-dark-card: #1a1a23;
+  --color-dark-border: #2a2a3a;
+  --color-dark-text: #e4e4ec;
+  --color-dark-text-secondary: #9a9ab0;
 }
 
 body {
   font-family: var(--font-sans);
   overflow-x: hidden;
+}
+
+/* Dark mode base styles */
+.dark body,
+.dark {
+  background-color: var(--color-dark-bg);
+  color: var(--color-dark-text);
+}
+
+.dark .bg-white {
+  background-color: var(--color-dark-card);
+}
+
+.dark .bg-gray-50 {
+  background-color: #15151f;
+}
+
+.dark .text-gray-900 {
+  color: var(--color-dark-text);
+}
+
+.dark .text-gray-700 {
+  color: #c8c8d8;
+}
+
+.dark .text-gray-600 {
+  color: var(--color-dark-text-secondary);
+}
+
+.dark .text-gray-500 {
+  color: #7a7a95;
+}
+
+.dark .border-gray-100 {
+  border-color: var(--color-dark-border);
+}
+
+.dark .border-gray-200 {
+  border-color: var(--color-dark-border);
+}
+
+.dark .border-gray-800 {
+  border-color: #2a2a3a;
+}
+
+.dark .shadow-lg,
+.dark .shadow-md,
+.dark .shadow-sm,
+.dark .shadow-xl {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Gradient backgrounds in dark mode */
+.dark .bg-gradient-to-br.from-rose-50 {
+  background: linear-gradient(to bottom right, #1a0a0f, var(--color-dark-bg), #1a1208);
+}
+
+.dark .bg-gradient-to-br.from-rose-100 {
+  background: linear-gradient(to bottom right, #1a0a0f, #1a1a23);
+}
+
+.dark .from-rose-50 {
+  --tw-gradient-from: #1a0a0f;
+}
+
+.dark .via-white {
+  --tw-gradient-via: var(--color-dark-card);
+}
+
+.dark .to-amber-50 {
+  --tw-gradient-to: #1a1208;
+}
+
+.dark .from-rose-100 {
+  --tw-gradient-from: #1a0a0f;
+}
+
+.dark .to-amber-100 {
+  --tw-gradient-to: #1a1208;
+}
+
+/* Navbar dark mode */
+.dark nav.bg-white {
+  background-color: rgba(15, 15, 19, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+.dark nav .border-gray-100 {
+  border-color: var(--color-dark-border);
+}
+
+/* Footer dark mode overrides */
+.dark footer.bg-gray-900 {
+  background-color: #0a0a0e;
+}
+
+/* Cards and containers */
+.dark .rounded-2xl.shadow-lg,
+.dark .rounded-2xl.shadow-sm {
+  background-color: var(--color-dark-card);
+}
+
+/* Inputs and selects */
+.dark select,
+.dark input,
+.dark textarea {
+  background-color: #15151f;
+  border-color: var(--color-dark-border);
+  color: var(--color-dark-text);
+}
+
+.dark select:focus,
+.dark input:focus,
+.dark textarea:focus {
+  border-color: #f43f5e;
+}
+
+/* Hover states */
+.dark .hover\:bg-rose-50:hover {
+  background-color: rgba(244, 63, 94, 0.15);
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: #1f1f2e;
+}
+
+.dark .hover\:bg-red-50:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Modal backdrop */
+.dark .bg-black\/50 {
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 @keyframes float-1 {

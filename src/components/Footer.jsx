@@ -2,8 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, Mail, Phone, MapPin } from "lucide-react";
 import logo from "../assets/logo.png";
+import { useI18n } from "../context/I18nContext";
 
 export default function Footer() {
+  const { t } = useI18n();
+
   return (
     <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -18,7 +21,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-sm text-gray-400 leading-relaxed">
-              Conectando corazones solitarios con patitas que necesitan un hogar. Adopta con responsabilidad y amor.
+              {t("footer.brand_desc")}
             </p>
             <div className="flex space-x-4">
               {/* Twitter/X SVG */}
@@ -46,26 +49,26 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Explorar</h3>
+            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">{t("footer.explore")}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/" className="hover:text-white transition-colors">Inicio</Link>
+                <Link to="/" className="hover:text-white transition-colors">{t("footer.home")}</Link>
               </li>
               <li>
-                <Link to="/pets" className="hover:text-white transition-colors">Buscar Mascotas</Link>
+                <Link to="/pets" className="hover:text-white transition-colors">{t("footer.search_pets")}</Link>
               </li>
               <li>
-                <Link to="/about" className="hover:text-white transition-colors">Cómo Funciona</Link>
+                <Link to="/about" className="hover:text-white transition-colors">{t("footer.how_it_works")}</Link>
               </li>
               <li>
-                <Link to="/volunteers" className="hover:text-white transition-colors">Ser Voluntario</Link>
+                <Link to="/volunteers" className="hover:text-white transition-colors">{t("footer.volunteer")}</Link>
               </li>
             </ul>
           </div>
 
           {/* Contact Details */}
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Contacto</h3>
+            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">{t("footer.contact")}</h3>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-rose-500 shrink-0" />
@@ -84,32 +87,33 @@ export default function Footer() {
 
           {/* Newsletter */}
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Boletín</h3>
+            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">{t("footer.newsletter")}</h3>
             <p className="text-sm text-gray-400 mb-4">
-              Suscríbete para recibir historias de éxito y alertas de nuevas mascotas en adopción.
+              {t("footer.newsletter_desc")}
             </p>
             <form onSubmit={(e) => e.preventDefault()} className="flex gap-2">
               <input
                 type="email"
-                placeholder="Tu correo"
+                placeholder={t("footer.newsletter_placeholder")}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
               />
               <button
                 type="submit"
                 className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
               >
-                Unirse
+                {t("footer.newsletter_btn")}
               </button>
             </form>
           </div>
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-800 text-center text-xs text-gray-500 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p>© {new Date().getFullYear()} Adoptify. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} Adoptify. {t("footer.rights")}</p>
           <div className="flex space-x-6">
-            <a href="#" className="hover:text-gray-300">Privacidad</a>
-            <a href="#" className="hover:text-gray-300">Términos</a>
-            <a href="#" className="hover:text-gray-300">Cookies</a>
+            <Link to="/settings" className="hover:text-gray-300">{t("footer.privacy")}</Link>
+            <Link to="/settings" className="hover:text-gray-300">{t("footer.terms")}</Link>
+            <Link to="/settings" className="hover:text-gray-300">{t("footer.cookies")}</Link>
+            <Link to="/settings" className="hover:text-gray-300">{t("footer.legal_notice")}</Link>
           </div>
         </div>
       </div>
