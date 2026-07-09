@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings, Bell, ShoppingCart } from "lucide-react";
+import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings, Bell, ShoppingCart, Sun, Moon } from "lucide-react";
 import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../context/I18nContext";
+import { useTheme } from "../context/ThemeContext";
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,9 +15,37 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { t } = useI18n();
+  const { theme, setTheme } = useTheme();
+  const { cartCount } = useCart();
+  const dropdownRef = useRef(null);
 
   const isActive = (path) => location.pathname === path;
   const isAuthenticated = !!user;
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user?.name) return "?";
+    const names = user.name.split(" ");
+    if (names.length >= 2) {
+      return (names[0][0] + names[1][0]).toUpperCase();
+    }
+    return names[0][0].toUpperCase();
+  };
+
+  // Get a consistent color based on user name for the avatar
+  const getAvatarColor = () => {
+    const colors = [
+      "from-rose-500 to-pink-600",
+      "from-amber-500 to-orange-600",
+      "from-violet-500 to-purple-600",
+      "from-blue-500 to-indigo-600",
+      "from-emerald-500 to-teal-600",
+      "from-cyan-500 to-blue-600",
+    ];
+    if (!user?.name) return colors[0];
+    const index = user.name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+    return colors[index];
+  };
 
   const handleScroll = (sectionId) => {
     setIsOpen(false);
@@ -38,6 +68,18 @@ export default function Navbar() {
     setIsOpen(false);
     navigate("/");
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!isHomePage) return;
@@ -65,7 +107,7 @@ export default function Navbar() {
   const isSectionActive = (section) => activeSection === section;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
+    <nav className="main-nav fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
@@ -78,13 +120,15 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-1">
             {isAuthenticated ? (
               <>
                 <Link
                   to="/dashboard"
-                  className={`text-sm font-medium transition-colors hover:text-rose-500 flex items-center gap-1 ${
-                    isActive("/dashboard") ? "text-rose-500 font-semibold" : "text-gray-600"
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
+                    isActive("/dashboard")
+                      ? "text-rose-500 font-semibold bg-rose-50/80"
+                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                   }`}
                 >
                   <HomeIcon className="w-4 h-4" />
@@ -92,8 +136,10 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/animals"
-                  className={`text-sm font-medium transition-colors hover:text-rose-500 flex items-center gap-1 ${
-                    isActive("/animals") ? "text-rose-500 font-semibold" : "text-gray-600"
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
+                    isActive("/animals")
+                      ? "text-rose-500 font-semibold bg-rose-50/80"
+                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                   }`}
                 >
                   <PawPrint className="w-4 h-4" />
@@ -101,8 +147,10 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/shelters"
-                  className={`text-sm font-medium transition-colors hover:text-rose-500 flex items-center gap-1 ${
-                    isActive("/shelters") ? "text-rose-500 font-semibold" : "text-gray-600"
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
+                    isActive("/shelters")
+                      ? "text-rose-500 font-semibold bg-rose-50/80"
+                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                   }`}
                 >
                   <HomeIcon className="w-4 h-4" />
@@ -110,8 +158,10 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/store"
-                  className={`text-sm font-medium transition-colors hover:text-rose-500 flex items-center gap-1 ${
-                    isActive("/store") ? "text-rose-500 font-semibold" : "text-gray-600"
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
+                    isActive("/store")
+                      ? "text-rose-500 font-semibold bg-rose-50/80"
+                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                   }`}
                 >
                   <ShoppingBag className="w-4 h-4" />
@@ -119,8 +169,10 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/forum"
-                  className={`text-sm font-medium transition-colors hover:text-rose-500 flex items-center gap-1 ${
-                    isActive("/forum") ? "text-rose-500 font-semibold" : "text-gray-600"
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
+                    isActive("/forum")
+                      ? "text-rose-500 font-semibold bg-rose-50/80"
+                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                   }`}
                 >
                   <MessageSquare className="w-4 h-4" />
@@ -132,8 +184,10 @@ export default function Navbar() {
                 {isHomePage ? (
                   <button
                     onClick={scrollToTop}
-                    className={`text-sm font-medium transition-colors hover:text-rose-500 flex items-center gap-1 ${
-                      isActive("/") ? "text-rose-500 font-semibold" : "text-gray-600"
+                    className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
+                      isActive("/")
+                        ? "text-rose-500 font-semibold bg-rose-50/80"
+                        : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                     }`}
                   >
                     {t("nav.inicio")}
@@ -141,8 +195,10 @@ export default function Navbar() {
                 ) : (
                   <Link
                     to="/"
-                    className={`text-sm font-medium transition-colors hover:text-rose-500 flex items-center gap-1 ${
-                      isActive("/") ? "text-rose-500 font-semibold" : "text-gray-600"
+                    className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
+                      isActive("/")
+                        ? "text-rose-500 font-semibold bg-rose-50/80"
+                        : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                     }`}
                   >
                     {t("nav.inicio")}
@@ -152,32 +208,40 @@ export default function Navbar() {
                   <>
                     <button
                       onClick={() => handleScroll('how-it-works')}
-                      className={`text-sm font-medium transition-colors hover:text-rose-500 ${
-                        isSectionActive('how-it-works') ? "text-rose-500 font-semibold" : "text-gray-600"
+                      className={`nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl ${
+                        isSectionActive('how-it-works')
+                          ? "text-rose-500 font-semibold bg-rose-50/80"
+                          : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                       }`}
                     >
                       {t("nav.como_funciona")}
                     </button>
                     <button
                       onClick={() => handleScroll('animals')}
-                      className={`text-sm font-medium transition-colors hover:text-rose-500 ${
-                        isSectionActive('animals') ? "text-rose-500 font-semibold" : "text-gray-600"
+                      className={`nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl ${
+                        isSectionActive('animals')
+                          ? "text-rose-500 font-semibold bg-rose-50/80"
+                          : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                       }`}
                     >
                       {t("nav.animales")}
                     </button>
                     <button
                       onClick={() => handleScroll('store')}
-                      className={`text-sm font-medium transition-colors hover:text-rose-500 ${
-                        isSectionActive('store') ? "text-rose-500 font-semibold" : "text-gray-600"
+                      className={`nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl ${
+                        isSectionActive('store')
+                          ? "text-rose-500 font-semibold bg-rose-50/80"
+                          : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                       }`}
                     >
                       {t("nav.tienda")}
                     </button>
                     <button
                       onClick={() => handleScroll('forum')}
-                      className={`text-sm font-medium transition-colors hover:text-rose-500 ${
-                        isSectionActive('forum') ? "text-rose-500 font-semibold" : "text-gray-600"
+                      className={`nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl ${
+                        isSectionActive('forum')
+                          ? "text-rose-500 font-semibold bg-rose-50/80"
+                          : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                       }`}
                     >
                       {t("nav.foro")}
@@ -187,25 +251,25 @@ export default function Navbar() {
                   <>
                     <Link
                       to="/#how-it-works"
-                      className="text-sm font-medium transition-colors hover:text-rose-500 text-gray-600"
+                      className="nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                     >
                       {t("nav.como_funciona")}
                     </Link>
                     <Link
                       to="/#animals"
-                      className="text-sm font-medium transition-colors hover:text-rose-500 text-gray-600"
+                      className="nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                     >
                       {t("nav.animales")}
                     </Link>
                     <Link
                       to="/#store"
-                      className="text-sm font-medium transition-colors hover:text-rose-500 text-gray-600"
+                      className="nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                     >
                       {t("nav.tienda")}
                     </Link>
                     <Link
                       to="/#forum"
-                      className="text-sm font-medium transition-colors hover:text-rose-500 text-gray-600"
+                      className="nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
                     >
                       {t("nav.foro")}
                     </Link>
@@ -228,25 +292,40 @@ export default function Navbar() {
                 {/* Cart */}
                 <Link to="/cart" className="relative p-2 text-gray-600 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
                   <ShoppingCart className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">
+                      {cartCount > 99 ? "99+" : cartCount}
+                    </span>
+                  )}
                 </Link>
 
                 {/* User Menu */}
-                <div className="relative">
+                <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-md shadow-rose-200/50"
                   >
-                    <User className="w-5 h-5" />
-                    <span className="font-medium">{t("nav.mi_cuenta")}</span>
+                    {/* User Avatar */}
+                    <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${getAvatarColor()} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                      {getUserInitials()}
+                    </div>
+                    <span className="font-medium text-sm max-w-[100px] truncate">{user?.name || t("nav.mi_cuenta")}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                   </button>
 
                   {showUserMenu && (
                     <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="font-semibold text-gray-900">{user?.name || "Usuario"}</p>
-                        <p className="text-sm text-gray-600">{user?.email || ""}</p>
+                        <div className="flex items-center gap-3">
+                          {/* Avatar in dropdown header */}
+                          <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor()} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
+                            {getUserInitials()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-gray-900 truncate">{user?.name || "Usuario"}</p>
+                            <p className="text-sm text-gray-600 truncate">{user?.email || ""}</p>
+                          </div>
+                        </div>
                       </div>
                       <Link
                         to="/profile"
@@ -280,7 +359,46 @@ export default function Navbar() {
                         <Settings className="w-4 h-4 text-gray-600" />
                         <span className="text-gray-700">{t("nav.configuracion")}</span>
                       </Link>
+
+                      {/* Theme Toggle in Dropdown */}
                       <div className="border-t border-gray-100 mt-2 pt-2">
+                        <div className="px-4 py-2 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {theme === "dark" ? (
+                              <Moon className="w-4 h-4 text-gray-600" />
+                            ) : (
+                              <Sun className="w-4 h-4 text-gray-600" />
+                            )}
+                            <span className="text-gray-700 text-sm">{t("settings.theme")}</span>
+                          </div>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => setTheme("light")}
+                              className={`p-1.5 rounded-lg transition-all ${
+                                theme === "light"
+                                  ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white"
+                                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                              }`}
+                              title="Claro"
+                            >
+                              <Sun className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setTheme("dark")}
+                              className={`p-1.5 rounded-lg transition-all ${
+                                theme === "dark"
+                                  ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white"
+                                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                              }`}
+                              title="Oscuro"
+                            >
+                              <Moon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-100 pt-2">
                         <button
                           onClick={handleLogout}
                           className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-red-600 w-full"
@@ -337,6 +455,16 @@ export default function Navbar() {
         <div className="px-4 space-y-1">
           {isAuthenticated ? (
             <>
+              {/* User info header in mobile */}
+              <div className="flex items-center gap-3 px-3 py-3 mb-2 border-b border-gray-100">
+                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getAvatarColor()} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                  {getUserInitials()}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-900 text-sm truncate">{user?.name || "Usuario"}</p>
+                  <p className="text-xs text-gray-600 truncate">{user?.email || ""}</p>
+                </div>
+              </div>
               <Link
                 to="/dashboard"
                 onClick={() => setIsOpen(false)}
@@ -395,7 +523,11 @@ export default function Navbar() {
                   </button>
                   <Link to="/cart" onClick={() => setIsOpen(false)} className="relative p-2 text-gray-600 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
                     <ShoppingCart className="w-5 h-5" />
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
+                    )}
                   </Link>
                 </div>
                 <Link
@@ -430,6 +562,43 @@ export default function Navbar() {
                   <Settings className="w-4 h-4" />
                   {t("nav.configuracion")}
                 </Link>
+
+                {/* Theme Toggle in Mobile Menu */}
+                <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100 mt-2 pt-3">
+                  <div className="flex items-center gap-3">
+                    {theme === "dark" ? (
+                      <Moon className="w-4 h-4 text-gray-600" />
+                    ) : (
+                      <Sun className="w-4 h-4 text-gray-600" />
+                    )}
+                    <span className="text-sm font-medium text-gray-700">{t("settings.theme")}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setTheme("light")}
+                      className={`p-1.5 rounded-lg transition-all ${
+                        theme === "light"
+                          ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white"
+                          : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                      }`}
+                      title="Claro"
+                    >
+                      <Sun className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setTheme("dark")}
+                      className={`p-1.5 rounded-lg transition-all ${
+                        theme === "dark"
+                          ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white"
+                          : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                      }`}
+                      title="Oscuro"
+                    >
+                      <Moon className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
                 <button
                   onClick={() => {
                     logout();
