@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, MapPin, Phone, Mail, Star, Heart, Clock, PawPrint, CheckCircle, Store, Eye, X } from "lucide-react";
+import {
+  ArrowLeft, MapPin, Phone, Mail, Star, Heart, Clock, PawPrint,
+  CheckCircle, Store, Eye, X, ShoppingBag, ChevronRight,
+  Package, Sparkles, Shield, Award
+} from "lucide-react";
+import {
+  products as allProducts,
+  getProductsByShelter,
+  categoryIcons,
+  categoryColors,
+} from "../../data/products";
 
 export default function ShelterDetails() {
   const { id } = useParams();
@@ -9,6 +19,62 @@ export default function ShelterDetails() {
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+
+  // Mock reviews data
+  const reviews = [
+    {
+      id: 1,
+      user: "María García",
+      avatar: null,
+      rating: 5,
+      date: "Hace 2 días",
+      comment: "Excelente refugio, muy comprometidos con el bienestar animal. Adopté a mi perrito Max y todo el proceso fue muy transparente y lleno de amor. Recomiendo totalmente.",
+    },
+    {
+      id: 2,
+      user: "Carlos López",
+      avatar: null,
+      rating: 4,
+      date: "Hace 1 semana",
+      comment: "Muy buen lugar, los animales están bien cuidados. El proceso de adopción fue rápido y bien explicado. Solo sugiero mejorar la comunicación en horarios.",
+    },
+    {
+      id: 3,
+      user: "Ana Martínez",
+      avatar: null,
+      rating: 5,
+      date: "Hace 2 semanas",
+      comment: "Hermosa experiencia. Rescataron a mi gatita Luna de la calle y la rehabilitaron con mucho cariño. Ahora es parte de nuestra familia. Infinitas gracias.",
+    },
+    {
+      id: 4,
+      user: "Pedro Sánchez",
+      avatar: null,
+      rating: 4,
+      date: "Hace 3 semanas",
+      comment: "Buen servicio y atención. Los voluntarios son muy dedicados. Me gustaría que tuvieran más horarios disponibles para visitas.",
+    },
+    {
+      id: 5,
+      user: "Laura Torres",
+      avatar: null,
+      rating: 5,
+      date: "Hace 1 mes",
+      comment: "El mejor refugio de la ciudad. Adopté a mi compañero fiel gracias a ellos. Hacen una labor increíble con recursos limitados. Todo mi apoyo.",
+    },
+  ];
+
+  const displayedReviews = showAllReviews ? reviews : reviews.slice(0, 3);
+
+  // Get initials for review avatars
+  const getReviewInitials = (name) => {
+    const names = name.split(" ");
+    if (names.length >= 2) {
+      return (names[0][0] + names[1][0]).toUpperCase();
+    }
+    return names[0][0].toUpperCase();
+  };
 
   useEffect(() => {
     setIsVisible(true);
@@ -17,7 +83,7 @@ export default function ShelterDetails() {
   // Mock data - in a real app this would come from an API
   const shelter = {
     id: id || 1,
-    name: "Hogar de huellas",
+    name: "Hogar de Huellas",
     location: "Ibagué - Tolima",
     verified: true,
     rating: 4.8,
@@ -47,6 +113,9 @@ export default function ShelterDetails() {
       { id: 4, name: "Rio", age: "12 meses", image: null }
     ]
   };
+
+  // Get products for this shelter
+  const shelterProducts = getProductsByShelter(shelter.id).slice(0, 4);
 
   if (!shelter) {
     return (
@@ -80,14 +149,14 @@ export default function ShelterDetails() {
           Volver
         </Link>
 
-        {/* Header Section */}
-        <div className={`bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-8 hover-lift ${
+        {/* ===== HEADER SECTION ===== */}
+        <div className={`bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-8 hover:shadow-xl transition-all duration-300 ${
           isVisible ? "animate-fade-in-down" : "opacity-0"
         }`}>
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             <div className="flex items-start gap-6 flex-1">
               {/* Logo */}
-              <div className="w-24 h-24 bg-gradient-to-br from-rose-100 to-amber-100 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 hover:scale-105">
+              <div className="w-24 h-24 bg-gradient-to-br from-rose-100 to-amber-100 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 hover:scale-105 hover:shadow-lg">
                 {shelter.logo ? (
                   <img src={shelter.logo} alt={shelter.name} className="w-full h-full object-cover rounded-2xl" />
                 ) : (
@@ -98,7 +167,7 @@ export default function ShelterDetails() {
                 <div className="flex flex-wrap items-center gap-3 mb-3">
                   <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 font-display">{shelter.name}</h1>
                   {shelter.verified && (
-                    <div className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-full text-sm font-medium border border-green-200">
                       <CheckCircle className="w-4 h-4" />
                       Verificado
                     </div>
@@ -108,7 +177,7 @@ export default function ShelterDetails() {
                   <MapPin className="w-5 h-5 text-rose-500" />
                   <span className="text-lg">{shelter.location}</span>
                 </div>
-                <p className="text-gray-700 mb-4 line-clamp-2">{shelter.description}</p>
+                <p className="text-gray-700 mb-4 leading-relaxed">{shelter.description}</p>
                 <div className="flex flex-wrap gap-3">
                   <button className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95">
                     <Phone className="w-5 h-5" />
@@ -116,7 +185,7 @@ export default function ShelterDetails() {
                   </button>
                   <Link
                     to={`/shelter-store/${shelter.id}`}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-dark-card text-emerald-600 dark:text-emerald-400 border-2 border-emerald-500 dark:border-emerald-600 font-semibold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-emerald-600 border-2 border-emerald-500 font-semibold rounded-xl hover:bg-emerald-50 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
                   >
                     <Store className="w-5 h-5" />
                     Ver Tienda
@@ -130,12 +199,13 @@ export default function ShelterDetails() {
                     }`}
                   >
                     <Heart className={`w-5 h-5 ${isFavorite ? "fill-white animate-heartbeat" : ""} transition-all`} />
-                    Favorito
+                    {isFavorite ? "Guardado" : "Favorito"}
                   </button>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-amber-50 to-rose-50 rounded-xl transition-all duration-300 hover:shadow-md hover:scale-105">
+            {/* Rating Badge */}
+            <div className="flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-amber-50 to-rose-50 rounded-xl transition-all duration-300 hover:shadow-md hover:scale-105 border border-amber-100">
               <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
               <div className="text-right">
                 <p className="text-2xl font-bold text-gray-900">{shelter.rating}</p>
@@ -145,105 +215,138 @@ export default function ShelterDetails() {
           </div>
         </div>
 
-        {/* Main Content Grid */}
+        {/* ===== MAIN CONTENT GRID ===== */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Left Column - Stats & Info */}
+          {/* ===== LEFT COLUMN (2/3) ===== */}
           <div className="lg:col-span-2 space-y-6">
             {/* Stats Section */}
             <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 ${
               isVisible ? "animate-fade-in-up animation-delay-100" : "opacity-0"
             }`}>
-              <div className="bg-white rounded-2xl shadow-lg p-5 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105">
-                <PawPrint className="w-8 h-8 text-rose-500 mx-auto mb-2" />
+              <div className="bg-white rounded-2xl shadow-lg p-5 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105 group">
+                <div className="w-12 h-12 bg-gradient-to-br from-rose-100 to-rose-200 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <PawPrint className="w-6 h-6 text-rose-500" />
+                </div>
                 <p className="text-2xl font-bold text-gray-900">{shelter.availablePets}</p>
                 <p className="text-sm text-gray-600">Disponibles</p>
               </div>
-              <div className="bg-white rounded-2xl shadow-lg p-5 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105">
-                <Heart className="w-8 h-8 text-rose-500 mx-auto mb-2" />
+              <div className="bg-white rounded-2xl shadow-lg p-5 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105 group">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <Heart className="w-6 h-6 text-amber-500" />
+                </div>
                 <p className="text-2xl font-bold text-gray-900">{shelter.adoptionsThisMonth}</p>
                 <p className="text-sm text-gray-600">Adopciones/mes</p>
               </div>
-              <div className="bg-white rounded-2xl shadow-lg p-5 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105">
-                <CheckCircle className={`w-8 h-8 mx-auto mb-2 ${shelter.vaccinated ? "text-green-500" : "text-gray-400"}`} />
-                <p className={`text-lg font-bold ${shelter.vaccinated ? "text-green-600" : "text-gray-400"}`}>Sí</p>
+              <div className="bg-white rounded-2xl shadow-lg p-5 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105 group">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300 ${
+                  shelter.vaccinated ? "bg-gradient-to-br from-green-100 to-emerald-100" : "bg-gray-100"
+                }`}>
+                  <CheckCircle className={`w-6 h-6 ${shelter.vaccinated ? "text-green-500" : "text-gray-400"}`} />
+                </div>
+                <p className={`text-lg font-bold ${shelter.vaccinated ? "text-green-600" : "text-gray-400"}`}>{shelter.vaccinated ? "Sí" : "No"}</p>
                 <p className="text-sm text-gray-600">Vacunados</p>
               </div>
-              <div className="bg-white rounded-2xl shadow-lg p-5 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105">
-                <CheckCircle className={`w-8 h-8 mx-auto mb-2 ${shelter.sterilized ? "text-green-500" : "text-gray-400"}`} />
-                <p className={`text-lg font-bold ${shelter.sterilized ? "text-green-600" : "text-gray-400"}`}>Sí</p>
+              <div className="bg-white rounded-2xl shadow-lg p-5 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105 group">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300 ${
+                  shelter.sterilized ? "bg-gradient-to-br from-green-100 to-emerald-100" : "bg-gray-100"
+                }`}>
+                  <Shield className={`w-6 h-6 ${shelter.sterilized ? "text-green-500" : "text-gray-400"}`} />
+                </div>
+                <p className={`text-lg font-bold ${shelter.sterilized ? "text-green-600" : "text-gray-400"}`}>{shelter.sterilized ? "Sí" : "No"}</p>
                 <p className="text-sm text-gray-600">Esterilizados</p>
               </div>
             </div>
 
-            {/* Hours Section */}
-            <div className={`bg-white rounded-2xl shadow-lg p-6 hover-lift ${
-              isVisible ? "animate-fade-in-up animation-delay-200" : "opacity-0"
-            }`}>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-rose-500 animate-pulse-soft" />
-                Horario de atención
-              </h3>
-              <p className="text-xl font-semibold text-gray-900">{shelter.hours}</p>
-              <p className="text-sm text-gray-600 mt-1">Lunes a Sábado</p>
-            </div>
-
-            {/* User Rating Section - Moved to left column after hours */}
-            <div className={`bg-white rounded-2xl shadow-lg p-6 hover-lift ${
-              isVisible ? "animate-fade-in-up animation-delay-250" : "opacity-0"
-            }`}>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Star className="w-5 h-5 text-rose-500" />
-                Califica este refugio
-              </h3>
-              <div className="flex items-center gap-2 mb-4">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setUserRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="transition-all duration-200 hover:scale-125 active:scale-90"
-                  >
-                    <Star
-                      className={`w-8 h-8 ${
-                        (hoverRating || userRating) >= star
-                          ? "text-amber-500 fill-amber-500 drop-shadow-sm"
-                          : "text-gray-300 hover:text-amber-300"
-                      } transition-all duration-200`}
-                    />
-                  </button>
-                ))}
+            {/* Hours + User Rating - Side by side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Hours Section */}
+              <div className={`bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${
+                isVisible ? "animate-fade-in-up animation-delay-200" : "opacity-0"
+              }`}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-rose-100 to-amber-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-rose-500" />
+                  </div>
+                  Horario de atención
+                </h3>
+                <p className="text-xl font-bold text-gray-900">{shelter.hours}</p>
+                <p className="text-sm text-gray-600 mt-1">Lunes a Sábado</p>
               </div>
-              <p className="text-sm text-gray-600">
-                {userRating > 0 ? `Tu calificación: ${userRating} estrella${userRating !== 1 ? 's' : ''}` : 'Haz clic en las estrellas para calificar'}
-              </p>
+
+              {/* User Rating Section */}
+              <div className={`bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${
+                isVisible ? "animate-fade-in-up animation-delay-250" : "opacity-0"
+              }`}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-amber-100 to-rose-100 rounded-lg flex items-center justify-center">
+                    <Star className="w-4 h-4 text-amber-500" />
+                  </div>
+                  Califica este refugio
+                </h3>
+                <div className="flex items-center gap-1 mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setUserRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      className="transition-all duration-200 hover:scale-125 active:scale-90"
+                    >
+                      <Star
+                        className={`w-7 h-7 ${
+                          (hoverRating || userRating) >= star
+                            ? "text-amber-500 fill-amber-500 drop-shadow-sm"
+                            : "text-gray-300 hover:text-amber-300"
+                        } transition-all duration-200`}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600">
+                  {userRating > 0
+                    ? `Tu calificación: ${userRating} estrella${userRating !== 1 ? "s" : ""}`
+                    : "Haz clic en las estrellas para calificar"}
+                </p>
+              </div>
             </div>
 
             {/* Pets for Adoption Section */}
-            <div className={`bg-white rounded-2xl shadow-lg p-6 hover-lift ${
+            <div className={`bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 ${
               isVisible ? "animate-fade-in-up animation-delay-300" : "opacity-0"
             }`}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 font-display">Mascotas en adopción</h2>
-                <span className="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-medium">{shelter.pets.length} disponibles</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-amber-100 rounded-xl flex items-center justify-center">
+                    <PawPrint className="w-5 h-5 text-rose-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 font-display">Mascotas en adopción</h2>
+                    <p className="text-sm text-gray-500">Conoce a nuestros rescatados</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-gradient-to-r from-rose-100 to-amber-100 text-rose-700 rounded-full text-sm font-medium">
+                  {shelter.pets.length} disponibles
+                </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {shelter.pets.map((pet, index) => (
                   <div
                     key={pet.id}
-                    className="bg-gradient-to-br from-rose-50 to-amber-50 rounded-xl p-4 hover:shadow-md transition-all duration-300 group hover-lift"
+                    className="bg-gradient-to-br from-rose-50 to-amber-50 rounded-xl p-4 hover:shadow-md transition-all duration-300 group hover:-translate-y-1"
                     style={{ animationDelay: `${350 + index * 100}ms` }}
                   >
-                    <div className="w-full h-32 bg-white rounded-lg mb-3 flex items-center justify-center overflow-hidden img-zoom-container">
-                      <div className="zoom-content w-full h-full flex items-center justify-center">
-                        <PawPrint className="w-12 h-12 text-rose-300 group-hover:text-rose-400 transition-colors duration-300" />
+                    <div className="w-full h-36 bg-white rounded-lg mb-3 flex items-center justify-center overflow-hidden relative">
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-amber-100 group-hover:scale-105 transition-transform duration-500">
+                        <PawPrint className="w-16 h-16 text-rose-300 group-hover:text-rose-400 transition-colors duration-300" />
+                      </div>
+                      <div className="absolute top-2 right-2 px-2 py-0.5 bg-white/80 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700">
+                        {pet.age}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900">{pet.name}</h3>
-                      <span className="text-sm text-gray-600">{pet.age}</span>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-gray-900 text-lg">{pet.name}</h3>
                     </div>
-                    <button className="w-full px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-sm font-semibold rounded-lg hover:from-rose-600 hover:to-amber-600 transition-all duration-300 hover:shadow-md hover:scale-[1.02] active:scale-95">
+                    <button className="w-full px-4 py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-sm font-semibold rounded-lg hover:from-rose-600 hover:to-amber-600 transition-all duration-300 hover:shadow-md hover:scale-[1.02] active:scale-95">
                       Adoptar
                     </button>
                   </div>
@@ -258,77 +361,112 @@ export default function ShelterDetails() {
                 >
                   <Eye className="w-5 h-5 group-hover:animate-wiggle" />
                   Ver más mascotas
-                  <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform duration-300" />
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
               </div>
             </div>
+
+            {/* ===== STORE PRODUCTS SECTION (NEW) ===== */}
+            {shelterProducts.length > 0 && (
+              <div className={`bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 ${
+                isVisible ? "animate-fade-in-up animation-delay-350" : "opacity-0"
+              }`}>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
+                      <Store className="w-5 h-5 text-emerald-500" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900 font-display">Tienda del Refugio</h2>
+                      <p className="text-sm text-gray-500">Productos para tu mascota</p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 rounded-full text-sm font-medium">
+                    {shelterProducts.length} productos
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {shelterProducts.map((product, index) => {
+                    const CatIcon = categoryIcons[product.category] || Package;
+                    const catColor = categoryColors[product.category] || "from-gray-400 to-gray-500";
+                    const isPremium = product.quality === "Premium";
+
+                    return (
+                      <Link
+                        key={product.id}
+                        to={`/product/${product.id}`}
+                        className="group bg-gradient-to-br from-gray-50 to-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex"
+                      >
+                        {/* Product color bar */}
+                        <div className={`w-2 bg-gradient-to-b ${catColor} flex-shrink-0`} />
+
+                        <div className="flex-1 p-4 flex gap-3">
+                          {/* Image placeholder */}
+                          <div className={`w-16 h-16 bg-gradient-to-br ${product.color} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300`}>
+                            <CatIcon className="w-7 h-7 text-white" />
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-1">
+                              <h3 className="font-semibold text-gray-900 text-sm leading-tight group-hover:text-rose-600 transition-colors line-clamp-1">
+                                {product.name}
+                              </h3>
+                              {isPremium && (
+                                <Award className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{product.description}</p>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-base font-bold text-rose-600 font-display">
+                                ${product.price.toFixed(2)}
+                              </span>
+                              <div className="flex items-center gap-0.5">
+                                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                                <span className="text-xs font-semibold text-gray-700">{product.rating}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* "Ver más productos" button */}
+                <div className="mt-6 text-center">
+                  <Link
+                    to={`/shelter-store/${shelter.id}`}
+                    className="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 group"
+                  >
+                    <ShoppingBag className="w-5 h-5 group-hover:animate-wiggle" />
+                    Ver más productos de este refugio
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Right Column - Contact, Gallery */}
-          <div className="space-y-6">
-            {/* Contact Information - Moved up */}
-            <div className={`bg-white rounded-2xl shadow-lg p-6 hover-lift ${
+          {/* ===== RIGHT COLUMN (1/3) ===== */}
+          <div className="flex flex-col gap-6">
+            {/* Photo Gallery */}
+            <div className={`bg-white rounded-2xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 ${
               isVisible ? "animate-fade-in-right animation-delay-100" : "opacity-0"
             }`}>
-              <h2 className="text-xl font-bold text-gray-900 mb-6 font-display">Información de contacto</h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-rose-50 transition-colors duration-300 group">
-                  <div className="p-2 bg-rose-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                    <Phone className="w-5 h-5 text-rose-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Teléfono</p>
-                    <p className="font-semibold text-gray-900">{shelter.phone}</p>
-                  </div>
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-rose-100 to-amber-100 rounded-lg flex items-center justify-center">
+                  <PawPrint className="w-3.5 h-3.5 text-rose-500" />
                 </div>
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-rose-50 transition-colors duration-300 group">
-                  <div className="p-2 bg-rose-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                    <Mail className="w-5 h-5 text-rose-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-semibold text-gray-900 text-sm">{shelter.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-rose-50 transition-colors duration-300 group">
-                  <div className="p-2 bg-rose-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                    <MapPin className="w-5 h-5 text-rose-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Dirección</p>
-                    <p className="font-semibold text-gray-900">{shelter.address}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Social Media */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-600 mb-3">Síguenos en redes</p>
-                <div className="flex gap-3">
-                  <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 active:scale-95">
-                    Facebook
-                  </button>
-                  <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 hover:scale-105 active:scale-95">
-                    Instagram
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Photo Gallery Section - Moved up, smaller photos */}
-            <div className={`bg-white rounded-2xl shadow-lg p-6 hover-lift ${
-              isVisible ? "animate-fade-in-right animation-delay-200" : "opacity-0"
-            }`}>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <PawPrint className="w-5 h-5 text-rose-500" />
                 Galería de fotos
               </h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {shelter.gallery.map((photo) => (
                   <div
                     key={photo.id}
                     onClick={() => setSelectedPhoto(photo)}
-                    className="aspect-[4/3] bg-gradient-to-br from-rose-100 to-amber-100 rounded-lg overflow-hidden group cursor-pointer relative hover:shadow-md transition-all duration-300"
+                    className="aspect-square bg-gradient-to-br from-rose-100 to-amber-100 rounded-lg overflow-hidden group cursor-pointer relative hover:shadow-md transition-all duration-300"
                   >
                     {photo.image ? (
                       <img src={photo.image} alt={`Foto ${photo.id}`} className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110" />
@@ -346,30 +484,152 @@ export default function ShelterDetails() {
                 ))}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Map Section - Full width below the grid */}
-        <div className={`bg-white rounded-2xl shadow-lg p-6 hover-lift ${
-          isVisible ? "animate-fade-in-up animation-delay-500" : "opacity-0"
-        }`}>
-          <h2 className="text-xl font-bold text-gray-900 mb-4 font-display flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-rose-500" />
-            Ubicación
-          </h2>
-          <div className="w-full h-72 sm:h-96 bg-gradient-to-br from-rose-100 to-amber-100 rounded-xl flex items-center justify-center overflow-hidden relative group">
-            {/* Decorative map pattern */}
-            <div className="absolute inset-0 opacity-30">
-              <div className="absolute top-10 left-10 w-32 h-32 border-2 border-rose-300 rounded-full" />
-              <div className="absolute bottom-10 right-20 w-48 h-48 border-2 border-amber-300 rounded-full" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-rose-400 rounded-full" />
-            </div>
-            <div className="text-center relative z-10 group-hover:scale-105 transition-transform duration-500">
-              <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                <MapPin className="w-8 h-8 text-white" />
+            {/* Location - Compact (MOVED from full-width, now smaller on right side) */}
+            <div className={`bg-white rounded-2xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${
+              isVisible ? "animate-fade-in-right animation-delay-150" : "opacity-0"
+            }`}>
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-rose-100 to-amber-100 rounded-lg flex items-center justify-center">
+                  <MapPin className="w-3.5 h-3.5 text-rose-500" />
+                </div>
+                Ubicación
+              </h3>
+              <div className="w-full h-48 bg-gradient-to-br from-rose-100 to-amber-100 rounded-xl flex items-center justify-center overflow-hidden relative group cursor-pointer">
+                {/* Decorative map pattern */}
+                <div className="absolute inset-0 opacity-30">
+                  <div className="absolute top-3 left-3 w-16 h-16 border-2 border-rose-300 rounded-full" />
+                  <div className="absolute bottom-3 right-6 w-20 h-20 border-2 border-amber-300 rounded-full" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 border-2 border-rose-400 rounded-full" />
+                </div>
+                <div className="text-center relative z-10 group-hover:scale-105 transition-transform duration-500">
+                  <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900">{shelter.address}</p>
+                  <p className="text-[10px] text-gray-600 mt-0.5">Ver en Google Maps</p>
+                </div>
               </div>
-              <p className="text-lg font-semibold text-gray-900">{shelter.address}</p>
-              <p className="text-sm text-gray-600 mt-1">Haz clic para ver en Google Maps</p>
+            </div>
+
+            {/* Contact Information */}
+            <div className={`bg-white rounded-2xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 flex flex-col ${
+              isVisible ? "animate-fade-in-right animation-delay-200" : "opacity-0"
+            }`}>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="w-7 h-7 bg-gradient-to-br from-rose-100 to-amber-100 rounded-lg flex items-center justify-center">
+                    <Phone className="w-3.5 h-3.5 text-rose-500" />
+                  </div>
+                  Contacto
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl hover:bg-rose-50 transition-colors duration-300 group">
+                    <div className="p-1.5 bg-rose-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <Phone className="w-4 h-4 text-rose-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500">Teléfono</p>
+                      <p className="text-sm font-semibold text-gray-900">{shelter.phone}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl hover:bg-rose-50 transition-colors duration-300 group">
+                    <div className="p-1.5 bg-rose-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <Mail className="w-4 h-4 text-rose-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500">Email</p>
+                      <p className="text-sm font-semibold text-gray-900 break-all">{shelter.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl hover:bg-rose-50 transition-colors duration-300 group">
+                    <div className="p-1.5 bg-rose-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <MapPin className="w-4 h-4 text-rose-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500">Dirección</p>
+                      <p className="text-sm font-semibold text-gray-900">{shelter.address}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media - pushes to bottom with flex-1 */}
+              <div className="mt-auto pt-5 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-2.5">Síguenos en redes</p>
+                <div className="flex gap-2">
+                  <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 active:scale-95">
+                    Facebook
+                  </button>
+                  <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 hover:scale-105 active:scale-95">
+                    Instagram
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ===== REVIEWS SECTION ===== */}
+            <div className={`bg-white rounded-2xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 ${
+              isVisible ? "animate-fade-in-right animation-delay-250" : "opacity-0"
+            }`}>
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-amber-100 to-rose-100 rounded-lg flex items-center justify-center">
+                  <Star className="w-3.5 h-3.5 text-amber-500" />
+                </div>
+                Reseñas y comentarios
+                <span className="ml-auto text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                  {reviews.length}
+                </span>
+              </h3>
+
+              <div className="space-y-3">
+                {displayedReviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-3.5 border border-gray-100 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+                  >
+                    <div className="flex items-start gap-3">
+                      {/* Avatar */}
+                      <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-rose-400 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {getReviewInitials(review.user)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-semibold text-gray-900 text-sm truncate">{review.user}</p>
+                          <span className="text-[10px] text-gray-500 whitespace-nowrap">{review.date}</span>
+                        </div>
+                        {/* Stars */}
+                        <div className="flex items-center gap-0.5 mt-0.5 mb-1.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-3 h-3 ${
+                                star <= review.rating
+                                  ? "text-amber-500 fill-amber-500"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-600 leading-relaxed">{review.comment}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {reviews.length > 3 && (
+                <button
+                  onClick={() => setShowAllReviews(!showAllReviews)}
+                  className="w-full mt-3 px-4 py-2.5 text-sm font-semibold text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-xl transition-all duration-300 hover:shadow-sm active:scale-95 flex items-center justify-center gap-1.5"
+                >
+                  {showAllReviews ? (
+                    <>Mostrar menos <span className="text-xs">▲</span></>
+                  ) : (
+                    <>Ver todas las reseñas ({reviews.length}) <span className="text-xs">▼</span></>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -126,36 +126,36 @@ body {
   color: #f43f5e !important;
 }
 
-/* When a nav-link is active/selected, its icon should be rose */
-.dark .main-nav .nav-link.text-rose-500 .lucide,
-.dark .main-nav a.text-rose-500 .lucide {
-  color: #f43f5e !important;
+/* When a nav-link is active/selected, its icon should be amber */
+.dark .main-nav .nav-link.text-amber-600 .lucide,
+.dark .main-nav a.text-amber-600 .lucide {
+  color: #d97706 !important;
 }
 
-/* Active/current page links keep rose brand color */
-.dark .main-nav .text-rose-500,
-.dark .main-nav a.text-rose-500 {
-  color: #f43f5e !important;
+/* Active/current page links keep amber brand color */
+.dark .main-nav .text-amber-600,
+.dark .main-nav a.text-amber-600 {
+  color: #d97706 !important;
 }
 
 /* Nav-link hover styles - background highlight */
-.dark .main-nav .nav-link.hover\:bg-rose-50\/50:hover,
+.dark .main-nav .nav-link.hover\:bg-amber-50\/50:hover,
 .dark .main-nav .nav-link:hover {
-  background-color: rgba(244, 63, 94, 0.1) !important;
+  background-color: rgba(217, 119, 6, 0.1) !important;
 }
 
 /* Nav-link active background */
-.dark .main-nav .nav-link.bg-rose-50\/80 {
-  background-color: rgba(244, 63, 94, 0.15) !important;
+.dark .main-nav .nav-link.bg-amber-50\/80 {
+  background-color: rgba(217, 119, 6, 0.15) !important;
 }
 
 /* Hover states within navbar */
-.dark .main-nav .hover\:text-rose-500:hover {
-  color: #f43f5e !important;
+.dark .main-nav .hover\:text-amber-600:hover {
+  color: #d97706 !important;
 }
 
-.dark .main-nav .hover\:bg-rose-50:hover {
-  background-color: rgba(244, 63, 94, 0.1) !important;
+.dark .main-nav .hover\:bg-amber-50:hover {
+  background-color: rgba(217, 119, 6, 0.1) !important;
 }
 
 .dark .main-nav .hover\:bg-gray-50:hover {
@@ -166,7 +166,7 @@ body {
 .dark .main-nav > div.max-h-96,
 .dark .main-nav > div.max-h-0 {
   background-color: #ffffff !important;
-  border-bottom-color: rgba(244, 63, 94, 0.15) !important;
+  border-bottom-color: rgba(217, 119, 6, 0.15) !important;
 }
 
 /* Mobile menu links and buttons */
@@ -177,9 +177,9 @@ body {
   color: #374151 !important;
 }
 
-.dark .main-nav > div.max-h-96 .hover\:text-rose-500:hover,
-.dark .main-nav > div.max-h-0 .hover\:text-rose-500:hover {
-  color: #f43f5e !important;
+.dark .main-nav > div.max-h-96 .hover\:text-amber-600:hover,
+.dark .main-nav > div.max-h-0 .hover\:text-amber-600:hover {
+  color: #d97706 !important;
 }
 
 .dark .main-nav > div.max-h-96 .hover\:bg-gray-50:hover,
@@ -187,14 +187,14 @@ body {
   background-color: rgba(243, 244, 246, 0.8) !important;
 }
 
-.dark .main-nav > div.max-h-96 .hover\:bg-rose-50:hover,
-.dark .main-nav > div.max-h-0 .hover\:bg-rose-50:hover {
-  background-color: rgba(244, 63, 94, 0.1) !important;
+.dark .main-nav > div.max-h-96 .hover\:bg-amber-50:hover,
+.dark .main-nav > div.max-h-0 .hover\:bg-amber-50:hover {
+  background-color: rgba(217, 119, 6, 0.1) !important;
 }
 
-.dark .main-nav > div.max-h-96 .bg-rose-50,
-.dark .main-nav > div.max-h-0 .bg-rose-50 {
-  background-color: rgba(244, 63, 94, 0.1) !important;
+.dark .main-nav > div.max-h-96 .bg-amber-50,
+.dark .main-nav > div.max-h-0 .bg-amber-50 {
+  background-color: rgba(217, 119, 6, 0.1) !important;
 }
 
 /* User dropdown menu in dark mode */

@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -32,6 +33,7 @@ function AppContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      <ScrollToTop />
       {!isAuthPage && <Navbar />}
       <main className="flex-grow">
         <Routes>

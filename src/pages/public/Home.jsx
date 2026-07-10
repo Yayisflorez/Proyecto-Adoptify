@@ -13,7 +13,7 @@ export default function Home() {
       setShowScrollTop(window.scrollY > 500);
 
       // Detect active section
-      const sections = ['forum', 'how-it-works', 'animals', 'store'];
+      const sections = ['forum', 'how-it-works', 'animals', 'shelters', 'store'];
       const scrollPosition = window.scrollY + 200;
 
       for (const section of sections) {
@@ -235,6 +235,74 @@ export default function Home() {
                 </Link>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Shelters Section */}
+      <section id="shelters" className="py-20 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-50/30 via-white to-rose-50/30" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex justify-between items-center mb-12">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
+                <HomeIcon className="w-4 h-4" />
+                <span>Refugios aliados</span>
+              </div>
+              <h2 className="text-4xl font-bold text-gray-900 font-display mb-2">
+                Conoce nuestros Refugios
+              </h2>
+              <p className="text-gray-600">Espacios dedicados al cuidado y bienestar animal</p>
+            </div>
+            <Link to="/login" className="text-rose-600 hover:text-rose-700 font-semibold text-lg flex items-center">
+              Ver todos los refugios <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { name: "Hogar de Huellas", location: "Bogotá, Colombia", animals: 45, desc: "Refugio dedicado a la recuperación y adopción de perros y gatos abandonados." },
+              { name: "Patitas de Amor", location: "Medellín, Colombia", animals: 32, desc: "Brindamos atención veterinaria y un hogar temporal a animales en situación de calle." },
+              { name: "Amigo Fiel", location: "Cali, Colombia", animals: 28, desc: "Fundación sin ánimo de lucro comprometida con el bienestar y la adopción responsable." }
+            ].map((shelter, index) => (
+              <div key={index} className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-100">
+                <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-amber-100 to-rose-100 flex items-center justify-center group-hover:from-amber-200 group-hover:to-rose-200 transition-all duration-300">
+                  <HomeIcon className="w-10 h-10 text-amber-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-1 text-center font-display">{shelter.name}</h3>
+                <p className="text-sm text-amber-600 font-medium mb-3 text-center">{shelter.location}</p>
+                <p className="text-sm text-gray-600 mb-4 text-center leading-relaxed">{shelter.desc}</p>
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mb-4">
+                  <PawPrint className="w-4 h-4 text-rose-500" />
+                  <span>{shelter.animals} animales esperando un hogar</span>
+                </div>
+                <div className="text-center">
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById('animals');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="inline-block px-6 py-2 bg-gradient-to-r from-amber-500 to-rose-500 text-white font-semibold rounded-full hover:from-amber-600 hover:to-rose-600 transition-all text-sm cursor-pointer"
+                  >
+                    Ver mascotas
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA dentro de refugios */}
+          <div className="mt-12 bg-gradient-to-r from-amber-50 to-rose-50 rounded-2xl p-8 text-center border border-amber-100">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 font-display">
+              ¿Eres un refugio y quieres unirte?
+            </h3>
+            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+              Registra tu refugio en Adoptify y llega a miles de personas que buscan adoptar y ayudar.
+            </p>
+            <Link to="/register" className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-200 hover:shadow-xl">
+              Registrar mi refugio
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
           </div>
         </div>
       </section>

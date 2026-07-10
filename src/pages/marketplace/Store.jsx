@@ -17,6 +17,8 @@ import {
   CheckCircle,
   ArrowLeft,
   Store as StoreIcon,
+  MapPin,
+  PawPrint,
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useFavorites } from "../../context/FavoritesContext";
@@ -99,17 +101,37 @@ export default function Store() {
                   <p className="text-lg sm:text-xl text-gray-600 dark:text-dark-text-secondary mb-6 max-w-xl">
                     {shelter.description}
                   </p>
+
+                  {/* Shelter quick info row */}
+                  <div className="flex flex-wrap items-center gap-5 justify-center lg:justify-start mb-6 text-sm">
+                    <div className="flex items-center gap-1.5 text-gray-500 dark:text-dark-text-secondary">
+                      <MapPin className="w-4 h-4 text-rose-400" />
+                      <span>{shelter.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-gray-500 dark:text-dark-text-secondary">
+                      <Package className="w-4 h-4 text-emerald-400" />
+                      <span>{getProductsByShelter(shelter.id).length} productos</span>
+                    </div>
+                  </div>
+
                   <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-start">
                     <Link
+                      to={`/shelter/${shelter.id}`}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-secondary border-2 border-gray-200 dark:border-dark-border font-semibold rounded-xl hover:border-rose-300 dark:hover:border-rose-700 hover:text-rose-600 dark:hover:text-rose-400 transition-all hover:scale-105 active:scale-95"
+                    >
+                      <PawPrint className="w-5 h-5" />
+                      Perfil del Refugio
+                    </Link>
+                    <Link
                       to="/store"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-secondary border-2 border-gray-200 dark:border-dark-border font-semibold rounded-xl hover:border-rose-300 dark:hover:border-rose-700 hover:text-rose-600 dark:hover:text-rose-400 transition-all"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-secondary border-2 border-gray-200 dark:border-dark-border font-semibold rounded-xl hover:border-rose-300 dark:hover:border-rose-700 hover:text-rose-600 dark:hover:text-rose-400 transition-all hover:scale-105 active:scale-95"
                     >
                       <StoreIcon className="w-5 h-5" />
                       Ver Tienda General
                     </Link>
                     <Link
                       to="/cart"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-200/50 dark:shadow-rose-500/20"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-200/50 dark:shadow-rose-500/20 hover:scale-105 active:scale-95"
                     >
                       <ShoppingCart className="w-5 h-5" />
                       Ver Carrito
@@ -140,7 +162,7 @@ export default function Store() {
                   <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-start">
                     <Link
                       to="/cart"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-200/50 dark:shadow-rose-500/20"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-200/50 dark:shadow-rose-500/20 hover:scale-105 active:scale-95"
                     >
                       <ShoppingCart className="w-5 h-5" />
                       Ver Carrito
@@ -167,7 +189,7 @@ export default function Store() {
             <div className="hidden lg:flex items-center justify-center w-72 h-72">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full blur-3xl opacity-20 animate-pulse" />
-                <div className="relative w-64 h-64 bg-gradient-to-br from-rose-200 via-amber-100 to-rose-200 dark:from-rose-900/40 dark:via-amber-900/20 dark:to-rose-900/40 rounded-full flex items-center justify-center">
+                <div className="relative w-64 h-64 bg-gradient-to-br from-rose-200 via-amber-100 to-rose-200 dark:from-rose-900/40 dark:via-amber-900/20 dark:to-rose-900/40 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
                   {shelter ? (
                     <ShelterIcon className="w-32 h-32 text-rose-400/60 dark:text-rose-500/40" />
                   ) : (
@@ -503,7 +525,7 @@ export default function Store() {
                 setSearchTerm("");
                 setSelectedCategory("all");
               }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-200/50 dark:shadow-rose-500/20"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-200/50 dark:shadow-rose-500/20 hover:scale-105 active:scale-95"
             >
               <X className="w-4 h-4" />
               Limpiar filtros

@@ -9,8 +9,8 @@ import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [activeNavSection, setActiveNavSection] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -47,20 +47,39 @@ export default function Navbar() {
     return colors[index];
   };
 
-  const handleScroll = (sectionId) => {
+  const scrollToSection = (sectionId) => {
+    setActiveNavSection(sectionId);
     setIsOpen(false);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setShowUserMenu(false);
+    if (location.pathname === "/") {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      navigate("/");
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
     }
   };
 
   const scrollToTop = () => {
+    setActiveNavSection("inicio");
     setIsOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setShowUserMenu(false);
+    if (location.pathname === "/") {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate("/");
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 150);
+    }
   };
-
-  const isHomePage = location.pathname === '/';
 
   const handleLogout = () => {
     logout();
@@ -81,30 +100,11 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (!isHomePage) return;
-
-    const handleScroll = () => {
-      const sections = ['forum', 'how-it-works', 'animals', 'store'];
-      const scrollPosition = window.scrollY + 200;
-
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveSection(section);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isHomePage]);
-
-  const isSectionActive = (section) => activeSection === section;
+  // Active style classes
+  const activeLinkClass = "text-amber-600 font-semibold bg-amber-50/80";
+  const inactiveLinkClass = "text-gray-600 hover:text-amber-600 hover:bg-amber-50/50";
+  const activeMobileClass = "bg-amber-50 text-amber-600";
+  const inactiveMobileClass = "text-gray-700 hover:bg-gray-50 hover:text-amber-600";
 
   return (
     <nav className="main-nav fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
@@ -127,8 +127,8 @@ export default function Navbar() {
                   to="/dashboard"
                   className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
                     isActive("/dashboard")
-                      ? "text-rose-500 font-semibold bg-rose-50/80"
-                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
+                      ? activeLinkClass
+                      : inactiveLinkClass
                   }`}
                 >
                   <HomeIcon className="w-4 h-4" />
@@ -138,8 +138,8 @@ export default function Navbar() {
                   to="/animals"
                   className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
                     isActive("/animals")
-                      ? "text-rose-500 font-semibold bg-rose-50/80"
-                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
+                      ? activeLinkClass
+                      : inactiveLinkClass
                   }`}
                 >
                   <PawPrint className="w-4 h-4" />
@@ -149,8 +149,8 @@ export default function Navbar() {
                   to="/shelters"
                   className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
                     isActive("/shelters")
-                      ? "text-rose-500 font-semibold bg-rose-50/80"
-                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
+                      ? activeLinkClass
+                      : inactiveLinkClass
                   }`}
                 >
                   <HomeIcon className="w-4 h-4" />
@@ -160,8 +160,8 @@ export default function Navbar() {
                   to="/store"
                   className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
                     isActive("/store")
-                      ? "text-rose-500 font-semibold bg-rose-50/80"
-                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
+                      ? activeLinkClass
+                      : inactiveLinkClass
                   }`}
                 >
                   <ShoppingBag className="w-4 h-4" />
@@ -171,8 +171,8 @@ export default function Navbar() {
                   to="/forum"
                   className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
                     isActive("/forum")
-                      ? "text-rose-500 font-semibold bg-rose-50/80"
-                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
+                      ? activeLinkClass
+                      : inactiveLinkClass
                   }`}
                 >
                   <MessageSquare className="w-4 h-4" />
@@ -181,100 +181,61 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                {isHomePage ? (
-                  <button
-                    onClick={scrollToTop}
-                    className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
-                      isActive("/")
-                        ? "text-rose-500 font-semibold bg-rose-50/80"
-                        : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                    }`}
-                  >
-                    {t("nav.inicio")}
-                  </button>
-                ) : (
-                  <Link
-                    to="/"
-                    className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
-                      isActive("/")
-                        ? "text-rose-500 font-semibold bg-rose-50/80"
-                        : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                    }`}
-                  >
-                    {t("nav.inicio")}
-                  </Link>
-                )}
-                {isHomePage ? (
-                  <>
-                    <button
-                      onClick={() => handleScroll('how-it-works')}
-                      className={`nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl ${
-                        isSectionActive('how-it-works')
-                          ? "text-rose-500 font-semibold bg-rose-50/80"
-                          : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                      }`}
-                    >
-                      {t("nav.como_funciona")}
-                    </button>
-                    <button
-                      onClick={() => handleScroll('animals')}
-                      className={`nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl ${
-                        isSectionActive('animals')
-                          ? "text-rose-500 font-semibold bg-rose-50/80"
-                          : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                      }`}
-                    >
-                      {t("nav.animales")}
-                    </button>
-                    <button
-                      onClick={() => handleScroll('store')}
-                      className={`nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl ${
-                        isSectionActive('store')
-                          ? "text-rose-500 font-semibold bg-rose-50/80"
-                          : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                      }`}
-                    >
-                      {t("nav.tienda")}
-                    </button>
-                    <button
-                      onClick={() => handleScroll('forum')}
-                      className={`nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl ${
-                        isSectionActive('forum')
-                          ? "text-rose-500 font-semibold bg-rose-50/80"
-                          : "text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                      }`}
-                    >
-                      {t("nav.foro")}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/#how-it-works"
-                      className="nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                    >
-                      {t("nav.como_funciona")}
-                    </Link>
-                    <Link
-                      to="/#animals"
-                      className="nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                    >
-                      {t("nav.animales")}
-                    </Link>
-                    <Link
-                      to="/#store"
-                      className="nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                    >
-                      {t("nav.tienda")}
-                    </Link>
-                    <Link
-                      to="/#forum"
-                      className="nav-link text-sm font-medium transition-all px-3 py-2 rounded-xl text-gray-600 hover:text-rose-500 hover:bg-rose-50/50"
-                    >
-                      {t("nav.foro")}
-                    </Link>
-                  </>
-                )}
+                <button
+                  onClick={scrollToTop}
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl cursor-pointer ${
+                    activeNavSection === "inicio"
+                      ? activeLinkClass
+                      : inactiveLinkClass
+                  }`}
+                >
+                  <HomeIcon className="w-4 h-4" />
+                  {t("nav.inicio")}
+                </button>
+                <button
+                  onClick={() => scrollToSection("animals")}
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl cursor-pointer ${
+                    activeNavSection === "animals"
+                      ? activeLinkClass
+                      : inactiveLinkClass
+                  }`}
+                >
+                  <PawPrint className="w-4 h-4" />
+                  {t("nav.animales")}
+                </button>
+                <button
+                  onClick={() => scrollToSection("shelters")}
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl cursor-pointer ${
+                    activeNavSection === "shelters"
+                      ? activeLinkClass
+                      : inactiveLinkClass
+                  }`}
+                >
+                  <HomeIcon className="w-4 h-4" />
+                  {t("nav.refugios")}
+                </button>
+                <button
+                  onClick={() => scrollToSection("store")}
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl cursor-pointer ${
+                    activeNavSection === "store"
+                      ? activeLinkClass
+                      : inactiveLinkClass
+                  }`}
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  {t("nav.tienda")}
+                </button>
+                <button
+                  onClick={() => scrollToSection("forum")}
+                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl cursor-pointer ${
+                    activeNavSection === "forum"
+                      ? activeLinkClass
+                      : inactiveLinkClass
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  {t("nav.foro")}
+                </button>
               </>
             )}
           </div>
@@ -415,8 +376,8 @@ export default function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className={`px-4 py-2 text-sm font-medium transition-colors hover:text-rose-600 ${
-                    isActive("/login") ? "text-rose-600 font-semibold" : "text-gray-600"
+                  className={`px-4 py-2 text-sm font-medium transition-colors hover:text-amber-600 ${
+                    isActive("/login") ? "text-amber-600 font-semibold" : "text-gray-600"
                   }`}
                 >
                   {t("nav.iniciar_sesion")}
@@ -438,7 +399,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-rose-500 hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-500 transition-colors"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-amber-500 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 transition-colors"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -469,7 +430,7 @@ export default function Navbar() {
                 to="/dashboard"
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isActive("/dashboard") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
+                  isActive("/dashboard") ? activeMobileClass : inactiveMobileClass
                 }`}
               >
                 <HomeIcon className="w-4 h-4" />
@@ -479,7 +440,7 @@ export default function Navbar() {
                 to="/animals"
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isActive("/animals") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
+                  isActive("/animals") ? activeMobileClass : inactiveMobileClass
                 }`}
               >
                 <PawPrint className="w-4 h-4" />
@@ -489,7 +450,7 @@ export default function Navbar() {
                 to="/shelters"
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isActive("/shelters") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
+                  isActive("/shelters") ? activeMobileClass : inactiveMobileClass
                 }`}
               >
                 <HomeIcon className="w-4 h-4" />
@@ -499,7 +460,7 @@ export default function Navbar() {
                 to="/store"
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isActive("/store") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
+                  isActive("/store") ? activeMobileClass : inactiveMobileClass
                 }`}
               >
                 <ShoppingBag className="w-4 h-4" />
@@ -509,7 +470,7 @@ export default function Navbar() {
                 to="/forum"
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isActive("/forum") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
+                  isActive("/forum") ? activeMobileClass : inactiveMobileClass
                 }`}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -533,7 +494,7 @@ export default function Navbar() {
                 <Link
                   to="/profile"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
+                  className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-amber-600 rounded-lg"
                 >
                   <User className="w-4 h-4" />
                   {t("nav.mi_perfil")}
@@ -541,7 +502,7 @@ export default function Navbar() {
                 <Link
                   to="/adoption-history"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
+                  className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-amber-600 rounded-lg"
                 >
                   <PawPrint className="w-4 h-4" />
                   {t("nav.historial_adopciones")}
@@ -549,7 +510,7 @@ export default function Navbar() {
                 <Link
                   to="/favorites"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
+                  className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-amber-600 rounded-lg"
                 >
                   <Heart className="w-4 h-4" />
                   {t("nav.mis_favoritos")}
@@ -557,7 +518,7 @@ export default function Navbar() {
                 <Link
                   to="/settings"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
+                  className="flex items-center gap-3 px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-amber-600 rounded-lg"
                 >
                   <Settings className="w-4 h-4" />
                   {t("nav.configuracion")}
@@ -614,98 +575,66 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {isHomePage ? (
-                <button
-                  onClick={scrollToTop}
-                  className={`block w-full text-left px-3 py-2 rounded-lg text-base font-medium ${
-                    isActive("/") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                  }`}
-                >
-                  {t("nav.inicio")}
-                </button>
-              ) : (
-                <Link
-                  to="/"
-                  onClick={() => setIsOpen(false)}
-                  className={`block px-3 py-2 rounded-lg text-base font-medium ${
-                    isActive("/") ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                  }`}
-                >
-                  {t("nav.inicio")}
-                </Link>
-              )}
-              {isHomePage ? (
-                <>
-                  <button
-                    onClick={() => handleScroll('how-it-works')}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-medium ${
-                      isSectionActive('how-it-works') ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                    }`}
-                  >
-                    {t("nav.como_funciona")}
-                  </button>
-                  <button
-                    onClick={() => handleScroll('animals')}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-medium ${
-                      isSectionActive('animals') ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                    }`}
-                  >
-                    {t("nav.animales")}
-                  </button>
-                  <button
-                    onClick={() => handleScroll('store')}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-medium ${
-                      isSectionActive('store') ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                    }`}
-                  >
-                    {t("nav.tienda")}
-                  </button>
-                  <button
-                    onClick={() => handleScroll('forum')}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-base font-medium ${
-                      isSectionActive('forum') ? "bg-rose-50 text-rose-500" : "text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                    }`}
-                  >
-                    {t("nav.foro")}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/#how-it-works"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                  >
-                    {t("nav.como_funciona")}
-                  </Link>
-                  <Link
-                    to="/#animals"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                  >
-                    {t("nav.animales")}
-                  </Link>
-                  <Link
-                    to="/#store"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                  >
-                    {t("nav.tienda")}
-                  </Link>
-                  <Link
-                    to="/#forum"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500"
-                  >
-                    {t("nav.foro")}
-                  </Link>
-                </>
-              )}
+              <button
+                onClick={scrollToTop}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
+                  activeNavSection === "inicio"
+                    ? activeMobileClass
+                    : inactiveMobileClass
+                }`}
+              >
+                <HomeIcon className="w-4 h-4" />
+                {t("nav.inicio")}
+              </button>
+              <button
+                onClick={() => scrollToSection("animals")}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
+                  activeNavSection === "animals"
+                    ? activeMobileClass
+                    : inactiveMobileClass
+                }`}
+              >
+                <PawPrint className="w-4 h-4" />
+                {t("nav.animales")}
+              </button>
+              <button
+                onClick={() => scrollToSection("shelters")}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
+                  activeNavSection === "shelters"
+                    ? activeMobileClass
+                    : inactiveMobileClass
+                }`}
+              >
+                <HomeIcon className="w-4 h-4" />
+                {t("nav.refugios")}
+              </button>
+              <button
+                onClick={() => scrollToSection("store")}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
+                  activeNavSection === "store"
+                    ? activeMobileClass
+                    : inactiveMobileClass
+                }`}
+              >
+                <ShoppingBag className="w-4 h-4" />
+                {t("nav.tienda")}
+              </button>
+              <button
+                onClick={() => scrollToSection("forum")}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
+                  activeNavSection === "forum"
+                    ? activeMobileClass
+                    : inactiveMobileClass
+                }`}
+              >
+                <MessageSquare className="w-4 h-4" />
+                {t("nav.foro")}
+              </button>
               <div className="pt-4 pb-2 border-t border-gray-100 flex flex-col gap-2">
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}
-                  className="text-center px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 rounded-lg"
+                  className="text-center px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-amber-600 rounded-lg"
                 >
                   {t("nav.iniciar_sesion")}
                 </Link>
