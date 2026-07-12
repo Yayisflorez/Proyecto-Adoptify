@@ -100,149 +100,52 @@ body {
 }
 
 /* ===== Navbar Dark Mode ===== */
-/* Keep the navbar light/white with a glass effect for striking contrast */
+/* Dark navbar background (#16181D) */
 .dark .main-nav {
-  background-color: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(16px) !important;
-  border-bottom: 1px solid rgba(244, 63, 94, 0.2) !important;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25) !important;
+  background-color: #16181D !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* All navbar text and icons become dark (exclude elements that should keep white text like badges, gradient buttons) */
-.dark .main-nav a:not(.text-white),
-.dark .main-nav button:not(.text-white),
+/* Navbar text and icons in white/gray tones */
+.dark .main-nav a,
+.dark .main-nav button,
+.dark .main-nav span,
 .dark .main-nav .text-gray-600,
 .dark .main-nav .text-gray-700 {
-  color: #1f2937 !important;
+  color: #e4e4ec !important;
 }
 
-/* Icons inside buttons/links - only when NOT hovering over a nav-link */
+/* Lucide icons in navbar */
 .dark .main-nav .lucide {
-  color: #374151 !important;
+  color: #9a9ab0 !important;
 }
 
-/* When hovering over a nav-link, its icon should become rose */
+/* Notification badge and cart badge keep their rose color */
+.dark .main-nav .bg-rose-500.text-white {
+  background-color: #f43f5e !important;
+  color: #ffffff !important;
+}
+
+/* Mobile menu background in dark mode */
+.dark .main-nav .md\:hidden.overflow-hidden {
+  background-color: #16181D !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Override the base rule so active links keep orange text */
+.dark .main-nav .text-orange-400 {
+  color: #f97316 !important;
+}
+
+/* Navbar nav-link hover in dark mode: icons turn pink, text orange, bg light orange */
 .dark .main-nav .nav-link:hover .lucide {
   color: #f43f5e !important;
 }
 
-/* When a nav-link is active/selected, its icon should be amber */
-.dark .main-nav .nav-link.text-amber-600 .lucide,
-.dark .main-nav a.text-amber-600 .lucide {
-  color: #d97706 !important;
-}
-
-/* Active/current page links keep amber brand color */
-.dark .main-nav .text-amber-600,
-.dark .main-nav a.text-amber-600 {
-  color: #d97706 !important;
-}
-
-/* Nav-link hover styles - background highlight */
-.dark .main-nav .nav-link.hover\:bg-amber-50\/50:hover,
-.dark .main-nav .nav-link:hover {
-  background-color: rgba(217, 119, 6, 0.1) !important;
-}
-
-/* Nav-link active background */
-.dark .main-nav .nav-link.bg-amber-50\/80 {
-  background-color: rgba(217, 119, 6, 0.15) !important;
-}
-
-/* Hover states within navbar */
-.dark .main-nav .hover\:text-amber-600:hover {
-  color: #d97706 !important;
-}
-
-.dark .main-nav .hover\:bg-amber-50:hover {
-  background-color: rgba(217, 119, 6, 0.1) !important;
-}
-
-.dark .main-nav .hover\:bg-gray-50:hover {
-  background-color: rgba(243, 244, 246, 0.8) !important;
-}
-
-/* Keep mobile menu background white in dark mode */
-.dark .main-nav > div.max-h-96,
-.dark .main-nav > div.max-h-0 {
-  background-color: #ffffff !important;
-  border-bottom-color: rgba(217, 119, 6, 0.15) !important;
-}
-
-/* Mobile menu links and buttons */
-.dark .main-nav > div.max-h-96 a:not(.text-white),
-.dark .main-nav > div.max-h-0 a:not(.text-white),
-.dark .main-nav > div.max-h-96 button:not(.text-white),
-.dark .main-nav > div.max-h-0 button:not(.text-white) {
-  color: #374151 !important;
-}
-
-.dark .main-nav > div.max-h-96 .hover\:text-amber-600:hover,
-.dark .main-nav > div.max-h-0 .hover\:text-amber-600:hover {
-  color: #d97706 !important;
-}
-
-.dark .main-nav > div.max-h-96 .hover\:bg-gray-50:hover,
-.dark .main-nav > div.max-h-0 .hover\:bg-gray-50:hover {
-  background-color: rgba(243, 244, 246, 0.8) !important;
-}
-
-.dark .main-nav > div.max-h-96 .hover\:bg-amber-50:hover,
-.dark .main-nav > div.max-h-0 .hover\:bg-amber-50:hover {
-  background-color: rgba(217, 119, 6, 0.1) !important;
-}
-
-.dark .main-nav > div.max-h-96 .bg-amber-50,
-.dark .main-nav > div.max-h-0 .bg-amber-50 {
-  background-color: rgba(217, 119, 6, 0.1) !important;
-}
-
-/* User dropdown menu in dark mode */
-.dark .main-nav .absolute.right-0.mt-2 {
-  background-color: #ffffff !important;
-  border-color: rgba(244, 63, 94, 0.15) !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
-}
-
-.dark .main-nav .absolute.right-0.mt-2 .border-gray-100,
-.dark .main-nav .absolute.right-0.mt-2 .border-t {
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-.dark .main-nav .absolute.right-0.mt-2 .text-gray-900 {
-  color: #111827 !important;
-}
-
-.dark .main-nav .absolute.right-0.mt-2 .text-gray-700,
-.dark .main-nav .absolute.right-0.mt-2 .text-gray-600 {
-  color: #374151 !important;
-}
-
-.dark .main-nav .absolute.right-0.mt-2 .hover\:bg-rose-50:hover {
-  background-color: rgba(244, 63, 94, 0.08) !important;
-}
-
-.dark .main-nav .absolute.right-0.mt-2 .hover\:bg-red-50:hover {
-  background-color: rgba(239, 68, 68, 0.08) !important;
-}
-
-/* Theme toggle buttons inside dropdown in dark mode */
-.dark .main-nav .absolute.right-0.mt-2 .hover\:bg-gray-100:hover {
-  background-color: rgba(243, 244, 246, 0.8) !important;
-}
-
-.dark .main-nav .absolute.right-0.mt-2 .text-gray-400 {
-  color: #9ca3af !important;
-}
-
-.dark .main-nav .absolute.right-0.mt-2 .hover\:text-gray-600:hover {
-  color: #4b5563 !important;
-}
-
-/* Notification badge and cart badge */
-.dark .main-nav .bg-rose-500.text-white {
-  background-color: #f43f5e !important;
-  color: #ffffff !important;
+/* Navbar nav-link active in dark mode: icons turn orange */
+.dark .main-nav .nav-link.text-orange-400 .lucide {
+  color: #f97316 !important;
 }
 
 /* Footer dark mode overrides */
@@ -282,6 +185,140 @@ body {
 
 .dark .hover\:bg-red-50:hover {
   background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* ===== Home Page Dark Mode Improvements ===== */
+
+/* Gradient CSS variable overrides for amber-start and rose-end colors */
+.dark .from-amber-50 {
+  --tw-gradient-from: #1a1208;
+}
+
+.dark .to-rose-50 {
+  --tw-gradient-to: #1a0a0f;
+}
+
+.dark .hover\:from-rose-100:hover {
+  --tw-gradient-from: #1a0a0f;
+}
+
+.dark .hover\:to-amber-100:hover {
+  --tw-gradient-to: #1a1208;
+}
+
+/* Features section: bg-gradient-to-br from-rose-100/50 to-amber-100/50 */
+.dark .bg-gradient-to-br.from-rose-100\/50.to-amber-100\/50 {
+  background: linear-gradient(to bottom right, rgba(26, 10, 15, 0.5), rgba(21, 21, 31, 0.7), rgba(26, 18, 8, 0.5)) !important;
+}
+
+/* How It Works overlay: bg-gradient-to-br from-rose-50/30 via-white to-amber-50/30 */
+.dark .bg-gradient-to-br.from-rose-50\/30 {
+  background: linear-gradient(to bottom right, rgba(26, 10, 15, 0.35), var(--color-dark-card), rgba(26, 18, 8, 0.35)) !important;
+}
+
+/* Shelters overlay: bg-gradient-to-br from-amber-50/30 via-white to-rose-50/30 */
+.dark .bg-gradient-to-br.from-amber-50\/30 {
+  background: linear-gradient(to bottom right, rgba(26, 18, 8, 0.35), var(--color-dark-card), rgba(26, 10, 15, 0.35)) !important;
+}
+
+/* Shelters CTA: bg-gradient-to-r from-amber-50 to-rose-50 */
+.dark .bg-gradient-to-r.from-amber-50.to-rose-50 {
+  background: linear-gradient(to right, #1a1208, #1a0a0f) !important;
+}
+
+/* Store product cards & forum items: bg-gradient-to-br from-rose-50 to-amber-50 */
+.dark .bg-gradient-to-br.from-rose-50.to-amber-50 {
+  background: linear-gradient(to bottom right, #1a0a0f, #1a1208) !important;
+}
+
+/* Forum topic links: bg-gradient-to-r from-rose-50 to-amber-50 */
+.dark .bg-gradient-to-r.from-rose-50.to-amber-50 {
+  background: linear-gradient(to right, #1a0a0f, #1a1208) !important;
+}
+
+/* Icon containers */
+.dark .bg-rose-100 {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+}
+
+.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+/* Group hover icon containers */
+.dark .group:hover .group-hover\:bg-rose-200 {
+  background-color: rgba(244, 63, 94, 0.25) !important;
+}
+
+.dark .group:hover .group-hover\:bg-amber-200 {
+  background-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.dark .group:hover .group-hover\:from-amber-200 {
+  --tw-gradient-from: rgba(245, 158, 11, 0.3);
+}
+
+.dark .group:hover .group-hover\:to-rose-200 {
+  --tw-gradient-to: rgba(244, 63, 94, 0.3);
+}
+
+/* Text colors */
+.dark .text-rose-600 {
+  color: #fb7185 !important;
+}
+
+.dark .text-rose-700 {
+  color: #fda4af !important;
+}
+
+.dark .text-amber-600 {
+  color: #fbbf24 !important;
+}
+
+.dark .text-amber-700 {
+  color: #fcd34d !important;
+}
+
+/* Border colors */
+.dark .border-amber-100 {
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.dark .border-rose-200 {
+  border-color: rgba(244, 63, 94, 0.25);
+}
+
+/* Step number circles in How It Works */
+.dark .border-4.border-rose-200 {
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+/* Shadow overrides for hero buttons and images */
+.dark .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.dark .shadow-rose-200 {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .shadow-rose-300 {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.25) !important;
+}
+
+.dark .hover\:shadow-xl:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+.dark .hover\:shadow-lg:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.25);
+}
+
+/* Full-section overrides: Store, How It Works, Shelters main bg should use dark-bg */
+.dark #store,
+.dark #how-it-works,
+.dark #shelters {
+  background-color: var(--color-dark-bg) !important;
 }
 
 /* Modal backdrop */

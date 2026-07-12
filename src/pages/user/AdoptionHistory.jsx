@@ -222,8 +222,8 @@ export default function AdoptionHistory() {
   };
 
   const TypeIcon = ({ type }) => {
-    if (type === "dog") return <Dog className="w-5 h-5" />;
-    return <Cat className="w-5 h-5" />;
+    if (type === "dog") return <Dog className="w-5 h-5 dark:text-gray-400" />;
+    return <Cat className="w-5 h-5 dark:text-gray-400" />;
   };
 
   const AdoptionProgress = ({ progress }) => {
@@ -232,7 +232,7 @@ export default function AdoptionHistory() {
     return (
       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
         <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-amber-500" />
+          <Clock className="w-4 h-4 text-amber-500 dark:text-gray-400" />
           <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             Progreso de la solicitud
           </span>
@@ -253,7 +253,7 @@ export default function AdoptionHistory() {
                 key={step.key}
                 className={`flex flex-col items-center transition-all duration-300 ${
                   i <= completedSteps
-                    ? "text-amber-600 dark:text-amber-400"
+                    ? "text-amber-600 dark:text-gray-400"
                     : "text-gray-300 dark:text-gray-600"
                 }`}
               >
@@ -461,7 +461,7 @@ export default function AdoptionHistory() {
                           <div
                             className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 ${style.bg} ${style.darkBg} rounded-xl border ${style.border} ${style.darkBorder} self-start`}
                           >
-                            <Icon className={`w-4 h-4 ${style.color}`} />
+                            <Icon className={`w-4 h-4 ${style.color} dark:text-gray-400`} />
                             <span
                               className={`text-xs sm:text-sm font-bold ${style.color}`}
                             >
