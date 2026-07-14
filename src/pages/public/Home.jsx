@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, PawPrint, Users, Search, ShoppingBag, MessageCircle, Home as HomeIcon, HandHeart, ArrowRight, ChevronRight, ShoppingCart, Star, ArrowUp, MessageSquare, ThumbsUp, Share2, User } from "lucide-react";
+import ScrollToTop from "../../components/ScrollToTop";
 import mascotaImg from "../../assets/Mascotas.jpg";
 import daycareImg from "../../assets/daycare.png";
 
 export default function Home() {
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 500);
-
       // Detect active section
       const sections = ['forum', 'how-it-works', 'animals', 'shelters', 'store'];
       const scrollPosition = window.scrollY + 200;
@@ -31,10 +29,6 @@ export default function Home() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   return (
     <div className="min-h-screen">
@@ -463,15 +457,7 @@ export default function Home() {
       </section>
 
       {/* Scroll to Top Button */}
-      {showScrollTop && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50 flex items-center justify-center"
-          aria-label="Volver arriba"
-        >
-          <ArrowUp className="w-6 h-6" />
-        </button>
-      )}
+      <ScrollToTop />
     </div>
   );
 }

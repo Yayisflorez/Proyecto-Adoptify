@@ -575,3 +575,101 @@ body {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
+
+/* ===== Forum Dark Mode Improvements ===== */
+
+/* Dark mode hover-lift shadow */
+.dark .hover-lift:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Dark mode select/option backgrounds */
+.dark select option {
+  background-color: #1a1a23;
+  color: #e4e4ec;
+}
+
+/* Dark mode modal backdrop blur refinements */
+.dark .backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Dark mode chip/tag hover states for forum */
+.dark .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .hover\:bg-white\/10:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode subtle border for dividers in cards */
+.dark .divide-dark-border > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--color-dark-border);
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== Forum Post Card Dark Mode Refinements ===== */
+
+.dark .ring-1 {
+  --tw-ring-color: rgba(245, 158, 11, 0.3);
+}
+
+/* Ensure gradient backgrounds in dark mode use dark colors */
+.dark .from-violet-50 {
+  --tw-gradient-from: #1a0a1f;
+}
+.dark .via-fuchsia-50 {
+  --tw-gradient-via: #1a0a1f;
+}
+.dark .to-rose-50 {
+  --tw-gradient-to: #1a0a0f;
+}
+
+/* Dark mode for violet/fuchsia backgrounds */
+.dark .bg-violet-50 {
+  background-color: rgba(139, 92, 246, 0.1);
+}
+.dark .bg-fuchsia-50 {
+  background-color: rgba(217, 70, 239, 0.1);
+}
+
+/* Dark mode border override for dashed AI placeholder */
+.dark .border-dashed {
+  border-style: dashed;
+}
+
+/* Dark mode input placeholder text */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6a6a85;
+}
+
+/* Dark mode disabled button/text */
+.dark .cursor-not-allowed {
+  opacity: 0.5;
+}
+
+/* ===== Nested Comment Borders ===== */
+.dark .border-l-2 {
+  border-left-width: 2px;
+}
+
+/* Gradient text for AI badges - ensure readability */
+.dark .from-violet-500\/10 {
+  background-image: linear-gradient(to right, rgba(139, 92, 246, 0.1), rgba(217, 70, 239, 0.1));
+}
+
+/* Ensure hover scale transforms work in dark mode */
+.dark .hover\:scale-105:hover {
+  transform: scale(1.05);
+}

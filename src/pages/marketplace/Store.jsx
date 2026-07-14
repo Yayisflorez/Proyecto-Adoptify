@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import ScrollToTop from "../../components/ScrollToTop";
 import {
   ShoppingBag,
   Search,
@@ -533,6 +534,7 @@ export default function Store() {
           </div>
         )}
       </div>
+      <ScrollToTop />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, PawPrint, Heart, MapPin, Calendar, ChevronDown, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import ScrollToTop from "../../components/ScrollToTop";
 
 export default function Animals() {
   const { addFavorite, removeFavorite, isFavorite } = useAuth();
@@ -234,6 +235,7 @@ export default function Animals() {
           </div>
         )}
       </div>
+      <ScrollToTop />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, Phone, Mail, Star, Heart, Users, PawPrint, ArrowRight, Filter, ChevronDown, Home } from "lucide-react";
+import ScrollToTop from "../../components/ScrollToTop";
 
 export default function Shelters() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -239,6 +240,7 @@ export default function Shelters() {
           </div>
         )}
       </div>
+      <ScrollToTop />
     </div>
   );
 }

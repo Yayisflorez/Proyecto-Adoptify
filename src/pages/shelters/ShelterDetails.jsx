@@ -450,7 +450,7 @@ export default function ShelterDetails() {
           </div>
 
           {/* ===== RIGHT COLUMN (1/3) ===== */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2.5">
             {/* Photo Gallery */}
             <div className={`bg-white rounded-2xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 ${
               isVisible ? "animate-fade-in-right animation-delay-100" : "opacity-0"
