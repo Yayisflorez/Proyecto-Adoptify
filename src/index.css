@@ -133,19 +133,49 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-/* Override the base rule so active links keep orange text */
-.dark .main-nav .text-orange-400 {
-  color: #f97316 !important;
+/* Override the base rule so active links keep blue text */
+.dark .main-nav .text-blue-400 {
+  color: #60a5fa !important;
 }
 
-/* Navbar nav-link hover in dark mode: icons turn pink, text orange, bg light orange */
+/* ===== Navbar Hover & Active Styles ===== */
+
+/* --- LIGHT MODE --- */
+
+/* Navbar nav-link hover: icons turn pink, background light blue, text blue */
+.main-nav .nav-link:hover {
+  background-color: #dbeafe !important; /* blue-100 */
+  color: #2563eb !important; /* blue-600 */
+}
+.main-nav .nav-link:hover .lucide {
+  color: #f43f5e !important; /* rose/pink */
+}
+
+/* Navbar nav-link active: icons and text stay blue */
+.main-nav .nav-link.text-blue-600 {
+  background-color: #eff6ff !important; /* blue-50 */
+}
+.main-nav .nav-link.text-blue-600 .lucide {
+  color: #2563eb !important; /* blue-600 */
+}
+
+/* --- DARK MODE --- */
+
+/* Navbar nav-link hover in dark mode: icons turn pink, text blue, bg light blue */
+.dark .main-nav .nav-link:hover {
+  background-color: rgba(59, 130, 246, 0.15) !important; /* blue-500/15 */
+  color: #60a5fa !important; /* blue-400 */
+}
 .dark .main-nav .nav-link:hover .lucide {
-  color: #f43f5e !important;
+  color: #f43f5e !important; /* rose/pink */
 }
 
-/* Navbar nav-link active in dark mode: icons turn orange */
-.dark .main-nav .nav-link.text-orange-400 .lucide {
-  color: #f97316 !important;
+/* Navbar nav-link active in dark mode: icons and text stay blue */
+.dark .main-nav .nav-link.text-blue-400 {
+  color: #60a5fa !important; /* blue-400 */
+}
+.dark .main-nav .nav-link.text-blue-400 .lucide {
+  color: #60a5fa !important; /* blue-400 */
 }
 
 /* Footer dark mode overrides */

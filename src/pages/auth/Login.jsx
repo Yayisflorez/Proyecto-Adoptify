@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, PawPrint, Heart, Users, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, PawPrint, Heart, Users, Eye, EyeOff, CheckCircle, XCircle, Building2 } from "lucide-react";
 import logo from "../../assets/logo.png";
 import loginDog from "../../assets/loginDog.jpg";
 import { useAuth } from "../../context/AuthContext";
@@ -93,20 +93,57 @@ export default function Login() {
     setTimeout(() => {
       setIsLoading(false);
       setSuccess(true);
-      
-      // Simular login con datos del usuario
-      const userData = {
-        name: "María García",
-        email: email,
-        phone: "+57 300 123 4567",
-        location: "Bogotá, Colombia"
-      };
-      
+
+      // ========================================================
+      // VERIFICACIÓN DE ROL REFUGIO (SIN BASE DE DATOS AÚN)
+      // Se valida con credenciales hardcodeadas mientras se integra
+      // la base de datos real.
+      // ========================================================
+      const isShelterEmail = email === "pruebaRefugio@gmail.com";
+      const isShelterPassword = password === "RefugiosVistas123#";
+      const isShelter = isShelterEmail && isShelterPassword;
+
+      let userData;
+
+      if (isShelter) {
+        // Datos para rol refugio
+        userData = {
+          name: "Refugio Patitas Felices",
+          email: email,
+          role: "refugio", // Rol refugio para identificar el tipo de usuario
+          phone: "+57 301 987 6543",
+          location: "Bogotá, Colombia",
+          description: "Somos un refugio dedicado a rescatar y encontrar hogares amorosos para perros y gatos en situación de calle.",
+          address: "Cra 45 # 67-89, Bogotá",
+          socialMedia: {
+            facebook: "patitasfelices",
+            instagram: "@patitasfelices_refugio"
+          },
+          // Configuración del refugio: la tienda se activa manualmente desde configuración
+          settings: {
+            storeEnabled: false
+          }
+        };
+      } else {
+        // Datos para rol usuario normal
+        userData = {
+          name: "María García",
+          email: email,
+          role: "usuario", // Rol usuario normal
+          phone: "+57 300 123 4567",
+          location: "Bogotá, Colombia"
+        };
+      }
+
       login(userData);
-      
-      // Redirigir a dashboard después de mostrar éxito
+
+      // Redirigir según el rol después de mostrar éxito
       setTimeout(() => {
-        navigate("/dashboard");
+        if (isShelter) {
+          navigate("/refugio/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       }, 2000);
     }, 1200);
   };
@@ -176,7 +213,7 @@ export default function Login() {
                 <Heart className="w-6 h-6" />
               </div>
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 to-amber-400 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform cursor-pointer">
-                <Users className="w-6 h-6" />
+                <Building2 className="w-6 h-6" />
               </div>
             </div>
           </div>

@@ -12,6 +12,15 @@ export default function Footer() {
   const navigate = useNavigate();
 
   const isAuthenticated = !!user;
+  const isShelter = user?.role === "refugio";
+  const isStoreEnabled = user?.settings?.storeEnabled ?? false;
+
+  const navigateWithScroll = (path) => {
+    navigate(path);
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+  };
 
   const scrollToSection = (sectionId) => {
     if (location.pathname === "/") {
@@ -105,51 +114,87 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               {isAuthenticated ? (
                 <>
-                  <li>
-                    <Link
-                      to="/dashboard"
-                      className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300"
-                    >
-                      <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
-                      {t("nav.inicio")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/animals"
-                      className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300"
-                    >
-                      <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
-                      {t("nav.animales")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/shelters"
-                      className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300"
-                    >
-                      <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
-                      {t("nav.refugios")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/store"
-                      className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300"
-                    >
-                      <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
-                      {t("nav.tienda")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/forum"
-                      className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300"
-                    >
-                      <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
-                      {t("nav.foro")}
-                    </Link>
-                  </li>
+                  {isShelter ? (
+                    /* === ACCESOS RÁPIDOS PARA REFUGIO === */
+                    <>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/refugio/dashboard")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          Inicio
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/refugio/mascotas")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          Mascotas
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/refugio/solicitudes")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          Solicitudes
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/refugio/foro")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          Foro
+                        </button>
+                      </li>
+                      {isStoreEnabled && (
+                        <li>
+                          <button onClick={() => navigateWithScroll("/refugio/tienda")}
+                            className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                            <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                            Tienda
+                          </button>
+                        </li>
+                      )}
+                    </>
+                  ) : (
+                    /* === ACCESOS RÁPIDOS PARA USUARIO NORMAL === */
+                    <>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/dashboard")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          {t("nav.inicio")}
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/animals")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          {t("nav.animales")}
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/shelters")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          {t("nav.refugios")}
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/store")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          {t("nav.tienda")}
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => navigateWithScroll("/forum")}
+                          className="group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 cursor-pointer w-full text-left">
+                          <span className="w-1 h-1 bg-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:w-2" />
+                          {t("nav.foro")}
+                        </button>
+                      </li>
+                    </>
+                  )}
                 </>
               ) : (
                 <>

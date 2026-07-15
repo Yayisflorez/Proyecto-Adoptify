@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings, Bell, ShoppingCart, Sun, Moon } from "lucide-react";
+import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings, Bell, ShoppingCart, Sun, Moon, Building2, ClipboardList, Store, LayoutDashboard } from "lucide-react";
 import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../context/I18nContext";
@@ -21,9 +21,14 @@ export default function Navbar() {
 
   const isDark = theme === "dark";
 
+  // Determinar si el usuario es refugio
+  const isShelter = user?.role === "refugio";
+  // Verificar si la tienda del refugio está activada
+  const isStoreEnabled = user?.settings?.storeEnabled ?? false;
+
   const isActive = (path) => location.pathname === path;
   const isAuthenticated = !!user;
-  const isInicioActive = () => isActive("/dashboard") || isActive("/");
+  const isInicioActive = () => isActive("/dashboard") || isActive("/refugio/dashboard") || isActive("/");
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -46,6 +51,10 @@ export default function Navbar() {
       "from-cyan-500 to-blue-600",
     ];
     if (!user?.name) return colors[0];
+    // Para refugios usar tonos verdes/teal
+    if (isShelter) {
+      return "from-rose-500 to-amber-600";
+    }
     const index = user.name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
     return colors[index];
   };
@@ -104,16 +113,51 @@ export default function Navbar() {
   }, []);
 
   // Active style classes - light mode
-  const activeLinkClass = "text-amber-600 font-semibold bg-amber-50/80";
-  const inactiveLinkClass = "text-gray-600 hover:text-amber-600 hover:bg-amber-50/50";
-  const activeMobileClass = "bg-amber-50 text-amber-600";
-  const inactiveMobileClass = "text-gray-700 hover:bg-gray-50 hover:text-amber-600";
+  const activeLinkClass = "text-blue-600 font-semibold bg-blue-50/80";
+  const inactiveLinkClass = "text-gray-600 hover:text-blue-600 hover:bg-blue-50/50";
+  const activeMobileClass = "bg-blue-50 text-blue-600";
+  const inactiveMobileClass = "text-gray-700 hover:bg-gray-50 hover:text-blue-600";
 
-  // Dark mode active style classes — orange border, no background
-  const darkActiveLinkClass = "text-orange-400 font-semibold border border-orange-500/70";
-  const darkInactiveLinkClass = "text-gray-400 hover:text-orange-400 hover:bg-orange-500/10 border border-transparent";
-  const darkActiveMobileClass = "text-orange-400 font-semibold border border-orange-500/70";
-  const darkInactiveMobileClass = "text-gray-300 hover:text-orange-400 hover:bg-orange-500/10 border border-transparent";
+  // Dark mode active style classes
+  const darkActiveLinkClass = "text-blue-400 font-semibold border border-blue-500/70";
+  const darkInactiveLinkClass = "text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 border border-transparent";
+  const darkActiveMobileClass = "text-blue-400 font-semibold border border-blue-500/70";
+  const darkInactiveMobileClass = "text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 border border-transparent";
+
+  // Para refugios usar azul como el logo
+  const shelterActiveClass = "text-blue-600 font-semibold bg-blue-50/80";
+  const shelterInactiveClass = "text-gray-600 hover:text-blue-600 hover:bg-blue-50/50";
+  const shelterActiveMobileClass = "bg-blue-50 text-blue-600";
+  const shelterInactiveMobileClass = "text-gray-700 hover:bg-gray-50 hover:text-blue-600";
+  const darkShelterActiveClass = "text-blue-400 font-semibold border border-blue-500/70";
+  const darkShelterInactiveClass = "text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 border border-transparent";
+
+  // Determinar qué estilos usar según el rol
+  const getLinkClasses = (isActivePath) => {
+    if (isShelter) {
+      if (isDark) {
+        return isActivePath ? darkShelterActiveClass : darkShelterInactiveClass;
+      }
+      return isActivePath ? shelterActiveClass : shelterInactiveClass;
+    }
+    if (isDark) {
+      return isActivePath ? darkActiveLinkClass : darkInactiveLinkClass;
+    }
+    return isActivePath ? activeLinkClass : inactiveLinkClass;
+  };
+
+  const getMobileClasses = (isActivePath) => {
+    if (isShelter) {
+      if (isDark) {
+        return isActivePath ? darkShelterActiveClass : darkShelterInactiveClass;
+      }
+      return isActivePath ? shelterActiveMobileClass : shelterInactiveMobileClass;
+    }
+    if (isDark) {
+      return isActivePath ? darkActiveMobileClass : darkInactiveMobileClass;
+    }
+    return isActivePath ? activeMobileClass : inactiveMobileClass;
+  };
 
   return (
     <nav className={`main-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -136,61 +180,87 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-1">
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/dashboard"
-                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
-                    isDark
-                      ? (isInicioActive() ? darkActiveLinkClass : darkInactiveLinkClass)
-                      : (isInicioActive() ? activeLinkClass : inactiveLinkClass)
-                  }`}
-                >
-                  <HomeIcon className="w-4 h-4" />
-                  {t("nav.inicio")}
-                </Link>
-                <Link
-                  to="/animals"
-                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
-                    isDark
-                      ? (isActive("/animals") ? darkActiveLinkClass : darkInactiveLinkClass)
-                      : (isActive("/animals") ? activeLinkClass : inactiveLinkClass)
-                  }`}
-                >
-                  <PawPrint className="w-4 h-4" />
-                  {t("nav.animales")}
-                </Link>
-                <Link
-                  to="/shelters"
-                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
-                    isDark
-                      ? (isActive("/shelters") ? darkActiveLinkClass : darkInactiveLinkClass)
-                      : (isActive("/shelters") ? activeLinkClass : inactiveLinkClass)
-                  }`}
-                >
-                  <HomeIcon className="w-4 h-4" />
-                  {t("nav.refugios")}
-                </Link>
-                <Link
-                  to="/store"
-                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
-                    isDark
-                      ? (isActive("/store") ? darkActiveLinkClass : darkInactiveLinkClass)
-                      : (isActive("/store") ? activeLinkClass : inactiveLinkClass)
-                  }`}
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                  {t("nav.tienda")}
-                </Link>
-                <Link
-                  to="/forum"
-                  className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${
-                    isDark
-                      ? (isActive("/forum") ? darkActiveLinkClass : darkInactiveLinkClass)
-                      : (isActive("/forum") ? activeLinkClass : inactiveLinkClass)
-                  }`}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  {t("nav.foro")}
-                </Link>
+                {isShelter ? (
+                  /* === NAVEGACIÓN PARA REFUGIO === */
+                  <>
+                    <Link
+                      to="/refugio/dashboard"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/refugio/dashboard"))}`}
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Inicio
+                    </Link>
+                    <Link
+                      to="/refugio/mascotas"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/refugio/mascotas"))}`}
+                    >
+                      <PawPrint className="w-4 h-4" />
+                      Mascotas
+                    </Link>
+                    <Link
+                      to="/refugio/solicitudes"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/refugio/solicitudes"))}`}
+                    >
+                      <ClipboardList className="w-4 h-4" />
+                      Solicitudes
+                    </Link>
+                    {isStoreEnabled && (
+                      <Link
+                        to="/refugio/tienda"
+                        className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/refugio/tienda"))}`}
+                      >
+                        <Store className="w-4 h-4" />
+                        Tienda
+                      </Link>
+                    )}
+                    <Link
+                      to="/refugio/foro"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/refugio/foro"))}`}
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      Foro
+                    </Link>
+                  </>
+                ) : (
+                  /* === NAVEGACIÓN PARA USUARIO NORMAL === */
+                  <>
+                    <Link
+                      to="/dashboard"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isInicioActive())}`}
+                    >
+                      <HomeIcon className="w-4 h-4" />
+                      {t("nav.inicio")}
+                    </Link>
+                    <Link
+                      to="/animals"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/animals"))}`}
+                    >
+                      <PawPrint className="w-4 h-4" />
+                      {t("nav.animales")}
+                    </Link>
+                    <Link
+                      to="/shelters"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/shelters"))}`}
+                    >
+                      <HomeIcon className="w-4 h-4" />
+                      {t("nav.refugios")}
+                    </Link>
+                    <Link
+                      to="/store"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/store"))}`}
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      {t("nav.tienda")}
+                    </Link>
+                    <Link
+                      to="/forum"
+                      className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/forum"))}`}
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      {t("nav.foro")}
+                    </Link>
+                  </>
+                )}
               </>
             ) : (
               <>
@@ -258,28 +328,32 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 {/* Notifications */}
-                <button className={`relative p-2 rounded-xl transition-colors ${
-                  isDark
-                    ? "text-gray-300 hover:text-orange-400 hover:bg-white/5"
-                    : "text-gray-600 hover:text-rose-500 hover:bg-rose-50"
-                }`}>
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
-                </button>
+                {!isShelter && (
+                  <button className={`relative p-2 rounded-xl transition-colors ${
+                    isDark
+                      ? "text-gray-300 hover:text-blue-400 hover:bg-white/5"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                  }`}>
+                    <Bell className="w-5 h-5" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
+                  </button>
+                )}
 
-                {/* Cart */}
-                <Link to="/cart" className={`relative p-2 rounded-xl transition-colors ${
-                  isDark
-                    ? "text-gray-300 hover:text-orange-400 hover:bg-white/5"
-                    : "text-gray-600 hover:text-rose-500 hover:bg-rose-50"
-                }`}>
-                  <ShoppingCart className="w-5 h-5" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {cartCount > 99 ? "99+" : cartCount}
-                    </span>
-                  )}
-                </Link>
+                {/* Cart - Solo para usuarios normales */}
+                {!isShelter && (
+                  <Link to="/cart" className={`relative p-2 rounded-xl transition-colors ${
+                    isDark
+                      ? "text-gray-300 hover:text-blue-400 hover:bg-white/5"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                  }`}>
+                    <ShoppingCart className="w-5 h-5" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
+                    )}
+                  </Link>
+                )}
 
                 {/* User Menu */}
                 <div className="relative" ref={dropdownRef}>
@@ -288,7 +362,9 @@ export default function Navbar() {
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all ${
                       isDark
                         ? "bg-[#252628] text-white hover:bg-[#2f3033] shadow-none"
-                        : "bg-gradient-to-r from-rose-500 to-amber-500 text-white hover:from-rose-600 hover:to-amber-600 shadow-md shadow-rose-200/50"
+                        : isShelter
+                          ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white hover:from-rose-600 hover:to-amber-600 shadow-md shadow-rose-200/50"
+                          : "bg-gradient-to-r from-rose-500 to-amber-500 text-white hover:from-rose-600 hover:to-amber-600 shadow-md shadow-rose-200/50"
                     }`}
                   >
                     {/* User Avatar */}
@@ -309,7 +385,6 @@ export default function Navbar() {
                         isDark ? "border-white/5 bg-[#252628]" : "border-gray-100"
                       }`}>
                         <div className="flex items-center gap-3">
-                          {/* Avatar in dropdown header */}
                           <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor()} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
                             {getUserInitials()}
                           </div>
@@ -320,73 +395,137 @@ export default function Navbar() {
                             <p className={`text-sm truncate ${
                               isDark ? "text-gray-400" : "text-gray-600"
                             }`}>{user?.email || ""}</p>
+                            {isShelter && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 mt-1 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium">
+                                <Building2 className="w-3 h-3" />
+                                Refugio
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
-                      <Link
-                        to="/profile"
-                        onClick={() => setShowUserMenu(false)}
-                        className={`flex items-center gap-3 px-4 py-3 transition-colors ${
-                          isDark
-                            ? (isActive("/profile")
-                              ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
-                              : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
-                            : (isActive("/profile")
-                              ? "text-rose-600 font-semibold bg-rose-50"
-                              : "text-gray-700 hover:bg-rose-50")
-                        }`}
-                      >
-                        <User className="w-4 h-4" />
-                        <span>{t("nav.mi_perfil")}</span>
-                      </Link>
-                      <Link
-                        to="/adoption-history"
-                        onClick={() => setShowUserMenu(false)}
-                        className={`flex items-center gap-3 px-4 py-3 transition-colors ${
-                          isDark
-                            ? (isActive("/adoption-history")
-                              ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
-                              : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
-                            : (isActive("/adoption-history")
-                              ? "text-rose-600 font-semibold bg-rose-50"
-                              : "text-gray-700 hover:bg-rose-50")
-                        }`}
-                      >
-                        <PawPrint className="w-4 h-4" />
-                        <span>{t("nav.historial_adopciones")}</span>
-                      </Link>
-                      <Link
-                        to="/favorites"
-                        onClick={() => setShowUserMenu(false)}
-                        className={`flex items-center gap-3 px-4 py-3 transition-colors ${
-                          isDark
-                            ? (isActive("/favorites")
-                              ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
-                              : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
-                            : (isActive("/favorites")
-                              ? "text-rose-600 font-semibold bg-rose-50"
-                              : "text-gray-700 hover:bg-rose-50")
-                        }`}
-                      >
-                        <Heart className="w-4 h-4" />
-                        <span>{t("nav.mis_favoritos")}</span>
-                      </Link>
-                      <Link
-                        to="/settings"
-                        onClick={() => setShowUserMenu(false)}
-                        className={`flex items-center gap-3 px-4 py-3 transition-colors ${
-                          isDark
-                            ? (isActive("/settings")
-                              ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
-                              : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
-                            : (isActive("/settings")
-                              ? "text-rose-600 font-semibold bg-rose-50"
-                              : "text-gray-700 hover:bg-rose-50")
-                        }`}
-                      >
-                        <Settings className="w-4 h-4" />
-                        <span>{t("nav.configuracion")}</span>
-                      </Link>
+
+                      {isShelter ? (
+                        /* === DROPDOWN PARA REFUGIO === */
+                        <>
+                          <Link
+                            to="/refugio/perfil"
+                            onClick={() => setShowUserMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                              isDark
+                                ? (isActive("/refugio/perfil")
+                                  ? "text-rose-400 font-semibold bg-gradient-to-r from-rose-300/15 via-amber-300/15 to-rose-300/15"
+                                  : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-rose-300/15 hover:via-amber-300/15 hover:to-rose-300/15")
+                                : (isActive("/refugio/perfil")
+                                  ? "text-rose-600 font-semibold bg-rose-50"
+                                  : "text-gray-700 hover:bg-rose-50")
+                            }`}
+                          >
+                            <Building2 className="w-4 h-4" />
+                            <span>Mi Perfil</span>
+                          </Link>
+                          <Link
+                            to="/refugio/historial"
+                            onClick={() => setShowUserMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                              isDark
+                                ? (isActive("/refugio/historial")
+                                  ? "text-rose-400 font-semibold bg-gradient-to-r from-rose-300/15 via-amber-300/15 to-rose-300/15"
+                                  : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-rose-300/15 hover:via-amber-300/15 hover:to-rose-300/15")
+                                : (isActive("/refugio/historial")
+                                  ? "text-rose-600 font-semibold bg-rose-50"
+                                  : "text-gray-700 hover:bg-rose-50")
+                            }`}
+                          >
+                            <Heart className="w-4 h-4" />
+                            <span>Historial de Solicitudes</span>
+                          </Link>
+                          <Link
+                            to="/refugio/configuracion"
+                            onClick={() => setShowUserMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                              isDark
+                                ? (isActive("/refugio/configuracion")
+                                  ? "text-rose-400 font-semibold bg-gradient-to-r from-rose-300/15 via-amber-300/15 to-rose-300/15"
+                                  : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-rose-300/15 hover:via-amber-300/15 hover:to-rose-300/15")
+                                : (isActive("/refugio/configuracion")
+                                  ? "text-rose-600 font-semibold bg-rose-50"
+                                  : "text-gray-700 hover:bg-rose-50")
+                            }`}
+                          >
+                            <Settings className="w-4 h-4" />
+                            <span>Configuración</span>
+                          </Link>
+                        </>
+                      ) : (
+                        /* === DROPDOWN PARA USUARIO NORMAL === */
+                        <>
+                          <Link
+                            to="/profile"
+                            onClick={() => setShowUserMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                              isDark
+                                ? (isActive("/profile")
+                                  ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
+                                  : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
+                                : (isActive("/profile")
+                                  ? "text-rose-600 font-semibold bg-rose-50"
+                                  : "text-gray-700 hover:bg-rose-50")
+                            }`}
+                          >
+                            <User className="w-4 h-4" />
+                            <span>{t("nav.mi_perfil")}</span>
+                          </Link>
+                          <Link
+                            to="/adoption-history"
+                            onClick={() => setShowUserMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                              isDark
+                                ? (isActive("/adoption-history")
+                                  ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
+                                  : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
+                                : (isActive("/adoption-history")
+                                  ? "text-rose-600 font-semibold bg-rose-50"
+                                  : "text-gray-700 hover:bg-rose-50")
+                            }`}
+                          >
+                            <PawPrint className="w-4 h-4" />
+                            <span>{t("nav.historial_adopciones")}</span>
+                          </Link>
+                          <Link
+                            to="/favorites"
+                            onClick={() => setShowUserMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                              isDark
+                                ? (isActive("/favorites")
+                                  ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
+                                  : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
+                                : (isActive("/favorites")
+                                  ? "text-rose-600 font-semibold bg-rose-50"
+                                  : "text-gray-700 hover:bg-rose-50")
+                            }`}
+                          >
+                            <Heart className="w-4 h-4" />
+                            <span>{t("nav.mis_favoritos")}</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            onClick={() => setShowUserMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                              isDark
+                                ? (isActive("/settings")
+                                  ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
+                                  : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
+                                : (isActive("/settings")
+                                  ? "text-rose-600 font-semibold bg-rose-50"
+                                  : "text-gray-700 hover:bg-rose-50")
+                            }`}
+                          >
+                            <Settings className="w-4 h-4" />
+                            <span>{t("nav.configuracion")}</span>
+                          </Link>
+                        </>
+                      )}
 
                       {/* Theme Toggle in Dropdown */}
                       <div className={`border-t mt-2 pt-2 ${
@@ -457,8 +596,8 @@ export default function Navbar() {
                   to="/login"
                   className={`px-4 py-2 text-sm font-medium transition-colors ${
                     isDark
-                      ? (isActive("/login") ? "text-orange-400 font-semibold" : "text-gray-300 hover:text-orange-400")
-                      : (isActive("/login") ? "text-amber-600 font-semibold" : "text-gray-600 hover:text-amber-600")
+                      ? (isActive("/login") ? "text-blue-400 font-semibold" : "text-gray-300 hover:text-blue-400")
+                      : (isActive("/login") ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600")
                   }`}
                 >
                   {t("nav.iniciar_sesion")}
@@ -486,8 +625,8 @@ export default function Navbar() {
               onClick={() => setIsOpen(!isOpen)}
               className={`inline-flex items-center justify-center p-2 rounded-lg transition-colors ${
                 isDark
-                  ? "text-gray-300 hover:text-orange-400 hover:bg-white/5 focus:ring-2 focus:ring-inset focus:ring-orange-500"
-                  : "text-gray-400 hover:text-amber-500 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500"
+                  ? "text-gray-300 hover:text-blue-400 hover:bg-white/5 focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                  : "text-gray-400 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
               }`}
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -521,295 +660,197 @@ export default function Navbar() {
                   <p className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-600"}`}>{user?.email || ""}</p>
                 </div>
               </div>
-              <Link
-                to="/dashboard"
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isDark
-                    ? (isInicioActive() ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (isInicioActive() ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
-                <HomeIcon className="w-4 h-4" />
-                {t("nav.inicio")}
-              </Link>
-              <Link
-                to="/animals"
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isDark
-                    ? (isActive("/animals") ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (isActive("/animals") ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
-                <PawPrint className="w-4 h-4" />
-                {t("nav.animales")}
-              </Link>
-              <Link
-                to="/shelters"
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isDark
-                    ? (isActive("/shelters") ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (isActive("/shelters") ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
-                <HomeIcon className="w-4 h-4" />
-                {t("nav.refugios")}
-              </Link>
-              <Link
-                to="/store"
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isDark
-                    ? (isActive("/store") ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (isActive("/store") ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
-                <ShoppingBag className="w-4 h-4" />
-                {t("nav.tienda")}
-              </Link>
-              <Link
-                to="/forum"
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${
-                  isDark
-                    ? (isActive("/forum") ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (isActive("/forum") ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
-                <MessageSquare className="w-4 h-4" />
-                {t("nav.foro")}
-              </Link>
-              <div className={`pt-4 pb-2 border-t flex flex-col gap-2 ${
-                isDark ? "border-white/5" : "border-gray-100"
-              }`}>
-                <div className="flex items-center gap-3 px-3 py-2">
-                  <button className={`relative p-2 rounded-xl transition-colors ${
-                    isDark
-                      ? "text-gray-300 hover:text-orange-400 hover:bg-white/5"
-                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50"
-                  }`}>
-                    <Bell className="w-5 h-5" />
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
-                  </button>
-                  <Link to="/cart" onClick={() => setIsOpen(false)} className={`relative p-2 rounded-xl transition-colors ${
-                    isDark
-                      ? "text-gray-300 hover:text-orange-400 hover:bg-white/5"
-                      : "text-gray-600 hover:text-rose-500 hover:bg-rose-50"
-                  }`}>
-                    <ShoppingCart className="w-5 h-5" />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">
-                        {cartCount > 99 ? "99+" : cartCount}
-                      </span>
-                    )}
+
+              {isShelter ? (
+                /* === MOBILE NAV PARA REFUGIO === */
+                <>
+                  <Link to="/refugio/dashboard" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/refugio/dashboard"))}`}>
+                    <LayoutDashboard className="w-4 h-4" />
+                    Inicio
                   </Link>
-                </div>
-                <Link
-                  to="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${
-                    isDark
-                      ? (isActive("/profile")
-                        ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
-                        : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
-                      : (isActive("/profile")
-                        ? "text-rose-600 font-semibold bg-rose-50"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-amber-600")
-                  }`}
-                >
-                  <User className="w-4 h-4" />
-                  {t("nav.mi_perfil")}
-                </Link>
-                <Link
-                  to="/adoption-history"
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${
-                    isDark
-                      ? (isActive("/adoption-history")
-                        ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
-                        : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
-                      : (isActive("/adoption-history")
-                        ? "text-rose-600 font-semibold bg-rose-50"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-amber-600")
-                  }`}
-                >
-                  <PawPrint className="w-4 h-4" />
-                  {t("nav.historial_adopciones")}
-                </Link>
-                <Link
-                  to="/favorites"
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${
-                    isDark
-                      ? (isActive("/favorites")
-                        ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
-                        : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
-                      : (isActive("/favorites")
-                        ? "text-rose-600 font-semibold bg-rose-50"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-amber-600")
-                  }`}
-                >
-                  <Heart className="w-4 h-4" />
-                  {t("nav.mis_favoritos")}
-                </Link>
-                <Link
-                  to="/settings"
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${
-                    isDark
-                      ? (isActive("/settings")
-                        ? "text-orange-400 font-semibold bg-gradient-to-r from-orange-300/15 via-yellow-300/15 to-pink-300/15"
-                        : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-300/15 hover:via-yellow-300/15 hover:to-pink-300/15")
-                      : (isActive("/settings")
-                        ? "text-rose-600 font-semibold bg-rose-50"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-amber-600")
-                  }`}
-                >
-                  <Settings className="w-4 h-4" />
-                  {t("nav.configuracion")}
-                </Link>
+                  <Link to="/refugio/mascotas" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/refugio/mascotas"))}`}>
+                    <PawPrint className="w-4 h-4" />
+                    Mascotas
+                  </Link>
+                  <Link to="/refugio/solicitudes" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/refugio/solicitudes"))}`}>
+                    <ClipboardList className="w-4 h-4" />
+                    Solicitudes
+                  </Link>
+                  {isStoreEnabled && (
+                    <Link to="/refugio/tienda" onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/refugio/tienda"))}`}>
+                      <Store className="w-4 h-4" />
+                      Tienda
+                    </Link>
+                  )}
+                  <Link to="/refugio/foro" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/refugio/foro"))}`}>
+                    <MessageSquare className="w-4 h-4" />
+                    Foro
+                  </Link>
+                  <div className={`pt-4 pb-2 border-t flex flex-col gap-2 ${isDark ? "border-white/5" : "border-gray-100"}`}>
+                    <Link to="/refugio/perfil" onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${getMobileClasses(isActive("/refugio/perfil"))}`}>
+                      <Building2 className="w-4 h-4" />
+                      Mi Perfil
+                    </Link>
+                    <Link to="/refugio/historial" onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${getMobileClasses(isActive("/refugio/historial"))}`}>
+                      <Heart className="w-4 h-4" />
+                      Historial de Solicitudes
+                    </Link>
 
-                {/* Theme Toggle in Mobile Menu */}
-                <div className={`flex items-center justify-between px-3 py-2 border-t mt-2 pt-3 ${
-                  isDark ? "border-white/5" : "border-gray-100"
-                }`}>
-                  <div className="flex items-center gap-3">
-                    {theme === "dark" ? (
-                      <Moon className={`w-4 h-4 ${isDark ? "text-gray-400" : "text-gray-600"}`} />
-                    ) : (
-                      <Sun className={`w-4 h-4 ${isDark ? "text-gray-400" : "text-gray-600"}`} />
-                    )}
-                    <span className={`text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>{t("settings.theme")}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setTheme("light")}
-                      className={`p-1.5 rounded-lg transition-all ${
-                        theme === "light"
-                          ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white"
-                          : isDark
-                            ? "text-gray-500 hover:text-white hover:bg-white/10"
-                            : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                      }`}
-                      title="Claro"
-                    >
-                      <Sun className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setTheme("dark")}
-                      className={`p-1.5 rounded-lg transition-all ${
-                        theme === "dark"
-                          ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white"
-                          : isDark
-                            ? "text-gray-500 hover:text-white hover:bg-white/10"
-                            : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                      }`}
-                      title="Oscuro"
-                    >
-                      <Moon className="w-4 h-4" />
+                    {/* Theme Toggle */}
+                    <div className={`flex items-center justify-between px-3 py-2 border-t mt-2 pt-3 ${isDark ? "border-white/5" : "border-gray-100"}`}>
+                      <div className="flex items-center gap-3">
+                        {theme === "dark" ? <Moon className={`w-4 h-4 ${isDark ? "text-gray-400" : "text-gray-600"}`} /> : <Sun className={`w-4 h-4 ${isDark ? "text-gray-400" : "text-gray-600"}`} />}
+                        <span className={`text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>{t("settings.theme")}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => setTheme("light")}
+                          className={`p-1.5 rounded-lg transition-all ${theme === "light" ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white" : isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}>
+                          <Sun className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setTheme("dark")}
+                          className={`p-1.5 rounded-lg transition-all ${theme === "dark" ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white" : isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}>
+                          <Moon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <button onClick={() => { logout(); setIsOpen(false); navigate("/"); }}
+                      className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg w-full ${isDark ? "text-red-400 hover:text-red-300 hover:bg-red-500/10" : "text-red-600 hover:bg-red-50"}`}>
+                      <LogOut className="w-4 h-4" />
+                      Cerrar Sesión
                     </button>
                   </div>
-                </div>
+                </>
+              ) : (
+                /* === MOBILE NAV PARA USUARIO NORMAL === */
+                <>
+                  <Link to="/dashboard" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isInicioActive())}`}>
+                    <HomeIcon className="w-4 h-4" />
+                    {t("nav.inicio")}
+                  </Link>
+                  <Link to="/animals" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/animals"))}`}>
+                    <PawPrint className="w-4 h-4" />
+                    {t("nav.animales")}
+                  </Link>
+                  <Link to="/shelters" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/shelters"))}`}>
+                    <HomeIcon className="w-4 h-4" />
+                    {t("nav.refugios")}
+                  </Link>
+                  <Link to="/store" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/store"))}`}>
+                    <ShoppingBag className="w-4 h-4" />
+                    {t("nav.tienda")}
+                  </Link>
+                  <Link to="/forum" onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/forum"))}`}>
+                    <MessageSquare className="w-4 h-4" />
+                    {t("nav.foro")}
+                  </Link>
+                  <div className={`pt-4 pb-2 border-t flex flex-col gap-2 ${isDark ? "border-white/5" : "border-gray-100"}`}>
+                    <div className="flex items-center gap-3 px-3 py-2">
+                      <button className={`relative p-2 rounded-xl transition-colors ${isDark ? "text-gray-300 hover:text-orange-400 hover:bg-white/5" : "text-gray-600 hover:text-rose-500 hover:bg-rose-50"}`}>
+                        <Bell className="w-5 h-5" />
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
+                      </button>
+                      <Link to="/cart" onClick={() => setIsOpen(false)} className={`relative p-2 rounded-xl transition-colors ${isDark ? "text-gray-300 hover:text-orange-400 hover:bg-white/5" : "text-gray-600 hover:text-rose-500 hover:bg-rose-50"}`}>
+                        <ShoppingCart className="w-5 h-5" />
+                        {cartCount > 0 && (
+                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">{cartCount > 99 ? "99+" : cartCount}</span>
+                        )}
+                      </Link>
+                    </div>
+                    <Link to="/profile" onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${getMobileClasses(isActive("/profile"))}`}>
+                      <User className="w-4 h-4" />
+                      {t("nav.mi_perfil")}
+                    </Link>
+                    <Link to="/adoption-history" onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${getMobileClasses(isActive("/adoption-history"))}`}>
+                      <PawPrint className="w-4 h-4" />
+                      {t("nav.historial_adopciones")}
+                    </Link>
+                    <Link to="/favorites" onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${getMobileClasses(isActive("/favorites"))}`}>
+                      <Heart className="w-4 h-4" />
+                      {t("nav.mis_favoritos")}
+                    </Link>
+                    <Link to="/settings" onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg ${getMobileClasses(isActive("/settings"))}`}>
+                      <Settings className="w-4 h-4" />
+                      {t("nav.configuracion")}
+                    </Link>
 
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsOpen(false);
-                    navigate("/");
-                  }}
-                  className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg w-full ${
-                    isDark
-                      ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                      : "text-red-600 hover:bg-red-50"
-                  }`}
-                >
-                  <LogOut className="w-4 h-4" />
-                  {t("nav.cerrar_sesion")}
-                </button>
-              </div>
+                    {/* Theme Toggle */}
+                    <div className={`flex items-center justify-between px-3 py-2 border-t mt-2 pt-3 ${isDark ? "border-white/5" : "border-gray-100"}`}>
+                      <div className="flex items-center gap-3">
+                        {theme === "dark" ? <Moon className={`w-4 h-4 ${isDark ? "text-gray-400" : "text-gray-600"}`} /> : <Sun className={`w-4 h-4 ${isDark ? "text-gray-400" : "text-gray-600"}`} />}
+                        <span className={`text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>{t("settings.theme")}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => setTheme("light")}
+                          className={`p-1.5 rounded-lg transition-all ${theme === "light" ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white" : isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}>
+                          <Sun className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setTheme("dark")}
+                          className={`p-1.5 rounded-lg transition-all ${theme === "dark" ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white" : isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}>
+                          <Moon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <button onClick={() => { logout(); setIsOpen(false); navigate("/"); }}
+                      className={`flex items-center gap-3 px-3 py-2 text-base font-medium rounded-lg w-full ${isDark ? "text-red-400 hover:text-red-300 hover:bg-red-500/10" : "text-red-600 hover:bg-red-50"}`}>
+                      <LogOut className="w-4 h-4" />
+                      {t("nav.cerrar_sesion")}
+                    </button>
+                  </div>
+                </>
+              )}
             </>
           ) : (
             <>
-              <button
-                onClick={scrollToTop}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
-                  isDark
-                    ? (activeNavSection === "inicio" ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (activeNavSection === "inicio" ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
+              <button onClick={scrollToTop}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${isDark ? (activeNavSection === "inicio" ? darkActiveMobileClass : darkInactiveMobileClass) : (activeNavSection === "inicio" ? activeMobileClass : inactiveMobileClass)}`}>
                 <HomeIcon className="w-4 h-4" />
                 {t("nav.inicio")}
               </button>
-              <button
-                onClick={() => scrollToSection("animals")}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
-                  isDark
-                    ? (activeNavSection === "animals" ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (activeNavSection === "animals" ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
+              <button onClick={() => scrollToSection("animals")}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${isDark ? (activeNavSection === "animals" ? darkActiveMobileClass : darkInactiveMobileClass) : (activeNavSection === "animals" ? activeMobileClass : inactiveMobileClass)}`}>
                 <PawPrint className="w-4 h-4" />
                 {t("nav.animales")}
               </button>
-              <button
-                onClick={() => scrollToSection("shelters")}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
-                  isDark
-                    ? (activeNavSection === "shelters" ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (activeNavSection === "shelters" ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
+              <button onClick={() => scrollToSection("shelters")}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${isDark ? (activeNavSection === "shelters" ? darkActiveMobileClass : darkInactiveMobileClass) : (activeNavSection === "shelters" ? activeMobileClass : inactiveMobileClass)}`}>
                 <HomeIcon className="w-4 h-4" />
                 {t("nav.refugios")}
               </button>
-              <button
-                onClick={() => scrollToSection("store")}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
-                  isDark
-                    ? (activeNavSection === "store" ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (activeNavSection === "store" ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
+              <button onClick={() => scrollToSection("store")}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${isDark ? (activeNavSection === "store" ? darkActiveMobileClass : darkInactiveMobileClass) : (activeNavSection === "store" ? activeMobileClass : inactiveMobileClass)}`}>
                 <ShoppingBag className="w-4 h-4" />
                 {t("nav.tienda")}
               </button>
-              <button
-                onClick={() => scrollToSection("forum")}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${
-                  isDark
-                    ? (activeNavSection === "forum" ? darkActiveMobileClass : darkInactiveMobileClass)
-                    : (activeNavSection === "forum" ? activeMobileClass : inactiveMobileClass)
-                }`}
-              >
+              <button onClick={() => scrollToSection("forum")}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium w-full text-left cursor-pointer ${isDark ? (activeNavSection === "forum" ? darkActiveMobileClass : darkInactiveMobileClass) : (activeNavSection === "forum" ? activeMobileClass : inactiveMobileClass)}`}>
                 <MessageSquare className="w-4 h-4" />
                 {t("nav.foro")}
               </button>
-              <div className={`pt-4 pb-2 border-t flex flex-col gap-2 ${
-                isDark ? "border-white/5" : "border-gray-100"
-              }`}>
-                <Link
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className={`text-center px-4 py-2 text-base font-medium rounded-lg ${
-                    isDark
-                      ? "text-gray-300 hover:text-orange-400 hover:bg-white/5"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-amber-600"
-                  }`}
-                >
+              <div className={`pt-4 pb-2 border-t flex flex-col gap-2 ${isDark ? "border-white/5" : "border-gray-100"}`}>
+                <Link to="/login" onClick={() => setIsOpen(false)}
+                  className={`text-center px-4 py-2 text-base font-medium rounded-lg ${isDark ? "text-gray-300 hover:text-blue-400 hover:bg-white/5" : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"}`}>
                   {t("nav.iniciar_sesion")}
                 </Link>
-                <Link
-                  to="/register"
-                  onClick={() => setIsOpen(false)}
-                  className={`text-center px-4 py-2 text-base font-medium text-white rounded-lg shadow-sm ${
-                    isDark
-                      ? "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
-                      : "bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600"
-                  }`}
-                >
+                <Link to="/register" onClick={() => setIsOpen(false)}
+                  className={`text-center px-4 py-2 text-base font-medium text-white rounded-lg shadow-sm ${isDark ? "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600" : "bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600"}`}>
                   {t("nav.registrarse")}
                 </Link>
               </div>
