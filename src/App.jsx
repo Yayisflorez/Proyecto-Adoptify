@@ -45,6 +45,7 @@ import ShelterDetails from "./pages/shelters/ShelterDetails";
 import Store from "./pages/marketplace/Store";
 import ProductProfile from "./pages/marketplace/ProductProfile";
 import Cart from "./pages/marketplace/Cart";
+import StoreProfile from "./pages/marketplace/StoreProfile";
 import Forum from "./pages/community/Forum";
 
 function AppContent() {
@@ -91,6 +92,7 @@ function AppContent() {
           <Route path="/shelter/:id/animals" element={<ProtectedRoute><ShelterAnimals /></ProtectedRoute>} />
           <Route path="/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
           <Route path="/shelter-store/:shelterId" element={<ProtectedRoute><Store /></ProtectedRoute>} />
+          <Route path="/store-profile/:storeId" element={<ProtectedRoute><StoreProfile /></ProtectedRoute>} />
           <Route path="/product/:id" element={<ProtectedRoute><ProductProfile /></ProtectedRoute>} />
           <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/forum" element={<ProtectedRoute><Forum /></ProtectedRoute>} />

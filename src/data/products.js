@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Dog, Shirt, Bone, Stethoscope, Droplets, PawPrint, Heart, Home } from "lucide-react";
+import { Sparkles, Dog, Shirt, Bone, Stethoscope, Droplets, PawPrint, Heart, Home, Store, Star } from "lucide-react";
 
 export const categoryIcons = {
   all: Sparkles,
@@ -45,6 +45,62 @@ export const shelters = [
     description: "Organización dedicada a encontrar hogares amorosos para mascotas abandonadas.",
     icon: Home,
     color: "from-blue-500 to-cyan-500",
+  },
+];
+
+export const stores = [
+  {
+    id: 1,
+    name: "Mundo Mascota",
+    location: "Bogotá - Cundinamarca",
+    slug: "mundo-mascota",
+    description: "Tienda especializada en productos de alta calidad para mascotas. Encuentra todo lo que necesitas para el bienestar de tu compañero peludo.",
+    rating: 4.5,
+    reviews: 89,
+    logo: Store,
+    color: "from-purple-500 to-pink-500",
+    phone: "+57 601 234 5678",
+    email: "contacto@mundomascota.com",
+    website: "www.mundomascota.com",
+    socialMedia: {
+      facebook: "mundomascota",
+      instagram: "@mundomascota_oficial",
+    },
+    hours: {
+      weekdays: "Lun - Vie: 9:00 AM - 7:00 PM",
+      weekends: "Sáb: 9:00 AM - 5:00 PM",
+    },
+    gallery: [
+      { id: "s1-g1", color: "from-purple-400 to-pink-400", label: "Fachada" },
+      { id: "s1-g2", color: "from-pink-400 to-rose-400", label: "Interior" },
+      { id: "s1-g3", color: "from-violet-400 to-purple-400", label: "Productos" },
+    ],
+  },
+  {
+    id: 2,
+    name: "Patitas Store",
+    location: "Cali - Valle del Cauca",
+    slug: "patitas-store",
+    description: "Todo para tu mascota con los mejores precios y atención personalizada. Productos seleccionados con amor y cuidado.",
+    rating: 4.3,
+    reviews: 56,
+    logo: Store,
+    color: "from-blue-500 to-indigo-500",
+    phone: "+57 602 987 6543",
+    email: "info@patitasstore.com",
+    website: "www.patitasstore.com",
+    socialMedia: {
+      facebook: "patitasstore",
+      instagram: "@patitasstore_cali",
+    },
+    hours: {
+      weekdays: "Lun - Vie: 8:30 AM - 6:30 PM",
+      weekends: "Sáb: 9:00 AM - 4:00 PM",
+    },
+    gallery: [
+      { id: "s2-g1", color: "from-blue-400 to-indigo-400", label: "Local" },
+      { id: "s2-g2", color: "from-indigo-400 to-cyan-400", label: "Vitrina" },
+    ],
   },
 ];
 
@@ -153,7 +209,7 @@ export const products = [
     rating: 4.7,
     reviews: 203,
     description: "Correa retráctil con freno de seguridad y agarre ergonómico",
-    shelterId: 1,
+    storeId: 1,
     longDescription:
       "Correa retráctil de 5 metros con sistema de freno instantáneo que te permite controlar la distancia de tu mascota con solo presionar un botón. Su mango ergonómico recubierto de goma antideslizante proporciona un agarre cómodo y seguro durante los paseos. La cinta reflectante garantiza visibilidad nocturna.",
     quality: "Premium",
@@ -313,7 +369,7 @@ export const products = [
     rating: 4.7,
     reviews: 67,
     description: "Multivitamínico para fortalecer el sistema inmunológico",
-    shelterId: 2,
+    storeId: 2,
     longDescription:
       "Suplemento multivitamínico en tabletas masticables sabor a pollo, formulado para fortalecer el sistema inmunológico de tu mascota. Contiene vitaminas A, C, D, E, complejo B, zinc y probióticos. Ayuda a mejorar la salud digestiva, ósea y cardiovascular. Recomendado por veterinarios.",
     quality: "Premium",
@@ -441,7 +497,7 @@ export const products = [
     rating: 4.4,
     reviews: 76,
     description: "Kit de cepillo dental y pasta sabor a pollo",
-    shelterId: 3,
+    storeId: 1,
     longDescription:
       "Kit de higiene dental que incluye un cepillo de cerdas suaves diseñado para la boca de tu mascota y pasta dental sabor a pollo, libre de flúor y segura para ingerir. Ayuda a prevenir la acumulación de sarro, mal aliento y enfermedades periodontales. Uso recomendado: 3 veces por semana.",
     quality: "Estándar",
@@ -473,7 +529,7 @@ export const products = [
     rating: 4.5,
     reviews: 189,
     description: "Tratamiento mensual de amplio espectro",
-    shelterId: 3,
+    storeId: 2,
     longDescription:
       "Tratamiento tópico mensual que protege a tu mascota contra pulgas, garrapatas, mosquitos y piojos. Fórmula de amplio espectro que comienza a actuar en 24 horas y dura hasta 30 días. Aplicación fácil en la nuca. Resistente al agua después de 48 horas. Aprobado por entidades veterinarias.",
     quality: "Premium",
@@ -541,6 +597,41 @@ export const getShelterById = (id) => {
   return shelters.find((shelter) => shelter.id === Number(id));
 };
 
+export const getStoreById = (id) => {
+  return stores.find((store) => store.id === Number(id));
+};
+
 export const getProductsByShelter = (shelterId) => {
   return products.filter((product) => product.shelterId === Number(shelterId));
+};
+
+export const getProductsByStore = (storeId) => {
+  return products.filter((product) => product.storeId === Number(storeId));
+};
+
+/**
+ * Determina el tipo de vendedor de un producto.
+ * Retorna { type: 'shelter'|'store'|null, data: object|null }
+ */
+export const getSellerInfo = (product) => {
+  if (!product) return { type: null, data: null };
+  if (product.shelterId) {
+    const shelter = getShelterById(product.shelterId);
+    return { type: 'shelter', data: shelter };
+  }
+  if (product.storeId) {
+    const store = getStoreById(product.storeId);
+    return { type: 'store', data: store };
+  }
+  return { type: null, data: null };
+};
+
+export const getProductsBySellerType = (type) => {
+  if (type === 'shelter') {
+    return products.filter(p => p.shelterId != null);
+  }
+  if (type === 'store') {
+    return products.filter(p => p.storeId != null);
+  }
+  return products;
 };

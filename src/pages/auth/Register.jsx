@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, PawPrint, Heart, User, Mail, Lock, ArrowRight, Users, Eye, EyeOff, CheckCircle, XCircle, Phone, FileText } from "lucide-react";
+import {
+  ArrowLeft, PawPrint, Heart, User, Mail, Lock, ArrowRight,
+  Eye, EyeOff, CheckCircle, XCircle, Phone, FileText, Sparkles,
+  Shield
+} from "lucide-react";
 import logo from "../../assets/logo.png";
 import loginDog from "../../assets/loginDog.jpg";
 import { useAuth } from "../../context/AuthContext";
@@ -64,7 +68,7 @@ export default function Register() {
   // Validar campo individual
   const validateField = (field, value) => {
     let error = "";
-    
+
     switch (field) {
       case "firstName":
         if (!value.trim()) {
@@ -130,7 +134,7 @@ export default function Register() {
         }
         break;
     }
-    
+
     return error;
   };
 
@@ -147,14 +151,22 @@ export default function Register() {
       confirmPassword: setConfirmPassword,
       terms: setTerms
     }[field];
-    
+
     setter(value);
-    
-    const error = validateField(field, value);
-    setErrors(prev => ({
-      ...prev,
-      [field]: error
-    }));
+
+    if (field !== "terms") {
+      const error = validateField(field, value);
+      setErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
+    } else {
+      const error = validateField(field, value);
+      setErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
+    }
   };
 
   // Validar todos los campos
@@ -170,14 +182,14 @@ export default function Register() {
       confirmPassword: validateField("confirmPassword", confirmPassword),
       terms: validateField("terms", terms)
     };
-    
+
     setErrors(newErrors);
     return Object.values(newErrors).every(error => !error);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!validateAll()) {
       return;
     }
@@ -188,13 +200,13 @@ export default function Register() {
     setTimeout(() => {
       setIsLoading(false);
       setSuccess(true);
-      
+
       // Guardar email como registrado
       const registeredEmails = localStorage.getItem("registeredEmails");
       const emails = registeredEmails ? JSON.parse(registeredEmails) : [];
       emails.push(email.toLowerCase());
       localStorage.setItem("registeredEmails", JSON.stringify(emails));
-      
+
       // Redirigir a login después de mostrar éxito
       setTimeout(() => {
         navigate("/login");
@@ -203,362 +215,421 @@ export default function Register() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-rose-100 via-rose-50 to-amber-100 animate-gradient flex items-center justify-center p-4 relative">
+    <div className="auth-page">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full blur-3xl animate-float-1" />
-        <div className="absolute top-40 right-32 w-48 h-48 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full blur-3xl animate-float-2" />
-        <div className="absolute bottom-32 left-40 w-44 h-44 bg-gradient-to-br from-rose-300 to-rose-400 rounded-full blur-3xl animate-float-3" />
-        <div className="absolute bottom-20 right-20 w-36 h-36 bg-gradient-to-br from-amber-300 to-amber-400 rounded-full blur-3xl animate-float-4" />
-        <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-gradient-to-br from-rose-200 to-rose-300 rounded-full blur-2xl animate-float-5" />
-        <div className="absolute top-1/3 right-1/3 w-28 h-28 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full blur-2xl animate-float-6" />
+        <div className="auth-bg-circle auth-bg-circle-1" />
+        <div className="auth-bg-circle auth-bg-circle-2" />
+        <div className="auth-bg-circle auth-bg-circle-3" />
+        <div className="auth-bg-circle auth-bg-circle-4" />
+        <div className="auth-bg-circle auth-bg-circle-5" />
+        <div className="auth-bg-circle auth-bg-circle-6" />
       </div>
 
-      {/* Success Message */}
+      {/* Success Modal */}
       {success && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-modal-overlay">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center animate-modal-content">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <CheckCircle className="w-10 h-10 text-green-500" />
+            </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2 font-display">¡Cuenta creada exitosamente!</h3>
-            <p className="text-gray-600 mb-4">Redirigiendo al inicio de sesión...</p>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-gradient-to-r from-rose-500 to-amber-500 h-2 rounded-full animate-[loading_2s_ease-in-out]" />
+            <p className="text-gray-500 mb-6">Redirigiendo al inicio de sesión...</p>
+            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-[#FF4D7A] to-[#FFA726] rounded-full animate-loading-bar" />
             </div>
           </div>
         </div>
       )}
 
-      {/* Back to Home Button */}
-      <Link 
-        to="/" 
-        className="absolute top-6 left-6 flex items-center gap-2 text-gray-600 hover:text-rose-600 transition-colors font-medium z-10"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        <span>Volver al inicio</span>
-      </Link>
-
-      {/* Main Card */}
-      <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-        
-        {/* Left Panel - Form */}
-        <div className="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-center">
-          <div className="w-full max-w-sm mx-auto space-y-4">
-            
+      {/* Main Card - Two columns */}
+      <div className="auth-card">
+        {/* ===== LEFT PANEL - Form ===== */}
+        <div className="auth-form-panel auth-animate-fade-in-left">
+          <div className="auth-form-container">
             {/* Logo */}
             <div className="flex justify-center mb-4">
               <img
                 src={logo}
                 alt="Adoptify Logo"
-                className="w-48 h-auto"
+                className="auth-logo"
               />
             </div>
 
-            {/* Title */}
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight font-display mb-2">
-                Crea tu cuenta
-              </h2>
-              <p className="text-sm text-gray-600">
+            {/* Title & Subtitle */}
+            <div className="text-center mb-5">
+              <h2 className="auth-title">Crea tu cuenta</h2>
+              <p className="auth-subtitle">
                 ¿Ya tienes cuenta?{" "}
-                <Link to="/login" className="text-rose-600 hover:text-rose-700 font-semibold transition-colors">
+                <Link to="/login" className="auth-link font-semibold">
                   Inicia sesión
                 </Link>
               </p>
             </div>
 
-            {/* Form Container with Scroll */}
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="max-h-[calc(100vh-320px)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-rose-300 scrollbar-track-gray-100 space-y-3">
-                {/* Document Type and Number */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Form */}
+            <form onSubmit={handleSubmit}>
+              {/* Scrollable form fields container */}
+              <div className="auth-form-scroll">
+                <div className="space-y-3.5 pr-2">
+                  {/* Document Type and Number */}
+                  <div className="grid grid-cols-5 gap-3">
+                    <div className="col-span-2 space-y-1.5">
+                      <label htmlFor="documentType" className="auth-label">
+                        Tipo Doc.
+                      </label>
+                      <div className={`auth-input-wrapper ${errors.documentType ? 'auth-input-error' : documentType && !errors.documentType ? 'auth-input-success' : ''}`}>
+                        <FileText className="auth-input-icon" />
+                        <select
+                          id="documentType"
+                          value={documentType}
+                          onChange={(e) => handleFieldChange("documentType", e.target.value)}
+                          className="auth-input auth-select"
+                        >
+                          <option value="">Seleccionar</option>
+                          <option value="CC">Cédula de Ciudadanía</option>
+                          <option value="CE">Cédula de Extranjería</option>
+                          <option value="TI">Tarjeta de Identidad</option>
+                          <option value="PP">Pasaporte</option>
+                        </select>
+                        {errors.documentType ? (
+                          <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                        ) : documentType ? (
+                          <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                        ) : null}
+                      </div>
+                      {errors.documentType && (
+                        <p className="auth-error-text">
+                          <XCircle className="w-3 h-3" />
+                          {errors.documentType}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="col-span-3 space-y-1.5">
+                      <label htmlFor="documentNumber" className="auth-label">
+                        Número de Documento
+                      </label>
+                      <div className={`auth-input-wrapper ${errors.documentNumber ? 'auth-input-error' : documentNumber && !errors.documentNumber ? 'auth-input-success' : ''}`}>
+                        <FileText className="auth-input-icon" />
+                        <input
+                          id="documentNumber"
+                          type="text"
+                          placeholder="1234567890"
+                          value={documentNumber}
+                          onChange={(e) => handleFieldChange("documentNumber", e.target.value)}
+                          className="auth-input"
+                        />
+                        {errors.documentNumber ? (
+                          <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                        ) : documentNumber ? (
+                          <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                        ) : null}
+                      </div>
+                      {errors.documentNumber && (
+                        <p className="auth-error-text">
+                          <XCircle className="w-3 h-3" />
+                          {errors.documentNumber}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Name and Last Name */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label htmlFor="firstName" className="auth-label">
+                        Nombres
+                      </label>
+                      <div className={`auth-input-wrapper ${errors.firstName ? 'auth-input-error' : firstName && !errors.firstName ? 'auth-input-success' : ''}`}>
+                        <User className="auth-input-icon" />
+                        <input
+                          id="firstName"
+                          type="text"
+                          placeholder="Juan"
+                          value={firstName}
+                          onChange={(e) => handleFieldChange("firstName", e.target.value)}
+                          className="auth-input"
+                        />
+                        {errors.firstName ? (
+                          <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                        ) : firstName ? (
+                          <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                        ) : null}
+                      </div>
+                      {errors.firstName && (
+                        <p className="auth-error-text">
+                          <XCircle className="w-3 h-3" />
+                          {errors.firstName}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="lastName" className="auth-label">
+                        Apellidos
+                      </label>
+                      <div className={`auth-input-wrapper ${errors.lastName ? 'auth-input-error' : lastName && !errors.lastName ? 'auth-input-success' : ''}`}>
+                        <User className="auth-input-icon" />
+                        <input
+                          id="lastName"
+                          type="text"
+                          placeholder="Pérez"
+                          value={lastName}
+                          onChange={(e) => handleFieldChange("lastName", e.target.value)}
+                          className="auth-input"
+                        />
+                        {errors.lastName ? (
+                          <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                        ) : lastName ? (
+                          <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                        ) : null}
+                      </div>
+                      {errors.lastName && (
+                        <p className="auth-error-text">
+                          <XCircle className="w-3 h-3" />
+                          {errors.lastName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Phone */}
                   <div className="space-y-1.5">
-                    <label htmlFor="documentType" className="text-sm font-semibold text-gray-700">
-                      Tipo de Documento
+                    <label htmlFor="phone" className="auth-label">
+                      Teléfono
                     </label>
-                    <div className="relative">
-                      <FileText className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                      <select
-                        id="documentType"
-                        value={documentType}
-                        onChange={(e) => handleFieldChange("documentType", e.target.value)}
-                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 ${
-                          errors.documentType ? 'border-red-500 focus:ring-red-500' : documentType && !errors.documentType ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                        }`}
-                      >
-                        <option value="">Seleccionar...</option>
-                        <option value="CC">Cédula de Ciudadanía</option>
-                        <option value="CE">Cédula de Extranjería</option>
-                        <option value="TI">Tarjeta de Identidad</option>
-                        <option value="PP">Pasaporte</option>
-                      </select>
-                      {errors.documentType ? (
-                        <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                      ) : documentType ? (
-                        <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                    <div className={`auth-input-wrapper ${errors.phone ? 'auth-input-error' : phone && !errors.phone ? 'auth-input-success' : ''}`}>
+                      <Phone className="auth-input-icon" />
+                      <input
+                        id="phone"
+                        type="tel"
+                        placeholder="300 123 4567"
+                        value={phone}
+                        onChange={(e) => handleFieldChange("phone", e.target.value)}
+                        className="auth-input"
+                      />
+                      {errors.phone ? (
+                        <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                      ) : phone ? (
+                        <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
                       ) : null}
                     </div>
-                    {errors.documentType && <p className="text-xs text-red-600">{errors.documentType}</p>}
+                    {errors.phone && (
+                      <p className="auth-error-text">
+                        <XCircle className="w-3 h-3" />
+                        {errors.phone}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Email */}
                   <div className="space-y-1.5">
-                    <label htmlFor="documentNumber" className="text-sm font-semibold text-gray-700">
-                      Número de Documento
+                    <label htmlFor="email" className="auth-label">
+                      Correo Electrónico
                     </label>
-                    <div className="relative">
-                      <FileText className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                    <div className={`auth-input-wrapper ${errors.email ? 'auth-input-error' : email && !errors.email ? 'auth-input-success' : ''}`}>
+                      <Mail className="auth-input-icon" />
                       <input
-                        id="documentNumber"
-                        type="text"
-                        placeholder="123456789"
-                        value={documentNumber}
-                        onChange={(e) => handleFieldChange("documentNumber", e.target.value)}
-                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
-                          errors.documentNumber ? 'border-red-500 focus:ring-red-500' : documentNumber && !errors.documentNumber ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                        }`}
+                        id="email"
+                        type="email"
+                        placeholder="ejemplo@correo.com"
+                        value={email}
+                        onChange={(e) => handleFieldChange("email", e.target.value)}
+                        className="auth-input"
                       />
-                      {errors.documentNumber ? (
-                        <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                      ) : documentNumber ? (
-                        <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
+                      {errors.email ? (
+                        <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                      ) : email ? (
+                        <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
                       ) : null}
                     </div>
-                    {errors.documentNumber && <p className="text-xs text-red-600">{errors.documentNumber}</p>}
+                    {errors.email && (
+                      <p className="auth-error-text">
+                        <XCircle className="w-3 h-3" />
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
-                </div>
 
-                {/* Name and Last Name */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label htmlFor="firstName" className="text-sm font-semibold text-gray-700">
-                      Nombres
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                      <input
-                        id="firstName"
-                        type="text"
-                        placeholder="Juan"
-                        value={firstName}
-                        onChange={(e) => handleFieldChange("firstName", e.target.value)}
-                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
-                          errors.firstName ? 'border-red-500 focus:ring-red-500' : firstName && !errors.firstName ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                        }`}
-                      />
-                      {errors.firstName ? (
-                        <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                      ) : firstName ? (
-                        <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                      ) : null}
+                  {/* Password Fields */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label htmlFor="password" className="auth-label">
+                        Contraseña
+                      </label>
+                      <div className={`auth-input-wrapper ${errors.password ? 'auth-input-error' : password && !errors.password ? 'auth-input-success' : ''}`}>
+                        <Lock className="auth-input-icon" />
+                        <input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => handleFieldChange("password", e.target.value)}
+                          className="auth-input"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="auth-eye-btn auth-eye-btn-inset"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {errors.password && (
+                        <p className="auth-error-text">
+                          <XCircle className="w-3 h-3" />
+                          {errors.password}
+                        </p>
+                      )}
                     </div>
-                    {errors.firstName && <p className="text-xs text-red-600">{errors.firstName}</p>}
-                  </div>
 
-                  <div className="space-y-1.5">
-                    <label htmlFor="lastName" className="text-sm font-semibold text-gray-700">
-                      Apellidos
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                      <input
-                        id="lastName"
-                        type="text"
-                        placeholder="Pérez"
-                        value={lastName}
-                        onChange={(e) => handleFieldChange("lastName", e.target.value)}
-                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
-                          errors.lastName ? 'border-red-500 focus:ring-red-500' : lastName && !errors.lastName ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                        }`}
-                      />
-                      {errors.lastName ? (
-                        <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                      ) : lastName ? (
-                        <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                      ) : null}
+                    <div className="space-y-1.5">
+                      <label htmlFor="confirmPassword" className="auth-label">
+                        Confirmar Contraseña
+                      </label>
+                      <div className={`auth-input-wrapper ${errors.confirmPassword ? 'auth-input-error' : confirmPassword && !errors.confirmPassword ? 'auth-input-success' : ''}`}>
+                        <Lock className="auth-input-icon" />
+                        <input
+                          id="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={confirmPassword}
+                          onChange={(e) => handleFieldChange("confirmPassword", e.target.value)}
+                          className="auth-input"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="auth-eye-btn auth-eye-btn-inset"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {errors.confirmPassword && (
+                        <p className="auth-error-text">
+                          <XCircle className="w-3 h-3" />
+                          {errors.confirmPassword}
+                        </p>
+                      )}
                     </div>
-                    {errors.lastName && <p className="text-xs text-red-600">{errors.lastName}</p>}
                   </div>
-                </div>
 
-                {/* Phone */}
-                <div className="space-y-1.5">
-                  <label htmlFor="phone" className="text-sm font-semibold text-gray-700">
-                    Teléfono
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                    <input
-                      id="phone"
-                      type="tel"
-                      placeholder="300 123 4567"
-                      value={phone}
-                      onChange={(e) => handleFieldChange("phone", e.target.value)}
-                      className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
-                        errors.phone ? 'border-red-500 focus:ring-red-500' : phone && !errors.phone ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                      }`}
-                    />
-                    {errors.phone ? (
-                      <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                    ) : phone ? (
-                      <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                    ) : null}
-                  </div>
-                  {errors.phone && <p className="text-xs text-red-600">{errors.phone}</p>}
-                </div>
-
-                {/* Email */}
-                <div className="space-y-1.5">
-                  <label htmlFor="email" className="text-sm font-semibold text-gray-700">
-                    Correo Electrónico
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                    <input
-                      id="email"
-                      type="email"
-                      placeholder="ejemplo@correo.com"
-                      value={email}
-                      onChange={(e) => handleFieldChange("email", e.target.value)}
-                      className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
-                        errors.email ? 'border-red-500 focus:ring-red-500' : email && !errors.email ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                      }`}
-                    />
-                    {errors.email ? (
-                      <XCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-red-500" />
-                    ) : email ? (
-                      <CheckCircle className="absolute right-3 top-3.5 h-4.5 w-4.5 text-green-500" />
-                    ) : null}
-                  </div>
-                  {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
-                </div>
-
-                {/* Password Fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label htmlFor="password" className="text-sm font-semibold text-gray-700">
-                      Contraseña
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
+                  {/* Terms */}
+                  <div className="flex items-start pt-1">
+                    <div className="relative mt-0.5">
                       <input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => handleFieldChange("password", e.target.value)}
-                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
-                          errors.password ? 'border-red-500 focus:ring-red-500' : password && !errors.password ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                        }`}
+                        id="terms"
+                        type="checkbox"
+                        checked={terms}
+                        onChange={(e) => handleFieldChange("terms", e.target.checked)}
+                        className="sr-only"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
+                      <div className={`w-[18px] h-[18px] rounded-[5px] border-2 flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                        terms
+                          ? 'border-[#FF4D7A] bg-gradient-to-br from-[#FF4D7A] to-[#FFA726]'
+                          : 'border-gray-300 bg-white hover:border-gray-400'
+                      }`}>
+                        {terms && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
                     </div>
-                    {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700">
-                      Confirmar
+                    <label htmlFor="terms" className="ml-2.5 text-sm text-gray-500 leading-relaxed cursor-pointer select-none">
+                      Acepto los{" "}
+                      <a href="#" className="font-semibold text-[#FF4D7A] hover:text-[#e04060] hover:underline underline-offset-2 transition-colors">
+                        Términos y Condiciones
+                      </a>{" "}
+                      y la{" "}
+                      <a href="#" className="font-semibold text-[#FF4D7A] hover:text-[#e04060] hover:underline underline-offset-2 transition-colors">
+                        Política de Privacidad
+                      </a>
                     </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3.5 h-4.5 w-4.5 text-gray-400" />
-                      <input
-                        id="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={confirmPassword}
-                        onChange={(e) => handleFieldChange("confirmPassword", e.target.value)}
-                        className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-700 placeholder-gray-400 ${
-                          errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : confirmPassword && !errors.confirmPassword ? 'border-green-500 focus:ring-green-500' : 'border-gray-200 focus:ring-rose-500'
-                        }`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                    {errors.confirmPassword && <p className="text-xs text-red-600">{errors.confirmPassword}</p>}
                   </div>
+                  {errors.terms && (
+                    <p className="auth-error-text">
+                      <XCircle className="w-3 h-3" />
+                      {errors.terms}
+                    </p>
+                  )}
                 </div>
-
-                {/* Terms */}
-                <div className="flex items-start">
-                  <input
-                    id="terms"
-                    type="checkbox"
-                    checked={terms}
-                    onChange={(e) => handleFieldChange("terms", e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
-                  />
-                  <label htmlFor="terms" className="ml-2 text-sm text-gray-600 leading-normal">
-                    Acepto los{" "}
-                    <a href="#" className="font-semibold text-rose-600 hover:underline">
-                      Términos
-                    </a>{" "}
-                    y{" "}
-                    <a href="#" className="font-semibold text-rose-600 hover:underline">
-                      Privacidad
-                    </a>
-                  </label>
-                </div>
-                {errors.terms && <p className="text-xs text-red-600">{errors.terms}</p>}
               </div>
 
               {/* Submit Button - Outside scroll */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-300 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Crear Cuenta
-                    <ArrowRight className="w-5 h-5" />
-                  </>
-                )}
-              </button>
+              <div className="mt-4">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="auth-primary-btn"
+                >
+                  <div className="auth-btn-shimmer" />
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Creando cuenta...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      <span>Crear Cuenta</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         </div>
 
-        {/* Right Panel - Image with Gradient Border */}
-        <div className="w-full md:w-1/2 bg-gradient-to-br from-rose-50 via-white to-amber-50 p-8 flex flex-col justify-center items-center relative overflow-hidden">
-          {/* Decorative circles */}
-          <div className="absolute top-0 left-0 w-64 h-64 bg-rose-200/30 rounded-full blur-3xl -translate-x-20 -translate-y-20" />
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-amber-200/30 rounded-full blur-3xl translate-x-20 translate-y-20" />
+        {/* ===== RIGHT PANEL - Decorative / Branding ===== */}
+        <div className="auth-decorative-panel auth-animate-fade-in-right">
+          {/* Back to Home */}
+          <Link
+            to="/"
+            className="auth-back-btn"
+          >
+            <div className="auth-back-btn-icon">
+              <ArrowLeft className="w-4 h-4" />
+            </div>
+            <span>Volver al inicio</span>
+          </Link>
 
-          {/* Image Container with Gradient Border */}
-          <div className="relative z-10 w-full max-w-sm">
-            <div className="relative p-2 bg-gradient-to-br from-rose-500 via-rose-400 to-amber-500 rounded-3xl shadow-2xl">
-              <div className="relative rounded-2xl overflow-hidden bg-white">
-                <img
-                  src={loginDog}
-                  alt="Adoptify - Conectando corazones con patitas"
-                  className="w-full h-auto object-cover"
-                />
+          {/* Decorative circles background */}
+          <div className="absolute top-0 left-0 w-64 h-64 bg-[#FF4D7A]/10 rounded-full blur-3xl -translate-x-20 -translate-y-20" />
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#FFA726]/10 rounded-full blur-3xl translate-x-20 translate-y-20" />
+
+          {/* Content */}
+          <div className="auth-decorative-content">
+            {/* Image with gradient border */}
+            <div className="auth-image-wrapper">
+              <div className="auth-image-border">
+                <div className="auth-image-container">
+                  <img
+                    src={loginDog}
+                    alt="Adoptify - Conectando corazones con patitas"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Badges */}
-            <div className="flex justify-center gap-4 mt-8">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-500 to-rose-400 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform cursor-pointer">
-                <PawPrint className="w-6 h-6" />
-              </div>
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-amber-400 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform cursor-pointer">
-                <Heart className="w-6 h-6" />
-              </div>
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 to-amber-400 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform cursor-pointer">
-                <Users className="w-6 h-6" />
-              </div>
+            {/* Three circular gradient icons */}
+            <div className="flex justify-center gap-5 mt-8">
+              {[
+                { Icon: PawPrint, delay: "0s" },
+                { Icon: Heart, delay: "0.15s" },
+                { Icon: Shield, delay: "0.3s" },
+              ].map(({ Icon, delay }, i) => (
+                <div
+                  key={i}
+                  className="auth-icon-circle"
+                  style={{ animationDelay: delay }}
+                >
+                  <Icon className="w-6 h-6" />
+                </div>
+              ))}
             </div>
           </div>
         </div>

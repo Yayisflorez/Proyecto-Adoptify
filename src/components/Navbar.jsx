@@ -112,17 +112,17 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Active style classes - light mode
-  const activeLinkClass = "text-blue-600 font-semibold bg-blue-50/80";
-  const inactiveLinkClass = "text-gray-600 hover:text-blue-600 hover:bg-blue-50/50";
-  const activeMobileClass = "bg-blue-50 text-blue-600";
-  const inactiveMobileClass = "text-gray-700 hover:bg-gray-50 hover:text-blue-600";
+  // Active style classes - light mode (naranja para usuarios normales / no autenticados)
+  const activeLinkClass = "text-orange-600 font-semibold bg-orange-50/80";
+  const inactiveLinkClass = "text-gray-600 hover:text-orange-600 hover:bg-orange-50/50";
+  const activeMobileClass = "bg-orange-50 text-orange-600";
+  const inactiveMobileClass = "text-gray-700 hover:bg-gray-50 hover:text-orange-600";
 
-  // Dark mode active style classes
-  const darkActiveLinkClass = "text-blue-400 font-semibold border border-blue-500/70";
-  const darkInactiveLinkClass = "text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 border border-transparent";
-  const darkActiveMobileClass = "text-blue-400 font-semibold border border-blue-500/70";
-  const darkInactiveMobileClass = "text-gray-300 hover:text-blue-400 hover:bg-blue-500/10 border border-transparent";
+  // Dark mode active style classes (naranja para usuarios normales / no autenticados)
+  const darkActiveLinkClass = "text-orange-400 font-semibold border border-orange-500/70";
+  const darkInactiveLinkClass = "text-gray-400 hover:text-orange-400 hover:bg-orange-500/10 border border-transparent";
+  const darkActiveMobileClass = "text-orange-400 font-semibold border border-orange-500/70";
+  const darkInactiveMobileClass = "text-gray-300 hover:text-orange-400 hover:bg-orange-500/10 border border-transparent";
 
   // Para refugios usar azul como el logo
   const shelterActiveClass = "text-blue-600 font-semibold bg-blue-50/80";
@@ -210,7 +210,7 @@ export default function Navbar() {
                         className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/refugio/tienda"))}`}
                       >
                         <Store className="w-4 h-4" />
-                        Tienda
+                        Mi tienda
                       </Link>
                     )}
                     <Link
@@ -331,8 +331,8 @@ export default function Navbar() {
                 {!isShelter && (
                   <button className={`relative p-2 rounded-xl transition-colors ${
                     isDark
-                      ? "text-gray-300 hover:text-blue-400 hover:bg-white/5"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                      ? "text-gray-300 hover:text-orange-400 hover:bg-white/5"
+                      : "text-gray-600 hover:text-orange-600 hover:bg-orange-50"
                   }`}>
                     <Bell className="w-5 h-5" />
                     <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
@@ -343,8 +343,8 @@ export default function Navbar() {
                 {!isShelter && (
                   <Link to="/cart" className={`relative p-2 rounded-xl transition-colors ${
                     isDark
-                      ? "text-gray-300 hover:text-blue-400 hover:bg-white/5"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                      ? "text-gray-300 hover:text-orange-400 hover:bg-white/5"
+                      : "text-gray-600 hover:text-orange-600 hover:bg-orange-50"
                   }`}>
                     <ShoppingCart className="w-5 h-5" />
                     {cartCount > 0 && (
@@ -683,7 +683,7 @@ export default function Navbar() {
                     <Link to="/refugio/tienda" onClick={() => setIsOpen(false)}
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/refugio/tienda"))}`}>
                       <Store className="w-4 h-4" />
-                      Tienda
+                      Mi tienda
                     </Link>
                   )}
                   <Link to="/refugio/foro" onClick={() => setIsOpen(false)}
@@ -758,11 +758,11 @@ export default function Navbar() {
                   </Link>
                   <div className={`pt-4 pb-2 border-t flex flex-col gap-2 ${isDark ? "border-white/5" : "border-gray-100"}`}>
                     <div className="flex items-center gap-3 px-3 py-2">
-                      <button className={`relative p-2 rounded-xl transition-colors ${isDark ? "text-gray-300 hover:text-orange-400 hover:bg-white/5" : "text-gray-600 hover:text-rose-500 hover:bg-rose-50"}`}>
+                      <button className={`relative p-2 rounded-xl transition-colors ${isDark ? "text-gray-300 hover:text-orange-400 hover:bg-white/5" : "text-gray-600 hover:text-orange-600 hover:bg-orange-50"}`}>
                         <Bell className="w-5 h-5" />
                         <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
                       </button>
-                      <Link to="/cart" onClick={() => setIsOpen(false)} className={`relative p-2 rounded-xl transition-colors ${isDark ? "text-gray-300 hover:text-orange-400 hover:bg-white/5" : "text-gray-600 hover:text-rose-500 hover:bg-rose-50"}`}>
+                      <Link to="/cart" onClick={() => setIsOpen(false)} className={`relative p-2 rounded-xl transition-colors ${isDark ? "text-gray-300 hover:text-orange-400 hover:bg-white/5" : "text-gray-600 hover:text-orange-600 hover:bg-orange-50"}`}>
                         <ShoppingCart className="w-5 h-5" />
                         {cartCount > 0 && (
                           <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">{cartCount > 99 ? "99+" : cartCount}</span>

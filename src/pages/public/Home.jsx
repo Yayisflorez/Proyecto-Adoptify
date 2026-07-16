@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, PawPrint, Users, Search, ShoppingBag, MessageCircle, Home as HomeIcon, HandHeart, ArrowRight, ChevronRight, ShoppingCart, Star, ArrowUp, MessageSquare, ThumbsUp, Share2, User } from "lucide-react";
 import ScrollToTop from "../../components/ScrollToTop";
+import AnimatedSection from "../../components/AnimatedSection";
 import mascotaImg from "../../assets/Mascotas.jpg";
 import daycareImg from "../../assets/daycare.png";
 
@@ -33,7 +34,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-rose-50 via-white to-amber-50 overflow-hidden">
+      <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-rose-50 via-white to-amber-50 overflow-hidden animate-fade-in-up">
         {/* Animated Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-20 w-40 h-40 bg-rose-200/30 rounded-full blur-3xl animate-float-1" />
@@ -150,6 +151,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
+      <AnimatedSection animation="fadeInUp" delay={100}>
       <section id="how-it-works" className="py-20 bg-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-rose-50/30 via-white to-amber-50/30" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -195,6 +197,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </AnimatedSection>
 
       {/* Pets Section */}
       <section id="animals" className="py-20 bg-gradient-to-br from-rose-50 via-white to-amber-50">
@@ -234,6 +237,7 @@ export default function Home() {
       </section>
 
       {/* Shelters Section */}
+      <AnimatedSection animation="fadeInUp" delay={200}>
       <section id="shelters" className="py-20 bg-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-50/30 via-white to-rose-50/30" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -300,8 +304,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </AnimatedSection>
 
       {/* Store Section */}
+      <AnimatedSection animation="fadeInUp" delay={150}>
       <section id="store" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-12">
@@ -339,6 +345,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </AnimatedSection>
 
       {/* Help CTA Section */}
       <section className="py-20 bg-gradient-to-r from-rose-500 to-amber-500">
@@ -366,6 +373,7 @@ export default function Home() {
       </section>
 
       {/* Forum Section */}
+      <AnimatedSection animation="fadeInUp" delay={250}>
       <section id="forum" className="py-20 bg-gradient-to-br from-rose-50 via-white to-amber-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -455,6 +463,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </AnimatedSection>
 
       {/* Scroll to Top Button */}
       <ScrollToTop />

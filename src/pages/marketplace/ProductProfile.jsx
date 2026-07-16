@@ -43,6 +43,9 @@ import {
   categoryIcons,
   categoryColors,
   getShelterById,
+  getStoreById,
+  getSellerInfo,
+  stores,
 } from "../../data/products";
 
 const STORAGE_KEY = "adoptify_product_comments";
@@ -209,7 +212,9 @@ export default function ProductProfile() {
   const isFav = isStoreFavorite(product.id);
   const qualityBadge = getQualityBadge(product.quality);
   const QualityIcon = qualityBadge.icon;
-  const productShelter = product.shelterId ? getShelterById(product.shelterId) : null;
+  const sellerInfo = getSellerInfo(product);
+  const productShelter = sellerInfo.type === 'shelter' ? sellerInfo.data : null;
+  const productStore = sellerInfo.type === 'store' ? sellerInfo.data : null;
   const previewCommentsCount = 3;
   const displayComments = showAllComments ? comments : comments.slice(0, previewCommentsCount);
   const gallery = product.gallery || [];
@@ -993,82 +998,177 @@ export default function ProductProfile() {
               </div>
             </div>
 
-            {/* ─── SHELTER CARD ─── */}
-            {productShelter && (
+            {/* ─── SELLER CARD (Dinámica: Refugio o Tienda) ─── */}
+            {(productShelter || productStore) && (
               <div className="bg-white dark:bg-dark-card rounded-[2.5rem] shadow-2xl dark:shadow-dark-border/20 border border-gray-100/80 dark:border-dark-border/80 overflow-hidden group hover:shadow-3xl hover:shadow-rose-200/20 dark:hover:shadow-rose-900/20 transition-all duration-300">
-                {/* Gradient header */}
-                <div className="relative h-32 bg-gradient-to-br from-rose-500 via-rose-400 to-amber-400 dark:from-rose-600 dark:via-rose-500 dark:to-amber-500 overflow-hidden">
-                  <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
-                  <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-amber-300/20 blur-3xl" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-                  <div className="absolute inset-0 opacity-20">
-                    <div className="w-full h-full" style={{
-                      backgroundImage: 'radial-gradient(circle at 30% 70%, rgba(255,255,255,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 50%)'
-                    }} />
-                  </div>
-                  <div className="relative h-full flex items-end px-6 pb-6">
-                    <div className="flex items-end gap-3">
-                      <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-2xl ring-1 ring-white/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                        <Store className="w-8 h-8 text-white drop-shadow-lg" />
+                {sellerInfo.type === 'shelter' ? (
+                  <>
+                    {/* ─── SHELTER HEADER ─── */}
+                    <div className="relative h-32 bg-gradient-to-br from-rose-500 via-rose-400 to-amber-400 dark:from-rose-600 dark:via-rose-500 dark:to-amber-500 overflow-hidden">
+                      <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+                      <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-amber-300/20 blur-3xl" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                      <div className="absolute inset-0 opacity-20">
+                        <div className="w-full h-full" style={{
+                          backgroundImage: 'radial-gradient(circle at 30% 70%, rgba(255,255,255,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 50%)'
+                        }} />
                       </div>
-                      <div className="pb-1">
-                        <p className="text-[10px] text-white/80 uppercase tracking-widest font-bold">
-                          Vendido por
+                      <div className="relative h-full flex items-end px-6 pb-6">
+                        <div className="flex items-end gap-3">
+                          <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-2xl ring-1 ring-white/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                            <PawPrint className="w-8 h-8 text-white drop-shadow-lg" />
+                          </div>
+                          <div className="pb-1">
+                            <p className="text-[10px] text-white/80 uppercase tracking-widest font-bold">
+                              Refugio
+                            </p>
+                            <h3 className="text-lg font-bold text-white font-display drop-shadow-sm">
+                              {productShelter.name}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-6 pt-2 space-y-4">
+                      {/* Location */}
+                      {productShelter.location && (
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-rose-50 to-amber-50 dark:from-rose-900/10 dark:to-amber-900/10 rounded-2xl border border-rose-100/30 dark:border-rose-900/20 group-hover:shadow-md group-hover:shadow-rose-200/20 dark:group-hover:shadow-rose-900/20 transition-all duration-300">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 to-amber-400 flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <MapPin className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">
+                            {productShelter.location}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {productShelter.description && (
+                        <p className="text-sm text-gray-500 dark:text-dark-text-secondary leading-relaxed px-1 italic border-l-2 border-rose-200 dark:border-rose-800/50 pl-3">
+                          "{productShelter.description}"
                         </p>
-                        <h3 className="text-lg font-bold text-white font-display drop-shadow-sm">
-                          {productShelter.name}
-                        </h3>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="space-y-3 pt-2">
+                        <Link
+                          to={`/shelter/${productShelter.id}`}
+                          className="w-full inline-flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-bold rounded-2xl hover:from-rose-600 hover:to-amber-600 transition-all duration-300 shadow-xl shadow-rose-200/40 dark:shadow-rose-500/20 hover:shadow-2xl hover:-translate-y-1 active:scale-[0.98] group/btn"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center group-hover/btn:scale-110 transition-transform duration-200">
+                            <PawPrint className="w-4 h-4" />
+                          </div>
+                          <span className="flex-1 text-left">Ver mascotas de este refugio</span>
+                          <div className="flex items-center">
+                            <span className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition">
+                              <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
+                            </span>
+                          </div>
+                        </Link>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Body */}
-                <div className="p-6 pt-2 space-y-4">
-                  {/* Location */}
-                  {productShelter.location && (
-                    <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-rose-50 to-amber-50 dark:from-rose-900/10 dark:to-amber-900/10 rounded-2xl border border-rose-100/30 dark:border-rose-900/20 group-hover:shadow-md group-hover:shadow-rose-200/20 dark:group-hover:shadow-rose-900/20 transition-all duration-300">
-                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 to-amber-400 flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <MapPin className="w-4 h-4 text-white" />
+                  </>
+                ) : (
+                  <>
+                    {/* ─── STORE HEADER ─── */}
+                    <div className={`relative h-32 bg-gradient-to-br ${productStore.color || 'from-purple-500 to-pink-500'} overflow-hidden`}>
+                      <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+                      <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-pink-300/20 blur-3xl" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                      <div className="absolute inset-0 opacity-20">
+                        <div className="w-full h-full" style={{
+                          backgroundImage: 'radial-gradient(circle at 30% 70%, rgba(255,255,255,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 50%)'
+                        }} />
                       </div>
-                      <span className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">
-                        {productShelter.location}
-                      </span>
+                      <div className="relative h-full flex items-end px-6 pb-6">
+                        <div className="flex items-end gap-3">
+                          <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-2xl ring-1 ring-white/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                            <Store className="w-8 h-8 text-white drop-shadow-lg" />
+                          </div>
+                          <div className="pb-1">
+                            <p className="text-[10px] text-white/80 uppercase tracking-widest font-bold">
+                              Tienda Asociada
+                            </p>
+                            <h3 className="text-lg font-bold text-white font-display drop-shadow-sm">
+                              {productStore.name}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  )}
 
-                  {/* Description */}
-                  {productShelter.description && (
-                    <p className="text-sm text-gray-500 dark:text-dark-text-secondary leading-relaxed px-1 italic border-l-2 border-rose-200 dark:border-rose-800/50 pl-3">
-                      "{productShelter.description}"
-                    </p>
-                  )}
+                    {/* Body */}
+                    <div className="p-6 pt-2 space-y-4">
+                      {/* Location */}
+                      {productStore.location && (
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10 rounded-2xl border border-purple-100/30 dark:border-purple-900/20 group-hover:shadow-md group-hover:shadow-purple-200/20 dark:group-hover:shadow-purple-900/20 transition-all duration-300">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <MapPin className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">
+                            {productStore.location}
+                          </span>
+                        </div>
+                      )}
 
-                  {/* Action Buttons */}
-                  <div className="space-y-3 pt-2">
-                    <Link
-                      to={`/shelter/${productShelter.id}`}
-                      className="w-full inline-flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-bold rounded-2xl hover:from-rose-600 hover:to-amber-600 transition-all duration-300 shadow-xl shadow-rose-200/40 dark:shadow-rose-500/20 hover:shadow-2xl hover:-translate-y-1 active:scale-[0.98] group/btn"
-                    >
-                      <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center group-hover/btn:scale-110 transition-transform duration-200">
-                        <PawPrint className="w-4 h-4" />
+                      {/* Rating */}
+                      {productStore.rating && (
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/10 dark:to-yellow-900/10 rounded-2xl border border-amber-100/30 dark:border-amber-900/20">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-400 flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <Star className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-gray-900 dark:text-dark-text">
+                              {productStore.rating}
+                            </span>
+                            <div className="flex">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`w-3 h-3 ${
+                                    star <= Math.round(productStore.rating)
+                                      ? "text-amber-400 fill-amber-400"
+                                      : "text-gray-200 dark:text-gray-600"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs text-gray-400 dark:text-dark-text-secondary">
+                              ({productStore.reviews} reseñas)
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {productStore.description && (
+                        <p className="text-sm text-gray-500 dark:text-dark-text-secondary leading-relaxed px-1 italic border-l-2 border-purple-200 dark:border-purple-800/50 pl-3">
+                          "{productStore.description}"
+                        </p>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="space-y-3 pt-2">
+                        <Link
+                          to={`/store-profile/${productStore.id}`}
+                          className="w-full inline-flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-xl shadow-purple-200/40 dark:shadow-purple-500/20 hover:shadow-2xl hover:-translate-y-1 active:scale-[0.98] group/btn"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center group-hover/btn:scale-110 transition-transform duration-200">
+                            <Store className="w-4 h-4" />
+                          </div>
+                          <span className="flex-1 text-left">Ver perfil de la tienda</span>
+                          <div className="flex items-center">
+                            <span className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition">
+                              <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
+                            </span>
+                          </div>
+                        </Link>
                       </div>
-                      <span className="flex-1 text-left">Ver mascotas de este refugio</span>
-                     <div className="flex items-center">
-                        <span className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition">
-                          <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
-                        </span>
-                      </div>
-                    </Link>
-                    <Link
-                      to={`/shelter-store/${productShelter.id}`}
-                      className="w-full inline-flex items-center justify-center gap-2.5 px-5 py-3.5 text-sm font-bold rounded-2xl transition-all duration-200 border-2 border-dashed border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 hover:border-rose-400 dark:hover:border-rose-600 hover:shadow-lg hover:shadow-rose-200/20 dark:hover:shadow-rose-900/10 group/btn2"
-                    >
-                      <Store className="w-4 h-4 group-hover/btn2:scale-110 transition-transform" />
-                      Ver más productos de este refugio
-                    </Link>
-                  </div>
-                </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
