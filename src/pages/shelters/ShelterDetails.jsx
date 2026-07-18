@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft, MapPin, Phone, Mail, Star, Heart, Clock, PawPrint,
-  CheckCircle, Store, Eye, X, ShoppingBag, ChevronRight,
+  CheckCircle, Store, Eye, X, ShoppingBag, ChevronRight, ChevronLeft,
   Package, Sparkles, Shield, Award
 } from "lucide-react";
 import {
@@ -11,13 +11,16 @@ import {
   categoryIcons,
   categoryColors,
 } from "../../data/products";
+import { useFavorites } from "../../context/FavoritesContext";
 
 export default function ShelterDetails() {
   const { id } = useParams();
+  const { isShelterFavorite, toggleShelterFavorite } = useFavorites();
   const [isFavorite, setIsFavorite] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
@@ -191,15 +194,15 @@ export default function ShelterDetails() {
                     Ver Tienda
                   </Link>
                   <button
-                    onClick={() => setIsFavorite(!isFavorite)}
+                    onClick={() => toggleShelterFavorite(shelter)}
                     className={`inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                      isFavorite
+                      isShelterFavorite(shelter.id)
                         ? "bg-rose-500 text-white shadow-md"
                         : "bg-white border-2 border-rose-500 text-rose-500 hover:bg-rose-50"
                     }`}
                   >
-                    <Heart className={`w-5 h-5 ${isFavorite ? "fill-white animate-heartbeat" : ""} transition-all`} />
-                    {isFavorite ? "Guardado" : "Favorito"}
+                    <Heart className={`w-5 h-5 ${isShelterFavorite(shelter.id) ? "fill-white animate-heartbeat" : ""} transition-all`} />
+                    {isShelterFavorite(shelter.id) ? "Guardado" : "Favorito"}
                   </button>
                 </div>
               </div>
@@ -311,20 +314,20 @@ export default function ShelterDetails() {
             </div>
 
             {/* Pets for Adoption Section */}
-            <div className={`bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 ${
+            <div className={`bg-white dark:bg-dark-card rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 ${
               isVisible ? "animate-fade-in-up animation-delay-300" : "opacity-0"
             }`}>
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-amber-100 rounded-xl flex items-center justify-center">
-                    <PawPrint className="w-5 h-5 text-rose-500" />
+                  <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-amber-100 dark:from-rose-900/30 dark:to-amber-900/30 rounded-xl flex items-center justify-center">
+                    <PawPrint className="w-5 h-5 text-rose-500 dark:text-rose-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900 font-display">Mascotas en adopción</h2>
-                    <p className="text-sm text-gray-500">Conoce a nuestros rescatados</p>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white font-display">Mascotas en adopción</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Conoce a nuestros rescatados</p>
                   </div>
                 </div>
-                <span className="px-3 py-1 bg-gradient-to-r from-rose-100 to-amber-100 text-rose-700 rounded-full text-sm font-medium">
+                <span className="px-3 py-1 bg-gradient-to-r from-rose-100 to-amber-100 dark:from-rose-900/40 dark:to-amber-900/40 text-rose-700 dark:text-rose-300 rounded-full text-sm font-medium">
                   {shelter.pets.length} disponibles
                 </span>
               </div>
@@ -332,23 +335,26 @@ export default function ShelterDetails() {
                 {shelter.pets.map((pet, index) => (
                   <div
                     key={pet.id}
-                    className="bg-gradient-to-br from-rose-50 to-amber-50 rounded-xl p-4 hover:shadow-md transition-all duration-300 group hover:-translate-y-1"
+                    className="bg-gradient-to-br from-rose-50 to-amber-50 dark:from-dark-bg/80 dark:to-dark-card rounded-xl p-4 hover:shadow-md transition-all duration-300 group hover:-translate-y-1"
                     style={{ animationDelay: `${350 + index * 100}ms` }}
                   >
-                    <div className="w-full h-36 bg-white rounded-lg mb-3 flex items-center justify-center overflow-hidden relative">
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-amber-100 group-hover:scale-105 transition-transform duration-500">
-                        <PawPrint className="w-16 h-16 text-rose-300 group-hover:text-rose-400 transition-colors duration-300" />
+                    <div className="w-full h-36 bg-white dark:bg-dark-bg rounded-lg mb-3 flex items-center justify-center overflow-hidden relative">
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-amber-100 dark:from-rose-900/30 dark:to-amber-900/30 group-hover:scale-105 transition-transform duration-500">
+                        <PawPrint className="w-16 h-16 text-rose-300 dark:text-rose-500 group-hover:text-rose-400 transition-colors duration-300" />
                       </div>
-                      <div className="absolute top-2 right-2 px-2 py-0.5 bg-white/80 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700">
+                      <div className="absolute top-2 right-2 px-2 py-0.5 bg-white/80 dark:bg-dark-bg/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700 dark:text-gray-300">
                         {pet.age}
                       </div>
                     </div>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-gray-900 text-lg">{pet.name}</h3>
+                      <h3 className="font-bold text-gray-900 dark:text-white text-lg">{pet.name}</h3>
                     </div>
-                    <button className="w-full px-4 py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-sm font-semibold rounded-lg hover:from-rose-600 hover:to-amber-600 transition-all duration-300 hover:shadow-md hover:scale-[1.02] active:scale-95">
-                      Adoptar
-                    </button>
+                    <Link
+                      to={`/animal/${pet.id}`}
+                      className="block w-full px-4 py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-sm font-semibold rounded-lg hover:from-rose-600 hover:to-amber-600 transition-all duration-300 hover:shadow-md hover:scale-[1.02] active:scale-95 text-center"
+                    >
+                      Ver perfil
+                    </Link>
                   </div>
                 ))}
               </div>
@@ -368,20 +374,20 @@ export default function ShelterDetails() {
 
             {/* ===== STORE PRODUCTS SECTION (NEW) ===== */}
             {shelterProducts.length > 0 && (
-              <div className={`bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 ${
+              <div className={`bg-white dark:bg-dark-card rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 ${
                 isVisible ? "animate-fade-in-up animation-delay-350" : "opacity-0"
               }`}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
-                      <Store className="w-5 h-5 text-emerald-500" />
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-xl flex items-center justify-center">
+                      <Store className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900 font-display">Tienda del Refugio</h2>
-                      <p className="text-sm text-gray-500">Productos para tu mascota</p>
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white font-display">Tienda del Refugio</h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Productos para tu mascota</p>
                     </div>
                   </div>
-                  <span className="px-3 py-1 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 rounded-full text-sm font-medium">
+                  <span className="px-3 py-1 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40 text-emerald-700 dark:text-emerald-300 rounded-full text-sm font-medium">
                     {shelterProducts.length} productos
                   </span>
                 </div>
@@ -396,7 +402,7 @@ export default function ShelterDetails() {
                       <Link
                         key={product.id}
                         to={`/product/${product.id}`}
-                        className="group bg-gradient-to-br from-gray-50 to-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex"
+                        className="group bg-gradient-to-br from-gray-50 to-white dark:from-dark-bg dark:to-dark-card rounded-xl overflow-hidden border border-gray-100 dark:border-dark-border hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex"
                       >
                         {/* Product color bar */}
                         <div className={`w-2 bg-gradient-to-b ${catColor} flex-shrink-0`} />
@@ -462,10 +468,13 @@ export default function ShelterDetails() {
                 Galería de fotos
               </h3>
               <div className="grid grid-cols-3 gap-1.5">
-                {shelter.gallery.map((photo) => (
+                {shelter.gallery.map((photo, idx) => (
                   <div
                     key={photo.id}
-                    onClick={() => setSelectedPhoto(photo)}
+                    onClick={() => {
+                      setSelectedPhoto(photo);
+                      setSelectedPhotoIndex(idx);
+                    }}
                     className="aspect-square bg-gradient-to-br from-rose-100 to-amber-100 rounded-lg overflow-hidden group cursor-pointer relative hover:shadow-md transition-all duration-300"
                   >
                     {photo.image ? (
@@ -569,15 +578,15 @@ export default function ShelterDetails() {
             </div>
 
             {/* ===== REVIEWS SECTION ===== */}
-            <div className={`bg-white rounded-2xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 ${
+            <div className={`bg-white dark:bg-dark-card rounded-2xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 ${
               isVisible ? "animate-fade-in-right animation-delay-250" : "opacity-0"
             }`}>
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <div className="w-7 h-7 bg-gradient-to-br from-amber-100 to-rose-100 rounded-lg flex items-center justify-center">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 rounded-lg flex items-center justify-center">
                   <Star className="w-3.5 h-3.5 text-amber-500" />
                 </div>
                 Reseñas y comentarios
-                <span className="ml-auto text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                <span className="ml-auto text-xs font-normal text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-border px-2 py-0.5 rounded-full">
                   {reviews.length}
                 </span>
               </h3>
@@ -586,7 +595,7 @@ export default function ShelterDetails() {
                 {displayedReviews.map((review) => (
                   <div
                     key={review.id}
-                    className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-3.5 border border-gray-100 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+                    className="bg-gradient-to-br from-gray-50 to-white dark:from-dark-bg dark:to-dark-card rounded-xl p-3.5 border border-gray-100 dark:border-dark-border hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
                   >
                     <div className="flex items-start gap-3">
                       {/* Avatar */}
@@ -595,8 +604,8 @@ export default function ShelterDetails() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="font-semibold text-gray-900 text-sm truncate">{review.user}</p>
-                          <span className="text-[10px] text-gray-500 whitespace-nowrap">{review.date}</span>
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{review.user}</p>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400 whitespace-nowrap">{review.date}</span>
                         </div>
                         {/* Stars */}
                         <div className="flex items-center gap-0.5 mt-0.5 mb-1.5">
@@ -606,12 +615,12 @@ export default function ShelterDetails() {
                               className={`w-3 h-3 ${
                                 star <= review.rating
                                   ? "text-amber-500 fill-amber-500"
-                                  : "text-gray-300"
+                                  : "text-gray-300 dark:text-gray-600"
                               }`}
                             />
                           ))}
                         </div>
-                        <p className="text-xs text-gray-600 leading-relaxed">{review.comment}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{review.comment}</p>
                       </div>
                     </div>
                   </div>
@@ -621,7 +630,7 @@ export default function ShelterDetails() {
               {reviews.length > 3 && (
                 <button
                   onClick={() => setShowAllReviews(!showAllReviews)}
-                  className="w-full mt-3 px-4 py-2.5 text-sm font-semibold text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-xl transition-all duration-300 hover:shadow-sm active:scale-95 flex items-center justify-center gap-1.5"
+                  className="w-full mt-3 px-4 py-2.5 text-sm font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-xl transition-all duration-300 hover:shadow-sm active:scale-95 flex items-center justify-center gap-1.5"
                 >
                   {showAllReviews ? (
                     <>Mostrar menos <span className="text-xs">▲</span></>
@@ -642,16 +651,52 @@ export default function ShelterDetails() {
           onClick={() => setSelectedPhoto(null)}
         >
           <div
-            className="relative max-w-3xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden animate-modal-content"
+            className="relative max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden animate-modal-content"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close button */}
             <button
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+              className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-20"
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="w-full h-96 sm:h-[500px] bg-gradient-to-br from-rose-100 to-amber-100 flex items-center justify-center">
+
+            {/* Previous arrow */}
+            {shelter.gallery.length > 1 && (
+              <button
+                onClick={() => {
+                  const prevIndex = selectedPhotoIndex > 0 ? selectedPhotoIndex - 1 : shelter.gallery.length - 1;
+                  setSelectedPhotoIndex(prevIndex);
+                  setSelectedPhoto(shelter.gallery[prevIndex]);
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-20"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Next arrow */}
+            {shelter.gallery.length > 1 && (
+              <button
+                onClick={() => {
+                  const nextIndex = selectedPhotoIndex < shelter.gallery.length - 1 ? selectedPhotoIndex + 1 : 0;
+                  setSelectedPhotoIndex(nextIndex);
+                  setSelectedPhoto(shelter.gallery[nextIndex]);
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-20"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Image counter */}
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-black/50 text-white text-xs font-medium rounded-full z-20 backdrop-blur-sm">
+              {selectedPhotoIndex + 1} / {shelter.gallery.length}
+            </div>
+
+            {/* Image */}
+            <div className="w-full h-96 sm:h-[500px] bg-gradient-to-br from-rose-100 to-amber-100 flex items-center justify-center relative">
               {selectedPhoto.image ? (
                 <img
                   src={selectedPhoto.image}
@@ -665,15 +710,20 @@ export default function ShelterDetails() {
                 </div>
               )}
             </div>
+
+            {/* Thumbnails bar */}
             <div className="p-4 bg-gray-50 flex items-center justify-between">
               <p className="text-sm text-gray-600 font-medium">
                 Galería de {shelter.name}
               </p>
               <div className="flex gap-2">
-                {shelter.gallery.map((photo) => (
+                {shelter.gallery.map((photo, idx) => (
                   <button
                     key={photo.id}
-                    onClick={() => setSelectedPhoto(photo)}
+                    onClick={() => {
+                      setSelectedPhoto(photo);
+                      setSelectedPhotoIndex(idx);
+                    }}
                     className={`w-10 h-10 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
                       selectedPhoto.id === photo.id
                         ? "border-rose-500 scale-110"

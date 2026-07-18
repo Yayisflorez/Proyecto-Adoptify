@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import { Heart, PawPrint, Users, Search, ShoppingBag, MessageCircle, Home as HomeIcon, HandHeart, ArrowRight, ChevronRight, ShoppingCart, Star, ArrowUp, MessageSquare, ThumbsUp, Share2, User } from "lucide-react";
 import ScrollToTop from "../../components/ScrollToTop";
 import AnimatedSection from "../../components/AnimatedSection";
+import { useAuth } from "../../context/AuthContext";
 import mascotaImg from "../../assets/Mascotas.jpg";
 import daycareImg from "../../assets/daycare.png";
 
 export default function Home() {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
@@ -100,15 +102,17 @@ export default function Home() {
                 alt="Perro y gato juntos"
                 className="rounded-3xl shadow-2xl w-full object-cover"
               />
-              <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-white" />
+              {!user && (
+                <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full flex items-center justify-center">
+                    <Heart className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-gray-900">¡Únete ahora!</div>
+                    <div className="text-sm text-gray-600">Es gratis</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-bold text-gray-900">¡Únete ahora!</div>
-                  <div className="text-sm text-gray-600">Es gratis</div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

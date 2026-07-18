@@ -30,6 +30,9 @@ export const AuthProvider = ({ children }) => {
     setFavorites([]);
     localStorage.removeItem("user");
     localStorage.removeItem("favorites");
+    // Force light mode on logout
+    localStorage.setItem("theme", "light");
+    document.documentElement.classList.remove("dark");
     window.location.href = "/";
   };
 

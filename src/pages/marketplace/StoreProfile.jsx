@@ -302,10 +302,10 @@ export default function StoreProfile() {
             </div>
 
             {/* Store Info */}
-            <div className="flex flex-col lg:flex-row items-center lg:items-end gap-8 lg:gap-16">
+            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-8 lg:gap-16">
               {/* Logo */}
               <div
-                className={`flex-shrink-0 -mb-14 lg:-mb-16 relative z-10 transition-all duration-700 delay-200 ${
+                className={`flex-shrink-0 relative z-10 transition-all duration-700 delay-200 ${
                   heroLoaded ? "opacity-100 scale-100" : "opacity-0 scale-75"
                 }`}
               >

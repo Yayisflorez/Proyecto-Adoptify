@@ -19,6 +19,10 @@ import {
   Trash2,
   X,
   RefreshCw,
+  Home,
+  Users,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useFavorites } from "../../context/FavoritesContext";
@@ -50,12 +54,12 @@ const categoryGradients = {
 
 export default function Favorites() {
   const { favorites: petFavorites, removeFavorite } = useAuth();
-  const { storeFavorites, removeStoreFavorite, toggleStoreFavorite } = useFavorites();
+  const { storeFavorites, removeStoreFavorite, toggleStoreFavorite, shelterFavorites, removeShelterFavorite, toggleShelterFavorite } = useFavorites();
   const { addToCart } = useCart();
   const [activeTab, setActiveTab] = useState("pets");
   const [addedToCart, setAddedToCart] = useState({});
 
-  const totalFavorites = petFavorites.length + storeFavorites.length;
+  const totalFavorites = petFavorites.length + storeFavorites.length + shelterFavorites.length;
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -106,6 +110,11 @@ export default function Favorites() {
                   <span className="font-semibold">{storeFavorites.length}</span>
                   <span className="text-amber-500">Tienda</span>
                 </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-100 text-violet-600 rounded-full">
+                  <Home className="w-4 h-4" />
+                  <span className="font-semibold">{shelterFavorites.length}</span>
+                  <span className="text-violet-500">Refugios</span>
+                </div>
               </div>
             )}
           </div>
@@ -132,6 +141,28 @@ export default function Favorites() {
                 }`}
               >
                 {petFavorites.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("shelters")}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === "shelters"
+                ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-lg shadow-rose-200/50"
+                : "text-gray-600 hover:text-rose-600 hover:bg-rose-50"
+            }`}
+          >
+            <Home className="w-4 h-4" />
+            <span>Refugios</span>
+            {shelterFavorites.length > 0 && (
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs ${
+                  activeTab === "shelters"
+                    ? "bg-white/20 text-white"
+                    : "bg-violet-100 text-violet-600"
+                }`}
+              >
+                {shelterFavorites.length}
               </span>
             )}
           </button>
@@ -238,6 +269,87 @@ export default function Favorites() {
                           Ver más
                         </Link>
                       </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ===================== SHELTER FAVORITES TAB ===================== */}
+        {activeTab === "shelters" && (
+          <>
+            {shelterFavorites.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center">
+                  <Home className="w-10 h-10 text-violet-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No tienes refugios favoritos
+                </h3>
+                <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                  Explora los refugios y guarda tus favoritos para visitarlos después.
+                </p>
+                <Link
+                  to="/shelters"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg shadow-rose-200/50"
+                >
+                  <Home className="w-5 h-5" />
+                  Explorar Refugios
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {shelterFavorites.map((shelter) => (
+                  <div
+                    key={shelter.id}
+                    className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+                  >
+                    <div className="relative">
+                      <div className="w-full h-40 bg-gradient-to-br from-violet-200 to-purple-200 flex items-center justify-center">
+                        <Home className="w-16 h-16 text-violet-400/60" />
+                      </div>
+                      <button
+                        onClick={() => removeShelterFavorite(shelter.id)}
+                        className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                        title="Quitar de favoritos"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </button>
+                      <div className="absolute bottom-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-700 shadow-sm flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                        {shelter.rating}
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-lg font-bold text-gray-900 font-display">
+                          {shelter.name}
+                        </h3>
+                        <Heart className="w-5 h-5 fill-violet-500 text-violet-500 shrink-0" />
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                        <MapPin className="w-4 h-4 text-rose-500" />
+                        <span>{shelter.location}</span>
+                      </div>
+                      <p className="text-sm text-gray-500 mb-4 line-clamp-2">{shelter.description}</p>
+                      <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <PawPrint className="w-4 h-4" />
+                          {shelter.animals} animales
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          Activo
+                        </span>
+                      </div>
+                      <Link
+                        to={`/shelter/${shelter.id}`}
+                        className="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-sm font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-md"
+                      >
+                        Ver refugio
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -387,7 +499,7 @@ export default function Favorites() {
           </>
         )}
 
-        {/* Bottom CTA when both empty */}
+        {/* Bottom CTA when empty */}
         {totalFavorites === 0 && (
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-400">
@@ -396,6 +508,10 @@ export default function Favorites() {
                 Empieza explorando{" "}
                 <Link to="/animals" className="text-rose-500 hover:text-rose-600 font-semibold underline">
                   animales
+                </Link>
+                ,{" "}
+                <Link to="/shelters" className="text-violet-500 hover:text-violet-600 font-semibold underline">
+                  refugios
                 </Link>{" "}
                 o la{" "}
                 <Link to="/store" className="text-amber-500 hover:text-amber-600 font-semibold underline">

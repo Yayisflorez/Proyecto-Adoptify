@@ -231,6 +231,14 @@ body {
   --tw-gradient-to: #1a0a0f;
 }
 
+.dark .from-gray-50 {
+  --tw-gradient-from: #15151f;
+}
+
+.dark .to-white {
+  --tw-gradient-to: var(--color-dark-card);
+}
+
 .dark .hover\:from-rose-100:hover {
   --tw-gradient-from: #1a0a0f;
 }

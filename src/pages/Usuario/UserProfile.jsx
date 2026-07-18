@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import {
   User, Mail, Phone, MapPin, Calendar, Edit, Camera, Save, X,
   PawPrint, Heart, Settings, LogOut, Shield, ChevronRight,
-  MessageCircle, Home, Star, ThumbsUp, Award, Clock, TrendingUp,
+  MessageCircle, Home, Star, ThumbsUp, Clock, TrendingUp,
   Dog, Cat, Gift, CheckCircle, AlertCircle,
   Image, Globe, Plus,
-  Search, Users, Share2, ArrowUp, Quote, Sparkles, Leaf
+  Search, Users, Share2, ArrowUp, Quote, Sparkles
 } from "lucide-react";
 
 // ─── Mock Data ───
@@ -40,14 +40,6 @@ const MOCK_ACTIVITY = [
   { id: 5, type: "share", icon: Share2, title: "Compartiste una historia", desc: "El día que conocí a Max", time: "hace 3 semanas", color: "from-cyan-400 to-cyan-500" },
 ];
 
-const MOCK_ACHIEVEMENTS = [
-  { id: 1, icon: Heart, title: "Corazón Solidario", desc: "Primera adopción completada", earned: true, color: "from-rose-400 to-rose-500" },
-  { id: 2, icon: Star, title: "Miembro Estrella", desc: "100 interacciones en el foro", earned: true, color: "from-amber-400 to-amber-500" },
-  { id: 3, icon: Gift, title: "Donador Frecuente", desc: "3 donaciones realizadas", earned: true, color: "from-emerald-400 to-emerald-500" },
-  { id: 4, icon: Users, title: "Voluntario Activo", desc: "10 horas de voluntariado", earned: true, color: "from-violet-400 to-violet-500" },
-  { id: 5, icon: Leaf, title: "Hogar Verde", desc: "Adopta 5 mascotas", earned: false, color: "from-green-400 to-green-500" },
-  { id: 6, icon: Award, title: "Embajador", desc: "Refiere a 10 amigos", earned: false, color: "from-blue-400 to-blue-500" },
-];
 
 // ─── Animated Counter ───
 function AnimatedCounter({ end, duration = 2000, suffix = "" }) {
@@ -160,41 +152,6 @@ function ActivityItem({ item, index }) {
   );
 }
 
-// ─── Achievement Badge ───
-function AchievementBadge({ achievement }) {
-  const Icon = achievement.icon;
-  return (
-    <div
-      className={`group relative p-5 rounded-2xl border-2 text-center transition-all duration-300 hover:scale-105 ${
-        achievement.earned
-          ? "bg-white dark:bg-dark-card border-gray-100 dark:border-dark-border hover:border-rose-200 dark:hover:border-rose-800 shadow-lg hover:shadow-xl"
-          : "bg-gray-50 dark:bg-dark-bg border-dashed border-gray-200 dark:border-gray-700 opacity-60 hover:opacity-80"
-      }`}
-    >
-      <div className={`w-14 h-14 mx-auto mb-3 bg-gradient-to-br ${achievement.earned ? achievement.color : "from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700"} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 ${achievement.earned ? "" : "grayscale"}`}>
-        <Icon className="w-7 h-7 text-white" />
-      </div>
-      <h4 className={`font-bold text-sm mb-1 ${achievement.earned ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}`}>
-        {achievement.title}
-      </h4>
-      <p className="text-xs text-gray-500 dark:text-gray-400">{achievement.desc}</p>
-      {!achievement.earned && (
-        <div className="absolute inset-0 rounded-2xl flex items-center justify-center bg-white/40 dark:bg-dark-bg/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="text-center">
-            <Lock className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-            <span className="text-xs font-semibold text-gray-500">Bloqueado</span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-const Lock = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-  </svg>
-);
 
 // ─── Avatar Modal ───
 function AvatarModal({ isOpen, onClose }) {
@@ -382,7 +339,6 @@ export default function UserProfile() {
   const stats = [
     { label: "Mascotas adoptadas", value: 3, icon: PawPrint, color: "from-rose-500 to-rose-600", shadow: "shadow-rose-200 dark:shadow-rose-900/30" },
     { label: "Favoritos", value: 12, icon: Heart, color: "from-amber-500 to-amber-600", shadow: "shadow-amber-200 dark:shadow-amber-900/30" },
-    { label: "Logros", value: 4, icon: Award, color: "from-violet-500 to-violet-600", shadow: "shadow-violet-200 dark:shadow-violet-900/30" },
     { label: "Miembro desde", value: user.joinDate, icon: Calendar, color: "from-rose-500 to-amber-500", shadow: "shadow-rose-200 dark:shadow-rose-900/30", isText: true },
   ];
 
@@ -390,7 +346,6 @@ export default function UserProfile() {
     { id: "overview", label: "Resumen", icon: User },
     { id: "pets", label: "Mis Mascotas", icon: PawPrint },
     { id: "activity", label: "Actividad", icon: Clock },
-    { id: "achievements", label: "Logros", icon: Award },
   ];
 
   return (
@@ -417,7 +372,7 @@ export default function UserProfile() {
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Gestiona tu información, descubre tus logros y conecta con la comunidad
+            Gestiona tu información y conecta con la comunidad
           </p>
         </div>
 
@@ -532,7 +487,7 @@ export default function UserProfile() {
                     {stat.isText ? (
                       stat.value
                     ) : (
-                      <AnimatedCounter end={stat.value} suffix={stat.label === "Logros" ? "/6" : ""} />
+                      <AnimatedCounter end={stat.value} />
                     )}
                   </p>
                   <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">{stat.label}</p>
@@ -714,34 +669,6 @@ export default function UserProfile() {
                 <Clock className="w-4 h-4" />
                 Cargar más actividad
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* ─── Achievements Tab ─── */}
-        {activeTab === "achievements" && (
-          <div className="bg-white dark:bg-dark-card rounded-3xl shadow-lg p-6 sm:p-8 border border-gray-100 dark:border-dark-border animate-fadeIn">
-            <SectionDivider icon={Award} label="Logros y Reconocimientos" />
-
-            <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-amber-50 to-rose-50 dark:from-amber-900/10 dark:to-rose-900/10 rounded-2xl mb-6 border border-amber-100 dark:border-amber-900/20">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-rose-400 rounded-xl flex items-center justify-center">
-                <Star className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  Has desbloqueado <span className="text-amber-600 dark:text-amber-400">4 de 6</span> logros
-                </p>
-                <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-amber-400 to-rose-400 rounded-full transition-all duration-1000" style={{ width: "66%" }} />
-                </div>
-              </div>
-              <Sparkles className="w-6 h-6 text-amber-500 dark:text-amber-400 flex-shrink-0 animate-pulse-soft" />
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              {MOCK_ACHIEVEMENTS.map((ach, idx) => (
-                <AchievementBadge key={ach.id} achievement={ach} />
-              ))}
             </div>
           </div>
         )}

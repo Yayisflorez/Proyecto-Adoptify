@@ -12,10 +12,25 @@ export const FavoritesProvider = ({ children }) => {
     }
   });
 
+  const [shelterFavorites, setShelterFavorites] = useState(() => {
+    try {
+      const saved = localStorage.getItem("adoptify_shelter_favorites");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   // Persist to localStorage
   useEffect(() => {
     localStorage.setItem("adoptify_store_favorites", JSON.stringify(storeFavorites));
   }, [storeFavorites]);
+
+  useEffect(() => {
+    localStorage.setItem("adoptify_shelter_favorites", JSON.stringify(shelterFavorites));
+  }, [shelterFavorites]);
+
+  // ─── Store Favorites ───
 
   const addStoreFavorite = useCallback((product) => {
     setStoreFavorites((prev) => {
@@ -48,6 +63,39 @@ export const FavoritesProvider = ({ children }) => {
     []
   );
 
+  // ─── Shelter Favorites ───
+
+  const addShelterFavorite = useCallback((shelter) => {
+    setShelterFavorites((prev) => {
+      if (prev.some((item) => item.id === shelter.id)) return prev;
+      return [...prev, shelter];
+    });
+  }, []);
+
+  const removeShelterFavorite = useCallback((shelterId) => {
+    setShelterFavorites((prev) => prev.filter((item) => item.id !== shelterId));
+  }, []);
+
+  const isShelterFavorite = useCallback(
+    (shelterId) => {
+      return shelterFavorites.some((item) => item.id === shelterId);
+    },
+    [shelterFavorites]
+  );
+
+  const toggleShelterFavorite = useCallback(
+    (shelter) => {
+      setShelterFavorites((prev) => {
+        const exists = prev.some((item) => item.id === shelter.id);
+        if (exists) {
+          return prev.filter((item) => item.id !== shelter.id);
+        }
+        return [...prev, shelter];
+      });
+    },
+    []
+  );
+
   return (
     <FavoritesContext.Provider
       value={{
@@ -56,6 +104,11 @@ export const FavoritesProvider = ({ children }) => {
         removeStoreFavorite,
         isStoreFavorite,
         toggleStoreFavorite,
+        shelterFavorites,
+        addShelterFavorite,
+        removeShelterFavorite,
+        isShelterFavorite,
+        toggleShelterFavorite,
       }}
     >
       {children}

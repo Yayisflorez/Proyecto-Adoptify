@@ -22,6 +22,7 @@ export default function AnimalProfile() {
     weight: "30 kg",
     color: "Dorado",
     shelter: "Refugio 'Hogar de huellas'",
+    shelterId: 1,
     shelterPhone: "+57 300 123 4567",
     shelterLocation: "Calle 123, Bogotá",
     description: "Max es un Golden Retriever lleno de energía y amor. Es muy sociable con otros perros y niños. Le encanta jugar al aire libre y necesita una familia activa que pueda dedicarle tiempo de ejercicio y entrenamiento.",
@@ -193,10 +194,13 @@ export default function AnimalProfile() {
                   <MessageCircle className="w-4 h-4" />
                   WhatsApp
                 </a>
-                <button className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all">
-                  <Send className="w-4 h-4" />
-                  Mensaje
-                </button>
+                <Link
+                  to={`/shelter/${animal.shelterId}`}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all"
+                >
+                  <Home className="w-4 h-4" />
+                  Ver refugio
+                </Link>
               </div>
             </div>
 

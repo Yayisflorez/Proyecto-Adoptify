@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, Phone, Mail, Star, Heart, Users, PawPrint, ArrowRight, Filter, ChevronDown, Home } from "lucide-react";
 import ScrollToTop from "../../components/ScrollToTop";
+import { useFavorites } from "../../context/FavoritesContext";
 
 export default function Shelters() {
+  const { isShelterFavorite, toggleShelterFavorite } = useFavorites();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCity, setSelectedCity] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
@@ -168,6 +170,20 @@ export default function Shelters() {
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                   {shelter.rating}
                 </div>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleShelterFavorite(shelter);
+                  }}
+                  className={`absolute top-4 left-4 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 ${
+                    isShelterFavorite(shelter.id)
+                      ? "bg-rose-500 text-white"
+                      : "bg-white/90 backdrop-blur-sm text-gray-400 hover:text-rose-500"
+                  }`}
+                  title={isShelterFavorite(shelter.id) ? "Quitar de favoritos" : "Agregar a favoritos"}
+                >
+                  <Heart className={`w-5 h-5 ${isShelterFavorite(shelter.id) ? "fill-white" : ""}`} />
+                </button>
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-2 font-display">{shelter.name}</h3>
