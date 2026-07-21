@@ -1,49 +1,28 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Store, Plus, Search, Package, DollarSign, X, Edit3, Trash2,
   AlertCircle, CheckCircle, Star, ShoppingBag,
   TrendingUp, Eye, EyeOff, Image, Upload, ChevronDown,
   ArrowUp, ArrowDown, Shirt, Bone, Stethoscope, Droplets, Dog,
-  Sparkles, Ruler, Weight, Layers, Tag, Palette, Scissors
+  Sparkles, Ruler, Weight, Layers, Tag, Palette, Scissors,
+  ShoppingCart, Heart, Phone, Mail, Clock, ChevronRight,
+  ArrowLeft, Shield, Info, Box
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { categoryIcons, categoryColors } from "../../data/products";
+import ConfirmModal from "../../components/ConfirmModal";
 
 const categories = ["Alimentos", "Accesorios", "Juguetes", "Salud", "Higiene"];
 const MAX_IMAGES = 5;
 
-// Dinamismo campo extra por categoría
 const categoryFields = {
-  Ropa: {
-    sizes: true, material: true, colors: true,
-    sizeOptions: ["XS", "S", "M", "L", "XL", "XXL"],
-    label: "Prenda de vestir"
-  },
-  Accesorios: {
-    sizes: true, material: true, colors: true,
-    sizeOptions: ["S", "M", "L", "XL"],
-    label: "Accesorio"
-  },
-  Alimentos: {
-    sizes: true, material: false, colors: false,
-    sizeOptions: ["250g", "500g", "1kg", "2kg", "5kg", "250ml", "500ml", "1L", "1.5L"],
-    label: "Alimento"
-  },
-  Juguetes: {
-    sizes: true, material: true, colors: true,
-    sizeOptions: ["S", "M", "L"],
-    label: "Juguete"
-  },
-  Salud: {
-    sizes: true, material: false, colors: false,
-    sizeOptions: ["3 dosis", "6 dosis", "12 dosis", "30 tabletas", "60 tabletas", "120 tabletas"],
-    label: "Producto de salud"
-  },
-  Higiene: {
-    sizes: true, material: false, colors: false,
-    sizeOptions: ["250ml", "500ml", "1L"],
-    label: "Producto de higiene"
-  },
+  Ropa: { sizes: true, material: true, colors: true, sizeOptions: ["XS", "S", "M", "L", "XL", "XXL"], label: "Prenda de vestir" },
+  Accesorios: { sizes: true, material: true, colors: true, sizeOptions: ["S", "M", "L", "XL"], label: "Accesorio" },
+  Alimentos: { sizes: true, material: false, colors: false, sizeOptions: ["250g", "500g", "1kg", "2kg", "5kg", "250ml", "500ml", "1L", "1.5L"], label: "Alimento" },
+  Juguetes: { sizes: true, material: true, colors: true, sizeOptions: ["S", "M", "L"], label: "Juguete" },
+  Salud: { sizes: true, material: false, colors: false, sizeOptions: ["3 dosis", "6 dosis", "12 dosis", "30 tabletas", "60 tabletas", "120 tabletas"], label: "Producto de salud" },
+  Higiene: { sizes: true, material: false, colors: false, sizeOptions: ["250ml", "500ml", "1L"], label: "Producto de higiene" },
 };
 
 const CatIconComponent = ({ category, className }) => {
@@ -51,68 +30,321 @@ const CatIconComponent = ({ category, className }) => {
   return <Icon className={className} />;
 };
 
+// ============================================================
+// COMPONENTES DE FORMULARIO (nivel de módulo — estables)
+// ============================================================
+
+const ImageUploadSection = ({ images, onUpload, onRemove, onMove, label }) => {
+  const inputRef = useRef(null);
+  const count = images?.length || 0;
+  const remaining = MAX_IMAGES - count;
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {label} ({count}/{MAX_IMAGES})
+      </label>
+      <div className="grid grid-cols-5 gap-2">
+        {(images || []).map((img, index) => (
+          <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-border border border-gray-200 dark:border-dark-border">
+            <img src={img.src} alt={`Imagen ${index + 1}`} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+              <button type="button" onClick={() => onRemove(img.id)}
+                className="p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors" title="Eliminar">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+              {index > 0 && (
+                <button type="button" onClick={() => onMove(index, -1)}
+                  className="p-1.5 bg-white/90 text-gray-700 rounded-lg hover:bg-white transition-colors" title="Mover izquierda">
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {index < count - 1 && (
+                <button type="button" onClick={() => onMove(index, 1)}
+                  className="p-1.5 bg-white/90 text-gray-700 rounded-lg hover:bg-white transition-colors" title="Mover derecha">
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <span className="absolute bottom-1 right-1 text-[10px] font-medium bg-black/50 text-white px-1.5 py-0.5 rounded-md">
+              {index + 1}
+            </span>
+          </div>
+        ))}
+        {remaining > 0 && (
+          <button type="button" onClick={() => inputRef.current?.click()}
+            className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-dark-border hover:border-rose-400 dark:hover:border-rose-500 flex flex-col items-center justify-center gap-1 transition-all hover:bg-rose-50/50 dark:hover:bg-rose-500/5">
+            <Upload className="w-5 h-5 text-gray-400" />
+            <span className="text-[10px] text-gray-400 font-medium">{remaining}</span>
+          </button>
+        )}
+      </div>
+      <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={onUpload} />
+    </div>
+  );
+};
+
+const CategorySpecificFields = ({ data, setData, category }) => {
+  const fields = categoryFields[category];
+  if (!fields) return null;
+
+  return (
+    <>
+      {fields.material && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Material</label>
+          <input type="text" value={data.material || ""} onChange={(e) => setData({...data, material: e.target.value})}
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+            placeholder="Ej: Cuero sintético, Algodón, Caucho" />
+        </div>
+      )}
+      {fields.colors && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Colores Disponibles</label>
+          <input type="text" value={data.colors || ""} onChange={(e) => setData({...data, colors: e.target.value})}
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+            placeholder="Ej: Negro, Marrón, Rojo, Azul" />
+        </div>
+      )}
+      {fields.sizes && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tallas / Tamaños</label>
+          <div className="flex flex-wrap gap-2">
+            {fields.sizeOptions.map(size => {
+              const isSelected = (data.sizes || []).includes(size);
+              return (
+                <button key={size} type="button" onClick={() => {
+                  const current = data.sizes || [];
+                  setData({ ...data, sizes: isSelected ? current.filter(s => s !== size) : [...current, size] });
+                }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                    isSelected
+                      ? "bg-rose-100 dark:bg-rose-500/20 border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-400"
+                      : "bg-white dark:bg-dark-bg border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-400 hover:border-rose-300 dark:hover:border-rose-500/40"
+                  }`}>
+                  {size}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+const ProductForm = ({ data, setData, onSubmit, onCancel, title, isEdit }) => {
+  const category = data.category || "Alimentos";
+  const [selectedCat, setSelectedCat] = useState(category);
+  const [newProductImages] = useState(null);
+  const [editProductImages] = useState(null);
+
+  const handleNewProductImages = (e, setDataFn) => {
+    const files = Array.from(e.target.files);
+    const remaining = MAX_IMAGES - (data.images?.length || 0);
+    const toAdd = files.slice(0, remaining);
+    toAdd.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const newImg = { id: Date.now() + Math.random(), src: ev.target.result, file, label: "" };
+        setDataFn(prev => ({ ...prev, images: [...(prev.images || []), newImg] }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (imgId, setDataFn) => {
+    setDataFn(prev => ({ ...prev, images: (prev.images || []).filter(img => img.id !== imgId) }));
+  };
+
+  const moveImage = (index, direction, setDataFn) => {
+    const imgs = [...(data.images || [])];
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= imgs.length) return;
+    [imgs[index], imgs[newIndex]] = [imgs[newIndex], imgs[index]];
+    setDataFn(prev => ({ ...prev, images: imgs }));
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del Producto</label>
+          <input type="text" required value={data.name} onChange={(e) => setData({...data, name: e.target.value})}
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+            placeholder="Ej: Collar Premium Ajustable" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoría</label>
+          <div className="relative">
+            <select value={selectedCat} onChange={(e) => {
+              const cat = e.target.value;
+              setSelectedCat(cat);
+              setData({...data, category: cat, sizes: [], material: "", colors: "" });
+            }}
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white appearance-none">
+              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Marca</label>
+          <input type="text" value={data.brand || ""} onChange={(e) => setData({...data, brand: e.target.value})}
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+            placeholder="Ej: PetStyle" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio ($)</label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input type="number" step="0.01" min="0" required value={data.price}
+              onChange={(e) => setData({...data, price: e.target.value})}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+              placeholder="0.00" />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock</label>
+          <input type="number" min="0" required value={data.stock}
+            onChange={(e) => setData({...data, stock: e.target.value})}
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+            placeholder="0" />
+        </div>
+
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+          <textarea rows={3} required value={data.description}
+            onChange={(e) => setData({...data, description: e.target.value})}
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white resize-none"
+            placeholder="Describe el producto y sus beneficios..." />
+        </div>
+
+        {["Ropa", "Accesorios", "Alimentos", "Juguetes", "Salud", "Higiene"].includes(selectedCat) && (
+          <>
+            <div className="col-span-2">
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border mb-2 ${
+                selectedCat === "Ropa" ? "bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-500/10 dark:to-fuchsia-500/10 border-violet-100 dark:border-violet-500/20" :
+                selectedCat === "Accesorios" ? "bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-500/10 dark:to-pink-500/10 border-purple-100 dark:border-purple-500/20" :
+                selectedCat === "Alimentos" ? "bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border-emerald-100 dark:border-emerald-500/20" :
+                selectedCat === "Juguetes" ? "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10 border-amber-100 dark:border-amber-500/20" :
+                selectedCat === "Salud" ? "bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-500/10 dark:to-cyan-500/10 border-blue-100 dark:border-blue-500/20" :
+                "bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-500/10 dark:to-pink-500/10 border-rose-100 dark:border-rose-500/20"
+              }`}>
+                {selectedCat === "Ropa" && <Shirt className="w-4 h-4 text-violet-600 dark:text-violet-400" />}
+                {selectedCat === "Accesorios" && <Scissors className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                {selectedCat === "Alimentos" && <Dog className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
+                {selectedCat === "Juguetes" && <Bone className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
+                {selectedCat === "Salud" && <Stethoscope className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                {selectedCat === "Higiene" && <Droplets className="w-4 h-4 text-rose-600 dark:text-rose-400" />}
+                <span className="text-xs font-medium">{categoryFields[selectedCat]?.label}</span>
+              </div>
+            </div>
+            <CategorySpecificFields data={data} setData={setData} category={selectedCat} />
+          </>
+        )}
+
+        {selectedCat === "Alimentos" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ingredientes</label>
+            <input type="text" value={data.ingredients || ""} onChange={(e) => setData({...data, ingredients: e.target.value})}
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+              placeholder="Ej: Pollo, arroz, verduras" />
+          </div>
+        )}
+
+        {selectedCat === "Salud" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ingredientes Activos</label>
+            <input type="text" value={data.activeIngredients || ""} onChange={(e) => setData({...data, activeIngredients: e.target.value})}
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+              placeholder="Ej: Ivermectina, Praziquantel" />
+          </div>
+        )}
+
+        {selectedCat === "Higiene" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Aroma / Tipo</label>
+            <input type="text" value={data.scent || ""} onChange={(e) => setData({...data, scent: e.target.value})}
+              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+              placeholder="Ej: Avena, Manzanilla, Neutro" />
+          </div>
+        )}
+
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Características (separado por comas)</label>
+          <input type="text" value={data.features || ""} onChange={(e) => setData({...data, features: e.target.value})}
+            className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
+            placeholder="Ej: Hebilla ajustable, Costuras reforzadas, Resistente al agua" />
+        </div>
+
+        <ImageUploadSection
+          images={data.images}
+          onUpload={(e) => handleNewProductImages(e, setData)}
+          onRemove={(imgId) => removeImage(imgId, setData)}
+          onMove={(index, direction) => moveImage(index, direction, setData)}
+          label="Imágenes del Producto"
+        />
+      </div>
+
+      <div className="flex gap-3 pt-2">
+        <button type="submit"
+          className="flex-1 py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all hover:shadow-lg hover:shadow-rose-200 dark:hover:shadow-rose-500/20 flex items-center justify-center gap-2">
+          {isEdit ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          {title}
+        </button>
+        <button type="button" onClick={onCancel}
+          className="px-6 py-2.5 text-gray-600 dark:text-gray-400 font-medium rounded-xl border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-bg transition-all">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const StatCard = ({ icon: Icon, label, value, color, bg }) => (
+  <div className="bg-white dark:bg-dark-card rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border border-gray-100 dark:border-dark-border">
+    <div className="flex items-center justify-between mb-3">
+      <div className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center`}>
+        <Icon className={`w-6 h-6 ${color}`} />
+      </div>
+      <span className={`text-2xl font-bold ${color} font-display`}>{value}</span>
+    </div>
+    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{label}</p>
+  </div>
+);
+
+
+// ============================================================
+// COMPONENTE PRINCIPAL
+// ============================================================
+
 export default function ShelterStore() {
   const { user } = useAuth();
-  const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("todas");
   const [activeFilter, setActiveFilter] = useState("todos");
+  const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, productId: null });
+  const [confirmToggle, setConfirmToggle] = useState({ isOpen: false, productId: null, newState: false });
 
   const [products, setProducts] = useState([
-    {
-      id: 1, name: "Collar Premium Ajustable", category: "Accesorios",
-      price: 100.00, stock: 25, description: "Collar de cuero sintético de alta calidad, ajustable y duradero",
-      brand: "PetStyle", material: "Cuero sintético", colors: "Negro, Marrón",
-      sizes: ["S", "M", "L", "XL"], active: true, rating: 4.8, sales: 124,
-      features: ["Hebilla ajustable", "Costuras reforzadas", "Diseño ergonómico"],
-      images: []
-    },
-    {
-      id: 2, name: "Recipiente de Comida Anti-vuelco", category: "Alimentos",
-      price: 45.00, stock: 50, description: "Bowl de acero inoxidable con base antideslizante",
-      brand: "HappyPet", material: "Acero inoxidable",
-      sizes: ["500ml", "1L", "1.5L"], active: true, rating: 4.6, sales: 89,
-      features: ["Base antideslizante", "Apto lavavajillas", "Bordes suaves"],
-      images: []
-    },
-    {
-      id: 3, name: "Juguete Interactivo Kong", category: "Juguetes",
-      price: 35.00, stock: 15, description: "Juguete resistente para estimulación mental",
-      brand: "Kong", material: "Caucho natural", colors: "Rojo, Azul",
-      sizes: ["S", "M", "L"], active: true, rating: 4.9, sales: 256,
-      features: ["Resistente", "Estimulación mental", "Dispensador de comida"],
-      images: []
-    },
-    {
-      id: 4, name: "Shampoo Natural para Mascotas", category: "Higiene",
-      price: 28.00, stock: 0, description: "Shampoo suave con ingredientes naturales",
-      brand: "PetCare", material: "Natural",
-      sizes: ["250ml", "500ml"], active: false, rating: 4.5, sales: 67,
-      features: ["Hipoalergénico", "Aroma suave", "pH balanceado"],
-      images: []
-    },
-    {
-      id: 5, name: "Desparasitante Oral", category: "Salud",
-      price: 32.00, stock: 40, description: "Desparasitante de amplio espectro para perros y gatos",
-      brand: "VetLife", material: "Oral",
-      sizes: ["3 dosis", "6 dosis"], active: true, rating: 4.7, sales: 312,
-      features: ["Amplio espectro", "Fácil administración", "Sabor agradable"],
-      images: []
-    },
+    { id: 1, name: "Collar Premium Ajustable", category: "Accesorios", price: 100.00, stock: 25, description: "Collar de cuero sintético de alta calidad, ajustable y duradero para todo tipo de mascotas. Diseño ergonómico que garantiza comodidad.", brand: "PetStyle", material: "Cuero sintético", colors: "Negro, Marrón", sizes: ["S", "M", "L", "XL"], active: true, rating: 4.8, sales: 124, features: ["Hebilla ajustable", "Costuras reforzadas", "Diseño ergonómico"], images: [] },
+    { id: 2, name: "Recipiente de Comida Anti-vuelco", category: "Alimentos", price: 45.00, stock: 50, description: "Bowl de acero inoxidable con base antideslizante. Perfecto para la alimentación diaria de tu mascota.", brand: "HappyPet", material: "Acero inoxidable", sizes: ["500ml", "1L", "1.5L"], active: true, rating: 4.6, sales: 89, features: ["Base antideslizante", "Apto lavavajillas", "Bordes suaves"], images: [] },
+    { id: 3, name: "Juguete Interactivo Kong", category: "Juguetes", price: 35.00, stock: 15, description: "Juguete resistente para estimulación mental de tu mascota. Ideal para liberar estrés y ansiedad.", brand: "Kong", material: "Caucho natural", colors: "Rojo, Azul", sizes: ["S", "M", "L"], active: true, rating: 4.9, sales: 256, features: ["Resistente", "Estimulación mental", "Dispensador de comida"], images: [] },
+    { id: 4, name: "Shampoo Natural para Mascotas", category: "Higiene", price: 28.00, stock: 0, description: "Shampoo suave con ingredientes naturales. Hipoalergénico y balanceado para el cuidado diario.", brand: "PetCare", material: "Natural", sizes: ["250ml", "500ml"], active: false, rating: 4.5, sales: 67, features: ["Hipoalergénico", "Aroma suave", "pH balanceado"], images: [] },
+    { id: 5, name: "Desparasitante Oral", category: "Salud", price: 32.00, stock: 40, description: "Desparasitante de amplio espectro para perros y gatos. Fácil administración con sabor agradable.", brand: "VetLife", material: "Oral", sizes: ["3 dosis", "6 dosis"], active: true, rating: 4.7, sales: 312, features: ["Amplio espectro", "Fácil administración", "Sabor agradable"], images: [] },
   ]);
 
-  const emptyProduct = {
-    name: "", category: "Alimentos", price: "", stock: "", description: "",
-    brand: "", material: "", colors: "", sizes: [], features: "", active: true, images: []
-  };
-
+  const emptyProduct = { name: "", category: "Alimentos", price: "", stock: "", description: "", brand: "", material: "", colors: "", sizes: [], features: "", active: true, images: [] };
   const [newProduct, setNewProduct] = useState({ ...emptyProduct });
-  const [editProduct, setEditProduct] = useState(null);
 
-  // Stats
   const totalProducts = products.length;
   const activeProducts = products.filter(p => p.active).length;
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
@@ -131,589 +363,98 @@ export default function ShelterStore() {
     return matchesSearch && matchesCategory && matchesActive;
   });
 
-  const handleImageUpload = (productData, setProductData, e) => {
-    const files = Array.from(e.target.files);
-    const remaining = MAX_IMAGES - (productData.images?.length || 0);
-    const toAdd = files.slice(0, remaining);
-
-    toAdd.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const newImg = { id: Date.now() + Math.random(), src: ev.target.result, file, label: "" };
-        setProductData(prev => ({ ...prev, images: [...(prev.images || []), newImg] }));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeImage = (productData, setProductData, imgId) => {
-    setProductData(prev => ({
-      ...prev,
-      images: (prev.images || []).filter(img => img.id !== imgId)
-    }));
-  };
-
-  const moveImage = (productData, setProductData, index, direction) => {
-    const imgs = [...(productData.images || [])];
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= imgs.length) return;
-    [imgs[index], imgs[newIndex]] = [imgs[newIndex], imgs[index]];
-    setProductData(prev => ({ ...prev, images: imgs }));
-  };
-
   const handleAddProduct = (e) => {
     e.preventDefault();
     const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    const product = {
-      ...newProduct,
-      id: newId,
-      price: parseFloat(newProduct.price),
-      stock: parseInt(newProduct.stock),
-      sales: 0, rating: 0,
-      sizes: newProduct.sizes || [],
-      features: newProduct.features ? newProduct.features.split(",").map(f => f.trim()).filter(Boolean) : [],
-      images: newProduct.images || [],
-    };
+    const product = { ...newProduct, id: newId, price: parseFloat(newProduct.price), stock: parseInt(newProduct.stock), sales: 0, rating: 0, sizes: newProduct.sizes || [], features: newProduct.features ? newProduct.features.split(",").map(f => f.trim()).filter(Boolean) : [], images: newProduct.images || [] };
     setProducts([...products, product]);
     setShowAddModal(false);
     setNewProduct({ ...emptyProduct });
   };
 
-  const handleEditProduct = (e) => {
-    e.preventDefault();
-    if (!editProduct) return;
-    setProducts(products.map(p =>
-      p.id === editProduct.id
-        ? {
-            ...editProduct,
-            price: parseFloat(editProduct.price),
-            stock: parseInt(editProduct.stock),
-            sizes: editProduct.sizes || [],
-            features: editProduct.features
-              ? (Array.isArray(editProduct.features) ? editProduct.features : editProduct.features.split(",").map(f => f.trim()).filter(Boolean))
-              : [],
-          }
-        : p
-    ));
-    setShowEditModal(null);
-    setEditProduct(null);
-  };
-
   const handleDeleteProduct = () => {
-    setProducts(products.filter(p => p.id !== showDeleteModal));
-    setShowDeleteModal(null);
+    if (confirmDelete.productId) setProducts(products.filter(p => p.id !== confirmDelete.productId));
+    setConfirmDelete({ isOpen: false, productId: null });
   };
 
-  const toggleProductActive = (id) => {
-    setProducts(products.map(p => p.id === id ? { ...p, active: !p.active } : p));
+  const handleToggleActive = () => {
+    if (confirmToggle.productId) setProducts(products.map(p => p.id === confirmToggle.productId ? { ...p, active: confirmToggle.newState } : p));
+    setConfirmToggle({ isOpen: false, productId: null, newState: false });
   };
 
-  const openEditModal = (product) => {
-    setEditProduct({
-      ...product,
-      price: product.price.toString(),
-      stock: product.stock.toString(),
-      features: product.features ? product.features.join(", ") : "",
-      sizes: product.sizes || [],
-      images: product.images || [],
-    });
-    setShowEditModal(product.id);
+  const openProductDetail = (product) => {
+    navigate(`/refugio/tienda/${product.id}`, { state: { product } });
   };
 
-  // Image Gallery Upload Component
-  const ImageGalleryUpload = ({ images, setData, maxImages = MAX_IMAGES }) => {
-    const inputRef = useRef(null);
-    const count = images?.length || 0;
-    const remaining = maxImages - count;
-
-    return (
-      <div className="col-span-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Imágenes del Producto ({count}/{maxImages})
-        </label>
-        <div className="grid grid-cols-5 gap-2">
-          {(images || []).map((img, index) => (
-            <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-border border border-gray-200 dark:border-dark-border">
-              {img.src ? (
-                <img src={img.src} alt={img.label || `Imagen ${index + 1}`} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Image className="w-6 h-6 text-gray-400" />
-                </div>
-              )}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
-                <button type="button" onClick={() => removeImage(setData.length >= 0 ? setData('dummy') : null, setData, img.id)}
-                  className="p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                  title="Eliminar">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-                {index > 0 && (
-                  <button type="button" onClick={() => moveImage(null, setData, index, -1)}
-                    className="p-1.5 bg-white/90 text-gray-700 rounded-lg hover:bg-white transition-colors" title="Mover izquierda">
-                    <ArrowUp className="w-3.5 h-3.5" />
-                  </button>
-                )}
-                {index < count - 1 && (
-                  <button type="button" onClick={() => moveImage(null, setData, index, 1)}
-                    className="p-1.5 bg-white/90 text-gray-700 rounded-lg hover:bg-white transition-colors" title="Mover derecha">
-                    <ArrowDown className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-              <span className="absolute bottom-1 right-1 text-[10px] font-medium bg-black/50 text-white px-1.5 py-0.5 rounded-md">
-                {index + 1}
-              </span>
-            </div>
-          ))}
-          {remaining > 0 && (
-            <button type="button" onClick={() => inputRef.current?.click()}
-              className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-dark-border hover:border-rose-400 dark:hover:border-rose-500 flex flex-col items-center justify-center gap-1 transition-all hover:bg-rose-50/50 dark:hover:bg-rose-500/5">
-              <Upload className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] text-gray-400 font-medium">Subir</span>
-            </button>
-          )}
-        </div>
-        <input ref={inputRef} type="file" accept="image/*" multiple className="hidden"
-          onChange={(e) => handleImageUpload(
-            images ? { images } : { images: [] },
-            (fn) => typeof fn === 'function' ? setData(fn({ images })) : null,
-            e
-          )} />
-        {count > 0 && (
-          <p className="text-[11px] text-gray-400 mt-1">Arrastra las imágenes para reordenar o usa los botones ↑ ↓</p>
-        )}
-      </div>
-    );
-  };
-
-  // Fix the image upload handlers for the form
-  const handleNewProductImages = (e) => {
-    const files = Array.from(e.target.files);
-    const remaining = MAX_IMAGES - (newProduct.images?.length || 0);
-    const toAdd = files.slice(0, remaining);
-    toAdd.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const newImg = { id: Date.now() + Math.random(), src: ev.target.result, file, label: "" };
-        setNewProduct(prev => ({ ...prev, images: [...(prev.images || []), newImg] }));
-      };
-      reader.readAsDataURL(file);
+  const openEditPage = (product) => {
+    navigate(`/refugio/tienda/editar/${product.id}`, {
+      state: {
+        product: {
+          ...product,
+          price: product.price.toString(),
+          stock: product.stock.toString(),
+          features: product.features ? (Array.isArray(product.features) ? product.features.join(", ") : product.features) : "",
+          sizes: product.sizes || [],
+          images: product.images || []
+        }
+      }
     });
   };
 
-  const removeNewProductImage = (imgId) => {
-    setNewProduct(prev => ({
-      ...prev, images: (prev.images || []).filter(img => img.id !== imgId)
-    }));
-  };
-
-  const moveNewProductImage = (index, direction) => {
-    const imgs = [...(newProduct.images || [])];
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= imgs.length) return;
-    [imgs[index], imgs[newIndex]] = [imgs[newIndex], imgs[index]];
-    setNewProduct(prev => ({ ...prev, images: imgs }));
-  };
-
-  const handleEditProductImages = (e) => {
-    if (!editProduct) return;
-    const files = Array.from(e.target.files);
-    const remaining = MAX_IMAGES - (editProduct.images?.length || 0);
-    const toAdd = files.slice(0, remaining);
-    toAdd.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const newImg = { id: Date.now() + Math.random(), src: ev.target.result, file, label: "" };
-        setEditProduct(prev => ({ ...prev, images: [...(prev.images || []), newImg] }));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeEditProductImage = (imgId) => {
-    if (!editProduct) return;
-    setEditProduct(prev => ({
-      ...prev, images: (prev.images || []).filter(img => img.id !== imgId)
-    }));
-  };
-
-  const moveEditProductImage = (index, direction) => {
-    if (!editProduct) return;
-    const imgs = [...(editProduct.images || [])];
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= imgs.length) return;
-    [imgs[index], imgs[newIndex]] = [imgs[newIndex], imgs[index]];
-    setEditProduct(prev => ({ ...prev, images: imgs }));
-  };
-
-  const ImageUploadSection = ({ images, onUpload, onRemove, onMove, label }) => {
-    const inputRef = useRef(null);
-    const count = images?.length || 0;
-    const remaining = MAX_IMAGES - count;
-
-    return (
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {label} ({count}/{MAX_IMAGES})
-        </label>
-        <div className="grid grid-cols-5 gap-2">
-          {(images || []).map((img, index) => (
-            <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-border border border-gray-200 dark:border-dark-border">
-              <img src={img.src} alt={`Imagen ${index + 1}`} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
-                <button type="button" onClick={() => onRemove(img.id)}
-                  className="p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors" title="Eliminar">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-                {index > 0 && (
-                  <button type="button" onClick={() => onMove(index, -1)}
-                    className="p-1.5 bg-white/90 text-gray-700 rounded-lg hover:bg-white transition-colors" title="Mover izquierda">
-                    <ArrowUp className="w-3.5 h-3.5" />
-                  </button>
-                )}
-                {index < count - 1 && (
-                  <button type="button" onClick={() => onMove(index, 1)}
-                    className="p-1.5 bg-white/90 text-gray-700 rounded-lg hover:bg-white transition-colors" title="Mover derecha">
-                    <ArrowDown className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-              <span className="absolute bottom-1 right-1 text-[10px] font-medium bg-black/50 text-white px-1.5 py-0.5 rounded-md">
-                {index + 1}
-              </span>
-            </div>
-          ))}
-          {remaining > 0 && (
-            <button type="button" onClick={() => inputRef.current?.click()}
-              className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-dark-border hover:border-rose-400 dark:hover:border-rose-500 flex flex-col items-center justify-center gap-1 transition-all hover:bg-rose-50/50 dark:hover:bg-rose-500/5">
-              <Upload className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] text-gray-400 font-medium">{remaining}</span>
-            </button>
-          )}
-        </div>
-        <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={onUpload} />
-      </div>
-    );
-  };
-
-  const CategorySpecificFields = ({ data, setData, category }) => {
-    const fields = categoryFields[category];
-    if (!fields) return null;
-
-    return (
-      <>
-        {fields.material && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Material</label>
-            <input type="text" value={data.material || ""} onChange={(e) => setData({...data, material: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-              placeholder="Ej: Cuero sintético, Algodón, Caucho" />
-          </div>
-        )}
-        {fields.colors && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Colores Disponibles</label>
-            <input type="text" value={data.colors || ""} onChange={(e) => setData({...data, colors: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-              placeholder="Ej: Negro, Marrón, Rojo, Azul" />
-          </div>
-        )}
-        {fields.sizes && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tallas / Tamaños</label>
-            <div className="flex flex-wrap gap-2">
-              {fields.sizeOptions.map(size => {
-                const isSelected = (data.sizes || []).includes(size);
-                return (
-                  <button key={size} type="button" onClick={() => {
-                    const current = data.sizes || [];
-                    setData({
-                      ...data,
-                      sizes: isSelected ? current.filter(s => s !== size) : [...current, size]
-                    });
-                  }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                      isSelected
-                        ? "bg-rose-100 dark:bg-rose-500/20 border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-400"
-                        : "bg-white dark:bg-dark-bg border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-400 hover:border-rose-300 dark:hover:border-rose-500/40"
-                    }`}>
-                    {size}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </>
-    );
-  };
-
-  // === Componente de formulario unificado ===
-  const ProductForm = ({ data, setData, onSubmit, onCancel, title, isEdit }) => {
-    const category = data.category || "Alimentos";
-    const [selectedCat, setSelectedCat] = useState(category);
-
-    return (
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          {/* Nombre */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del Producto</label>
-            <input type="text" required value={data.name} onChange={(e) => setData({...data, name: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-              placeholder="Ej: Collar Premium Ajustable" />
-          </div>
-
-          {/* Categoría */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoría</label>
-            <div className="relative">
-              <select value={selectedCat} onChange={(e) => {
-                const cat = e.target.value;
-                setSelectedCat(cat);
-                setData({...data, category: cat, sizes: [], material: "", colors: "" });
-              }}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white appearance-none">
-                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Marca */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Marca</label>
-            <input type="text" value={data.brand || ""} onChange={(e) => setData({...data, brand: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-              placeholder="Ej: PetStyle" />
-          </div>
-
-          {/* Precio */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio ($)</label>
-            <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="number" step="0.01" min="0" required value={data.price}
-                onChange={(e) => setData({...data, price: e.target.value})}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-                placeholder="0.00" />
-            </div>
-          </div>
-
-          {/* Stock */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock</label>
-            <input type="number" min="0" required value={data.stock}
-              onChange={(e) => setData({...data, stock: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-              placeholder="0" />
-          </div>
-
-          {/* Descripción */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
-            <textarea rows={3} required value={data.description}
-              onChange={(e) => setData({...data, description: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white resize-none"
-              placeholder="Describe el producto y sus beneficios..." />
-          </div>
-
-          {/* === CAMPOS DINÁMICOS POR CATEGORÍA === */}
-          {selectedCat === "Ropa" && (
-            <>
-              <div className="col-span-2">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-500/10 dark:to-fuchsia-500/10 rounded-xl border border-violet-100 dark:border-violet-500/20 mb-2">
-                  <Shirt className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-                  <span className="text-xs font-medium text-violet-700 dark:text-violet-400">Configuración de Prenda de Vestir</span>
-                </div>
-              </div>
-              <CategorySpecificFields data={data} setData={setData} category="Ropa" />
-            </>
-          )}
-
-          {selectedCat === "Accesorios" && (
-            <>
-              <div className="col-span-2">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-500/10 dark:to-pink-500/10 rounded-xl border border-purple-100 dark:border-purple-500/20 mb-2">
-                  <Scissors className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs font-medium text-purple-700 dark:text-purple-400">Configuración de Accesorio</span>
-                </div>
-              </div>
-              <CategorySpecificFields data={data} setData={setData} category="Accesorios" />
-            </>
-          )}
-
-          {selectedCat === "Alimentos" && (
-            <>
-              <div className="col-span-2">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 rounded-xl border border-emerald-100 dark:border-emerald-500/20 mb-2">
-                  <Dog className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Configuración de Alimento</span>
-                </div>
-              </div>
-              <CategorySpecificFields data={data} setData={setData} category="Alimentos" />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ingredientes</label>
-                <input type="text" value={data.ingredients || ""} onChange={(e) => setData({...data, ingredients: e.target.value})}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-                  placeholder="Ej: Pollo, arroz, verduras" />
-              </div>
-            </>
-          )}
-
-          {selectedCat === "Juguetes" && (
-            <>
-              <div className="col-span-2">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10 rounded-xl border border-amber-100 dark:border-amber-500/20 mb-2">
-                  <Bone className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  <span className="text-xs font-medium text-amber-700 dark:text-amber-400">Configuración de Juguete</span>
-                </div>
-              </div>
-              <CategorySpecificFields data={data} setData={setData} category="Juguetes" />
-            </>
-          )}
-
-          {selectedCat === "Salud" && (
-            <>
-              <div className="col-span-2">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-500/10 dark:to-cyan-500/10 rounded-xl border border-blue-100 dark:border-blue-500/20 mb-2">
-                  <Stethoscope className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Configuración de Producto de Salud</span>
-                </div>
-              </div>
-              <CategorySpecificFields data={data} setData={setData} category="Salud" />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ingredientes Activos</label>
-                <input type="text" value={data.activeIngredients || ""} onChange={(e) => setData({...data, activeIngredients: e.target.value})}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-                  placeholder="Ej: Ivermectina, Praziquantel" />
-              </div>
-            </>
-          )}
-
-          {selectedCat === "Higiene" && (
-            <>
-              <div className="col-span-2">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-500/10 dark:to-pink-500/10 rounded-xl border border-rose-100 dark:border-rose-500/20 mb-2">
-                  <Droplets className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                  <span className="text-xs font-medium text-rose-700 dark:text-rose-400">Configuración de Producto de Higiene</span>
-                </div>
-              </div>
-              <CategorySpecificFields data={data} setData={setData} category="Higiene" />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Aroma / Tipo</label>
-                <input type="text" value={data.scent || ""} onChange={(e) => setData({...data, scent: e.target.value})}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-                  placeholder="Ej: Avena, Manzanilla, Neutro" />
-              </div>
-            </>
-          )}
-
-          {/* Características */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Características (separado por comas)</label>
-            <input type="text" value={data.features || ""} onChange={(e) => setData({...data, features: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white"
-              placeholder="Ej: Hebilla ajustable, Costuras reforzadas, Resistente al agua" />
-          </div>
-
-          {/* === SUBIDA DE IMÁGENES === */}
-          {!isEdit ? (
-            <ImageUploadSection
-              images={newProduct.images}
-              onUpload={handleNewProductImages}
-              onRemove={removeNewProductImage}
-              onMove={moveNewProductImage}
-              label="Imágenes del Producto"
-            />
-          ) : (
-            <ImageUploadSection
-              images={editProduct?.images}
-              onUpload={handleEditProductImages}
-              onRemove={removeEditProductImage}
-              onMove={moveEditProductImage}
-              label="Imágenes del Producto"
-            />
-          )}
-        </div>
-
-        {/* Botones */}
-        <div className="flex gap-3 pt-2">
-          <button type="submit"
-            className="flex-1 py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all hover:shadow-lg hover:shadow-rose-200 dark:hover:shadow-rose-500/20 flex items-center justify-center gap-2">
-            {isEdit ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            {title}
-          </button>
-          <button type="button" onClick={onCancel}
-            className="px-6 py-2.5 text-gray-600 dark:text-gray-400 font-medium rounded-xl border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-bg transition-all">
-            Cancelar
-          </button>
-        </div>
-      </form>
-    );
-  };
-
-  const StatCard = ({ icon: Icon, label, value, color, bg }) => (
-    <div className="bg-white dark:bg-dark-card rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border border-gray-100 dark:border-dark-border">
-      <div className="flex items-center justify-between mb-3">
-        <div className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center`}>
-          <Icon className={`w-6 h-6 ${color}`} />
-        </div>
-        <span className={`text-2xl font-bold ${color} font-display`}>{value}</span>
-      </div>
-      <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{label}</p>
-    </div>
-  );
+  // Listen for updates from edit/detail pages
+  useEffect(() => {
+    if (location.state?.updatedProduct) {
+      const updated = location.state.updatedProduct;
+      setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
+      window.history.replaceState({}, document.title);
+    }
+    if (location.state?.deletedProductId) {
+      setProducts(prev => prev.filter(p => p.id !== location.state.deletedProductId));
+      window.history.replaceState({}, document.title);
+    }
+    if (location.state?.toggledProductId !== undefined) {
+      const { toggledProductId, newActiveState } = location.state;
+      setProducts(prev => prev.map(p => p.id === toggledProductId ? { ...p, active: newActiveState } : p));
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   return (
     <div className="min-h-screen pt-24 pb-16">
-      {/* Header */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium mb-3">
+          <div className="animate-fade-in-left">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium mb-3 shadow-sm">
               <Store className="w-4 h-4" />
               <span>Gestión de Tienda</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white font-display">Mi Tienda</h1>
-            <p className="text-gray-600 dark:text-dark-text-secondary mt-1">
-              Administra los productos de tu refugio para la venta
-            </p>
+            <p className="text-gray-600 dark:text-dark-text-secondary mt-1">Administra los productos de tu refugio para la venta</p>
           </div>
           <button onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-5 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 dark:shadow-rose-500/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <Plus className="w-5 h-5 mr-2" />
-            Agregar Producto
+            className="inline-flex items-center px-5 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl shadow-lg shadow-rose-200 dark:shadow-rose-500/20 hover:shadow-xl transition-all duration-300 hover:scale-105 animate-fade-in-right">
+            <Plus className="w-5 h-5 mr-2" /> Agregar Producto
           </button>
         </div>
       </section>
 
-      {/* Stats */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={Package} label="Total Productos" value={totalProducts}
-            color="text-rose-600 dark:text-rose-400" bg="bg-rose-50 dark:bg-rose-500/10" />
-          <StatCard icon={CheckCircle} label="Productos Activos" value={activeProducts}
-            color="text-emerald-600 dark:text-emerald-400" bg="bg-emerald-50 dark:bg-emerald-500/10" />
-          <StatCard icon={AlertCircle} label="Stock Bajo (≤10)" value={lowStock}
-            color="text-amber-600 dark:text-amber-400" bg="bg-amber-50 dark:bg-amber-500/10" />
-          <StatCard icon={TrendingUp} label="Ventas Totales" value={totalSales}
-            color="text-blue-600 dark:text-blue-400" bg="bg-blue-50 dark:bg-blue-500/10" />
+          <StatCard icon={Package} label="Total Productos" value={totalProducts} color="text-rose-600 dark:text-rose-400" bg="bg-rose-50 dark:bg-rose-500/10" />
+          <StatCard icon={CheckCircle} label="Productos Activos" value={activeProducts} color="text-emerald-600 dark:text-emerald-400" bg="bg-emerald-50 dark:bg-emerald-500/10" />
+          <StatCard icon={AlertCircle} label="Stock Bajo (≤10)" value={lowStock} color="text-amber-600 dark:text-amber-400" bg="bg-amber-50 dark:bg-amber-500/10" />
+          <StatCard icon={TrendingUp} label="Ventas Totales" value={totalSales} color="text-blue-600 dark:text-blue-400" bg="bg-blue-50 dark:bg-blue-500/10" />
         </div>
       </section>
 
-      {/* Search & Filters */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
         <div className="bg-white dark:bg-dark-card rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-dark-border">
-          {/* Search con desplegable de categorías */}
           <div className="flex flex-col sm:flex-row gap-2 mb-4">
             <div className="relative flex-shrink-0 sm:w-48">
               <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
                 className="w-full pl-10 pr-8 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white appearance-none cursor-pointer">
                 <option value="todas">Todas las categorías</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -724,8 +465,6 @@ export default function ShelterStore() {
                 className="w-full pl-4 pr-4 py-2.5 border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-rose-500 bg-white dark:bg-dark-bg text-gray-900 dark:text-white" />
             </div>
           </div>
-
-          {/* Status Filters */}
           <div className="flex flex-wrap gap-2">
             {[
               { id: "todos", label: "Todos", icon: Layers },
@@ -736,72 +475,58 @@ export default function ShelterStore() {
             ].map(({ id, label, icon: Icon }) => (
               <button key={id} onClick={() => setActiveFilter(activeFilter === id ? "todos" : id)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  activeFilter === id
-                    ? "bg-rose-100 dark:bg-rose-500/15 text-rose-700 dark:text-rose-400"
-                    : "bg-gray-50 dark:bg-dark-border/50 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-border"
+                  activeFilter === id ? "bg-rose-100 dark:bg-rose-500/15 text-rose-700 dark:text-rose-400" : "bg-gray-50 dark:bg-dark-border/50 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-border"
                 }`}>
-                <Icon className="w-3.5 h-3.5" />
-                {label}
+                <Icon className="w-3.5 h-3.5" /> {label}
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Products Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-20">
-            <ShoppingBag className="w-16 h-16 text-gray-300 dark:text-dark-text-secondary mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No hay productos</h3>
+          <div className="text-center py-20 animate-fade-in-up">
+            <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-rose-100 to-amber-100 dark:from-rose-500/10 dark:to-amber-500/10 flex items-center justify-center">
+              <ShoppingBag className="w-10 h-10 text-rose-400 dark:text-rose-400/60" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 font-display">No hay productos</h3>
             <p className="text-gray-500 dark:text-dark-text-secondary mb-6">
               {searchTerm || filterCategory !== "todas" || activeFilter !== "todos"
                 ? "No se encontraron productos con los filtros actuales"
                 : "Comienza agregando tu primer producto a la tienda"}
             </p>
             <button onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all">
-              <Plus className="w-5 h-5 mr-2" />
-              Agregar Producto
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg">
+              <Plus className="w-5 h-5 mr-2" /> Agregar Producto
             </button>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filteredProducts.map((product) => {
+            {filteredProducts.map((product, idx) => {
               const catColor = categoryColors[product.category] || "from-gray-400 to-gray-500";
               const isLowStock = product.stock > 0 && product.stock <= 10;
               const isOutOfStock = product.stock === 0;
-
               return (
                 <div key={product.id}
-                  className={`group bg-white dark:bg-dark-card rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border ${
-                    product.active ? "border-gray-100 dark:border-dark-border" : "border-gray-200 dark:border-dark-border opacity-75"
-                  } overflow-hidden`}>
-
-                  {/* Image Header */}
-                  <div className={`relative h-36 bg-gradient-to-br ${catColor}/20 dark:${catColor}/10 flex items-center justify-center overflow-hidden`}>
+                  className={`group bg-white dark:bg-dark-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border ${product.active ? "border-gray-100 dark:border-dark-border" : "border-gray-200 dark:border-dark-border opacity-75"} overflow-hidden animate-fade-in-up`}
+                  style={{ animationDelay: `${idx * 0.05}s` }}>
+                  <div className={`relative h-40 bg-gradient-to-br ${catColor}/20 dark:${catColor}/10 flex items-center justify-center overflow-hidden`}>
                     {product.images && product.images.length > 0 ? (
-                      <img src={product.images[0].src} alt={product.name} className="w-full h-full object-cover" />
+                      <img src={product.images[0].src} alt={product.name} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
                     ) : (
                       <div className="flex flex-col items-center gap-2">
-                        <CatIconComponent category={product.category} className={`w-16 h-16 ${catColor.replace('from-', 'text-').split(' ')[0]}/40`} />
-                        <span className="text-[10px] font-medium text-gray-400 dark:text-dark-text-secondary bg-white/60 dark:bg-dark-bg/60 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                          {product.category}
-                        </span>
+                        <CatIconComponent category={product.category} className={`w-20 h-20 ${catColor.replace('from-', 'text-').split(' ')[0]}/40 transition-transform group-hover:scale-110 duration-500`} />
+                        <span className="text-[10px] font-medium text-gray-400 dark:text-dark-text-secondary bg-white/60 dark:bg-dark-bg/60 px-2 py-0.5 rounded-full backdrop-blur-sm">{product.category}</span>
                       </div>
                     )}
-
-                    {/* Image count badge */}
                     {product.images && product.images.length > 1 && (
                       <div className="absolute top-3 left-3">
                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium rounded-lg">
-                          <Image className="w-3 h-3" />
-                          {product.images.length}
+                          <Image className="w-3 h-3" />{product.images.length}
                         </span>
                       </div>
                     )}
-
-                    {/* Status Badges */}
                     <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
                       {product.active ? (
                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100/90 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-[10px] font-medium backdrop-blur-sm">
@@ -824,43 +549,21 @@ export default function ShelterStore() {
                       )}
                     </div>
                   </div>
-
-                  {/* Content */}
                   <div className="p-4">
-                    <h3 className="text-base font-bold text-gray-900 dark:text-white font-display leading-tight line-clamp-1 mb-1">
-                      {product.name}
-                    </h3>
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white font-display leading-tight line-clamp-1 mb-1">{product.name}</h3>
                     <p className="text-[11px] text-gray-400 dark:text-dark-text-secondary mb-2 line-clamp-1">{product.brand}</p>
-
-                    {/* Price & Stock */}
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-lg font-bold text-rose-600 dark:text-rose-400 font-display">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${
-                        isOutOfStock ? "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400"
-                          : isLowStock ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                          : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      }`}>
+                      <span className="text-lg font-bold text-rose-600 dark:text-rose-400 font-display">${product.price.toFixed(2)}</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${isOutOfStock ? "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400" : isLowStock ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400" : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}>
                         {isOutOfStock ? "Agotado" : `${product.stock} uds`}
                       </span>
                     </div>
-
-                    {/* Rating & Sales */}
-                    <div className="flex items-center gap-3 text-[11px] text-gray-400 dark:text-dark-text-secondary mb-2">
+                    <div className="flex items-center gap-3 text-[11px] text-gray-400 dark:text-dark-text-secondary mb-3">
                       {product.rating > 0 && (
-                        <span className="flex items-center gap-1">
-                          <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                          {product.rating}
-                        </span>
+                        <span className="flex items-center gap-1"><Star className="w-3 h-3 text-amber-400 fill-amber-400" />{product.rating}</span>
                       )}
-                      <span className="flex items-center gap-1">
-                        <ShoppingBag className="w-3 h-3" />
-                        {product.sales} vendidos
-                      </span>
+                      <span className="flex items-center gap-1"><ShoppingBag className="w-3 h-3" />{product.sales} vendidos</span>
                     </div>
-
-                    {/* Sizes */}
                     {product.sizes && product.sizes.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-2">
                         {product.sizes.map((size, i) => (
@@ -868,27 +571,20 @@ export default function ShelterStore() {
                         ))}
                       </div>
                     )}
-
-                    {/* Actions */}
                     <div className="flex gap-2 pt-3 border-t border-gray-100 dark:border-dark-border">
-                      <button onClick={() => toggleProductActive(product.id)}
-                        className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium rounded-xl transition-all ${
-                          product.active
-                            ? "text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-dark-border hover:bg-gray-100 dark:hover:bg-dark-bg"
-                            : "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
-                        }`}>
-                        {product.active ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                        {product.active ? "Desactivar" : "Activar"}
-                      </button>
-                      <button onClick={() => openEditModal(product)}
-                        className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-all">
-                        <Edit3 className="w-3.5 h-3.5" /> Editar
-                      </button>
-                      <button onClick={() => setShowDeleteModal(product.id)}
-                        className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-all">
-                        <Trash2 className="w-3.5 h-3.5" /> Eliminar
-                      </button>
-                    </div>
+                        <button onClick={() => openProductDetail(product)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all">
+                          <Eye className="w-3.5 h-3.5" /> Ver perfil
+                        </button>
+                        <button onClick={() => openEditPage(product)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-all">
+                          <Edit3 className="w-3.5 h-3.5" /> Editar
+                        </button>
+                        <button onClick={() => setConfirmDelete({ isOpen: true, productId: product.id })}
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-all">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                   </div>
                 </div>
               );
@@ -899,58 +595,47 @@ export default function ShelterStore() {
 
       {/* Add Product Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-modal-overlay" onClick={() => setShowAddModal(false)}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false); }}>
           <div className="bg-white dark:bg-dark-card rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 animate-modal-content" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white font-display flex items-center gap-2">
-                <Plus className="w-5 h-5 text-rose-500" />
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-100 to-amber-100 dark:from-rose-500/20 dark:to-amber-500/20 flex items-center justify-center">
+                  <Plus className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                </div>
                 Nuevo Producto
               </h2>
               <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-border rounded-xl transition-colors">
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            <ProductForm data={newProduct} setData={setNewProduct} onSubmit={handleAddProduct}
-              onCancel={() => setShowAddModal(false)} title="Registrar Producto" isEdit={false} />
+            <ProductForm data={newProduct} setData={setNewProduct} onSubmit={handleAddProduct} onCancel={() => setShowAddModal(false)} title="Registrar Producto" isEdit={false} />
           </div>
         </div>
       )}
 
-      {/* Edit Product Modal */}
-      {showEditModal && editProduct && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-modal-overlay" onClick={() => { setShowEditModal(null); setEditProduct(null); }}>
-          <div className="bg-white dark:bg-dark-card rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 animate-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white font-display flex items-center gap-2">
-                <Edit3 className="w-5 h-5 text-amber-500" />
-                Editar {editProduct.name}
-              </h2>
-              <button onClick={() => { setShowEditModal(null); setEditProduct(null); }} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-border rounded-xl transition-colors">
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-            <ProductForm data={editProduct} setData={setEditProduct} onSubmit={handleEditProduct}
-              onCancel={() => { setShowEditModal(null); setEditProduct(null); }} title="Guardar Cambios" isEdit={true} />
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, productId: null })}
+        onConfirm={handleDeleteProduct}
+        title="¿Eliminar producto?"
+        message="Esta acción no se puede deshacer. El producto será eliminado permanentemente de la tienda."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-modal-overlay" onClick={() => setShowDeleteModal(null)}>
-          <div className="bg-white dark:bg-dark-card rounded-3xl shadow-2xl max-w-md w-full p-6 animate-modal-content text-center" onClick={e => e.stopPropagation()}>
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-8 h-8 text-red-500" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white font-display mb-2">¿Eliminar producto?</h2>
-            <p className="text-gray-500 dark:text-dark-text-secondary mb-6">Esta acción no se puede deshacer.</p>
-            <div className="flex gap-3">
-              <button onClick={handleDeleteProduct} className="flex-1 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all">Eliminar</button>
-              <button onClick={() => setShowDeleteModal(null)} className="flex-1 py-3 text-gray-600 dark:text-gray-400 font-medium rounded-xl border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-bg transition-all">Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Toggle Active Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmToggle.isOpen}
+        onClose={() => setConfirmToggle({ isOpen: false, productId: null, newState: false })}
+        onConfirm={handleToggleActive}
+        title={confirmToggle.newState ? "¿Activar producto?" : "¿Desactivar producto?"}
+        message={confirmToggle.newState ? "El producto será visible y estará disponible para la venta en la tienda." : "El producto dejará de ser visible para los usuarios en la tienda."}
+        confirmText={confirmToggle.newState ? "Activar" : "Desactivar"}
+        cancelText="Cancelar"
+        type={confirmToggle.newState ? "info" : "warning"}
+      />
     </div>
   );
 }

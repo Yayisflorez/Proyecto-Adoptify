@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import ConfirmModal from "../../components/ConfirmModal";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -72,6 +73,94 @@ const SORT_OPTIONS = [
 ];
 
 const POST_STATUS = { ALL: "all", PUBLISHED: "published", DRAFTS: "drafts", ARCHIVED: "archived" };
+
+// ============================================================
+// UTILIDADES DE BORRADORES
+// ============================================================
+
+const DRAFTS_KEY_PREFIX = "shelter_forum_drafts_";
+const getDraftsKey = (u) => `${DRAFTS_KEY_PREFIX}${u || "anonymous"}`;
+const loadDrafts = (u) => { try { const r = localStorage.getItem(getDraftsKey(u)); return r ? JSON.parse(r) : []; } catch { return []; } };
+const saveDrafts = (u, d) => localStorage.setItem(getDraftsKey(u), JSON.stringify(d));
+
+// ============================================================
+// DRAFTS LIST MODAL
+// ============================================================
+
+function DraftsListModal({ isOpen, onClose, onSelect, onDelete, drafts, isDark }) {
+  const [search, setSearch] = useState("");
+  if (!isOpen) return null;
+  const filtered = drafts.filter(d => !search.trim() || (d.title||"").toLowerCase().includes(search.toLowerCase()) || (d.content||"").toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  const fmt = (s) => { try { const d = new Date(s), n = new Date(), m = Math.floor((n-d)/60000); if (m<1) return "Ahora"; if (m<60) return `Hace ${m} min`; const h = Math.floor(m/60); if (h<24) return `Hace ${h} h`; const da = Math.floor(h/24); if (da<7) return `Hace ${da} días`; return d.toLocaleDateString("es-CO",{day:"numeric",month:"short"}); } catch { return ""; } };
+  const prev = (c) => !c ? "Sin contenido" : c.length > 100 ? c.substring(0,100)+"..." : c;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-overlay">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className={`relative w-full max-w-lg max-h-[80vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-dark-card border border-dark-border" : "bg-white"} animate-modal-content`}>
+        <div className={`relative px-6 pt-6 pb-5 ${isDark ? "bg-gradient-to-b from-amber-500/10 to-transparent" : "bg-gradient-to-b from-amber-50 to-transparent"}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg bg-gradient-to-br from-amber-400 to-orange-500">
+                <Bookmark className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-lg font-bold font-display ${isDark ? "text-dark-text" : "text-gray-900"}`}>Mis Borradores</h2>
+                <p className={`text-xs ${isDark ? "text-dark-text-secondary" : "text-gray-500"}`}>{drafts.length} {drafts.length===1?"guardado":"guardados"}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className={`p-2 rounded-xl transition-all ${isDark ? "text-dark-text-secondary hover:text-dark-text hover:bg-white/5" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="relative mt-4">
+            <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? "text-dark-text-secondary" : "text-gray-400"}`} />
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar borradores..."
+              className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all ${isDark ? "bg-[#15151f] border border-dark-border text-dark-text placeholder-dark-text-secondary" : "bg-white border border-gray-200 text-gray-700 placeholder-gray-400 shadow-sm"}`} />
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-2.5 mt-2">
+          {filtered.length === 0 ? (
+            <div className={`text-center py-14 ${isDark ? "text-dark-text-secondary" : "text-gray-500"}`}>
+              <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
+                <FileText className="w-7 h-7 opacity-50" />
+              </div>
+              <p className="text-sm font-semibold">{search ? "Sin resultados" : "No hay borradores"}</p>
+              <p className="text-xs mt-1 opacity-70">{search ? "Prueba con otros términos" : "Guarda un borrador desde el editor"}</p>
+            </div>
+          ) : filtered.map(d => (
+            <div key={d.id} onClick={() => onSelect(d)}
+              className={`group relative rounded-xl overflow-hidden transition-all cursor-pointer border ${isDark ? "bg-[#15151f] border-dark-border hover:border-amber-500/30" : "bg-gray-50/80 border border-gray-100 hover:border-amber-300 hover:bg-white hover:shadow-md"}`}>
+              <div className={`absolute left-0 top-0 bottom-0 w-1 ${isDark ? "bg-amber-500/30" : "bg-amber-400"}`}></div>
+              <div className="pl-5 pr-4 py-3.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-sm font-semibold truncate ${isDark ? "text-dark-text" : "text-gray-900"}`}>{d.title || <span className="italic opacity-60">Sin título</span>}</h3>
+                    <p className={`text-xs mt-1 line-clamp-2 ${isDark ? "text-dark-text-secondary" : "text-gray-500"}`}>{prev(d.content)}</p>
+                    <div className={`flex items-center gap-2.5 mt-2 text-xs ${isDark ? "text-dark-text-secondary" : "text-gray-400"}`}>
+                      <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{fmt(d.updatedAt)}</span>
+                      {d.category && <><span className="w-1 h-1 rounded-full bg-current opacity-30"></span><span>{CATEGORIES.find(c=>c.id===d.category)?.label||d.category}</span></>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={e => { e.stopPropagation(); onDelete(d.id); }}
+                      className={`p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all ${isDark ? "text-red-400 hover:bg-red-500/10" : "text-red-500 hover:bg-red-50"}`} title="Eliminar">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={e => { e.stopPropagation(); onSelect(d); }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm ${isDark ? "bg-amber-500/15 text-amber-300 hover:bg-amber-500/25" : "bg-amber-50 text-amber-700 hover:bg-amber-100"}`}>
+                      Editar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const SAMPLE_POSTS = [
   {
@@ -324,205 +413,147 @@ function CreatePostModal({ isOpen, onClose, onSave, editPost, isDark, user }) {
   const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState([]);
   const [errors, setErrors] = useState({});
+  const [currentDraftId, setCurrentDraftId] = useState(null);
+  const [drafts, setDrafts] = useState([]);
+  const [showDraftsModal, setShowDraftsModal] = useState(false);
+  const [saveFeedback, setSaveFeedback] = useState(false);
+  const [confirm, setConfirm] = useState({ isOpen: false, title: "", message: "", confirmText: "Confirmar", type: "danger", onConfirm: () => {} });
+
+  const uid = user?.id || user?.email || "anonymous";
+
+  useEffect(() => { if (isOpen) { setDrafts(loadDrafts(uid)); setSaveFeedback(false); } }, [isOpen, uid]);
+  const refreshDrafts = useCallback(() => setDrafts(loadDrafts(uid)), [uid]);
 
   useEffect(() => {
     if (editPost) {
-      setTitle(editPost.title || "");
-      setContent(editPost.content || "");
-      setCategory(editPost.category || "");
-      setTags(editPost.tags || []);
-      setImages(editPost.images || []);
-    } else {
-      setTitle("");
-      setContent("");
-      setCategory("");
-      setTags([]);
-      setImages([]);
+      setTitle(editPost.title||""); setContent(editPost.content||""); setCategory(editPost.category||""); setTags(editPost.tags||[]); setImages(editPost.images||[]); setCurrentDraftId(null);
+    } else if (!currentDraftId) {
+      setTitle(""); setContent(""); setCategory(""); setTags([]); setImages([]);
     }
     setErrors({});
-  }, [editPost, isOpen]);
+  }, [editPost, isOpen, uid, currentDraftId]);
 
   if (!isOpen) return null;
 
-  const validate = () => {
-    const errs = {};
-    if (!title.trim()) errs.title = "El título es obligatorio";
-    if (!content.trim()) errs.content = "El contenido es obligatorio";
-    if (!category) errs.category = "Selecciona una categoría";
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+  const validate = () => { const e={}; if(!title.trim()) e.title="El título es obligatorio"; if(!content.trim()) e.content="El contenido es obligatorio"; if(!category) e.category="Selecciona una categoría"; setErrors(e); return Object.keys(e).length===0; };
+  const hasContent = title.trim()||content.trim()||category||tags.length>0;
+  const canPublish = title.trim()&&content.trim()&&category;
+  const form = () => ({ title: title.trim(), content: content.trim(), category, tags, images });
+  const reset = () => { setCurrentDraftId(null); setTitle(""); setContent(""); setCategory(""); setTags([]); setImages([]); setSaveFeedback(false); };
+
+  const saveDraft = () => {
+    const all = loadDrafts(uid), data = form(), now = new Date().toISOString();
+    if (currentDraftId) saveDrafts(uid, all.map(d => d.id===currentDraftId ? {...d,...data,updatedAt:now} : d));
+    else { const nd = {id:`draft_${Date.now()}`,...data,savedAt:now,updatedAt:now}; saveDrafts(uid, [nd,...all]); setCurrentDraftId(nd.id); }
+    setDrafts(loadDrafts(uid)); setSaveFeedback(true);
+    setTimeout(() => { setSaveFeedback(false); reset(); }, 1200);
   };
 
-  const handleSubmit = (asDraft = false) => {
+  const delDraft = (id) => setConfirm({ isOpen: true, title: "Eliminar borrador", message: "Se eliminará permanentemente. No podrás recuperarlo.", confirmText: "Eliminar", type: "danger", onConfirm: () => { const a=loadDrafts(uid); saveDrafts(uid,a.filter(d=>d.id!==id)); setDrafts(loadDrafts(uid)); setConfirm(p=>({...p,isOpen:false})); if(currentDraftId===id) reset(); } });
+  const delCurrent = () => currentDraftId && setConfirm({ isOpen: true, title: "Eliminar borrador", message: "Se eliminará permanentemente. No podrás recuperarlo.", confirmText: "Eliminar", type: "danger", onConfirm: () => { const a=loadDrafts(uid); saveDrafts(uid,a.filter(d=>d.id!==currentDraftId)); setDrafts(loadDrafts(uid)); reset(); setConfirm(p=>({...p,isOpen:false})); } });
+  const selectDraft = (d) => { setTitle(d.title||""); setContent(d.content||""); setCategory(d.category||""); setTags(d.tags||[]); setImages(d.images||[]); setCurrentDraftId(d.id); setShowDraftsModal(false); };
+
+  const publish = () => {
     if (!validate()) return;
-    onSave({
-      title: title.trim(),
-      content: content.trim(),
-      category,
-      tags,
-      images,
-      status: asDraft ? "draft" : "published",
-      isPinned: editPost?.isPinned || false,
-    });
-    onClose();
+    if (currentDraftId) { const a=loadDrafts(uid); saveDrafts(uid, a.filter(d=>d.id!==currentDraftId)); }
+    onSave({ title:title.trim(), content:content.trim(), category, tags, images, status:"published", isPinned:false });
+    reset(); onClose();
   };
 
-  const addTag = (t) => {
-    const clean = t.trim().replace(/^#/, "");
-    if (clean && !tags.includes(clean) && tags.length < 10) {
-      setTags([...tags, clean]);
-    }
-    setTagInput("");
+  const cancel = () => {
+    if (hasContent) setConfirm({ isOpen: true, title: "Descartar cambios", message: "Los cambios no guardados se perderán. ¿Salir?", confirmText: "Salir sin guardar", type: "warning", onConfirm: () => { reset(); onClose(); setConfirm(p=>({...p,isOpen:false})); } });
+    else { reset(); onClose(); }
   };
 
+  const addTag = (t) => { const c = t.trim().replace(/^#/,""); if(c&&!tags.includes(c)&&tags.length<10) setTags([...tags,c]); setTagInput(""); };
   const removeTag = (t) => setTags(tags.filter(tag => tag !== t));
 
-  const getInitials = (name) => {
-    if (!name) return "R";
-    const parts = name.split(" ");
-    return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modal-overlay">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
-      <div className={`relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl ${isDark ? "bg-dark-card border border-dark-border" : "bg-white"} animate-modal-content`}>
-        {/* Header */}
-        <div className={`flex items-center justify-between p-5 border-b ${isDark ? "border-dark-border" : "border-gray-100"}`}>
-          <div>
-            <h2 className={`text-xl font-bold font-display ${isDark ? "text-dark-text" : "text-gray-900"}`}>
-              {editPost ? "Editar publicación" : "Crear publicación"}
-            </h2>
-            <p className={`text-sm mt-0.5 ${isDark ? "text-dark-text-secondary" : "text-gray-500"}`}>
-              Comparte novedades con la comunidad
-            </p>
-          </div>
-          <button onClick={onClose} className={`p-2 rounded-xl transition-all ${isDark ? "text-dark-text-secondary hover:text-dark-text hover:bg-white/5" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}>
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="p-5 space-y-5">
-          {/* Title */}
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${isDark ? "text-dark-text" : "text-gray-700"}`}>
-              Título <span className="text-rose-500">*</span>
-            </label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-              placeholder="Escribe un título descriptivo para tu publicación..."
-              className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all ${isDark ? "bg-[#15151f] border border-dark-border text-dark-text placeholder-dark-text-secondary" : "bg-gray-50 border border-gray-200 text-gray-700 placeholder-gray-400"}`} />
-            {errors.title && <p className="text-xs text-rose-500 mt-1">{errors.title}</p>}
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${isDark ? "text-dark-text" : "text-gray-700"}`}>
-              Categoría <span className="text-rose-500">*</span>
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {CATEGORIES.map(cat => (
-                <button key={cat.id} type="button" onClick={() => setCategory(cat.id)}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${category === cat.id ? `${cat.bg} ${cat.text} ring-2 ring-rose-500/50` : isDark ? "bg-[#15151f] border border-dark-border text-dark-text-secondary hover:border-rose-500/30" : "bg-gray-50 border border-gray-200 text-gray-600 hover:border-rose-300"}`}>
-                  <span>{cat.icon}</span>
-                  <span className="truncate">{cat.label}</span>
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modal-overlay">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={cancel}></div>
+        <div className={`relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl ${isDark ? "bg-dark-card border border-dark-border" : "bg-white"} animate-modal-content`}>
+          <div className={`sticky top-0 z-10 flex items-center justify-between p-5 border-b bg-inherit ${isDark ? "border-dark-border" : "border-gray-100"}`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${isDark ? "bg-gradient-to-br from-rose-500/20 to-amber-500/20" : "bg-gradient-to-br from-rose-100 to-amber-100"}`}>
+                <MessageSquare className={`w-5 h-5 ${isDark ? "text-rose-400" : "text-rose-600"}`} />
+              </div>
+              <div>
+                <h2 className={`text-xl font-bold font-display ${isDark ? "text-dark-text" : "text-gray-900"}`}>{editPost ? "Editar publicación" : "Crear publicación"}</h2>
+                <p className={`text-xs mt-0.5 ${isDark ? "text-dark-text-secondary" : "text-gray-500"}`}>Comparte novedades con la comunidad</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {drafts.length>0 && (
+                <button onClick={()=>{refreshDrafts();setShowDraftsModal(true);}}
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all shadow-sm ${isDark ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20" : "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"}`}>
+                  <Bookmark className="w-3.5 h-3.5" /> Borradores
+                  <span className={`w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center ${isDark ? "bg-amber-500/20 text-amber-300" : "bg-amber-200 text-amber-800"}`}>{drafts.length}</span>
                 </button>
-              ))}
-            </div>
-            {errors.category && <p className="text-xs text-rose-500 mt-1">{errors.category}</p>}
-          </div>
-
-          {/* Content */}
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${isDark ? "text-dark-text" : "text-gray-700"}`}>
-              Contenido <span className="text-rose-500">*</span>
-            </label>
-            <textarea value={content} onChange={e => setContent(e.target.value)} rows="6"
-              placeholder="Comparte detalles sobre esta publicación. Cuenta una historia, describe un evento o informa sobre una campaña..."
-              className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all resize-none ${isDark ? "bg-[#15151f] border border-dark-border text-dark-text placeholder-dark-text-secondary" : "bg-gray-50 border border-gray-200 text-gray-700 placeholder-gray-400"}`} />
-            {errors.content && <p className="text-xs text-rose-500 mt-1">{errors.content}</p>}
-            <div className={`flex items-center justify-between mt-1.5 ${isDark ? "text-dark-text-secondary" : "text-gray-400"}`}>
-              <span className="text-xs">{content.length} caracteres</span>
-              {content.length > 20 && (
-                <span className={`text-xs px-2 py-0.5 rounded-full ${isDark ? "bg-rose-500/10 text-rose-300" : "bg-rose-50 text-rose-600"}`}>
-                  ✅ Suficientemente descriptivo
-                </span>
               )}
+              <button onClick={cancel} className={`p-2 rounded-xl transition-all ${isDark ? "text-dark-text-secondary hover:text-dark-text hover:bg-white/5" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}><X className="w-5 h-5" /></button>
             </div>
           </div>
 
-          {/* Tags */}
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${isDark ? "text-dark-text" : "text-gray-700"}`}>
-              Etiquetas <span className={`text-xs ml-2 ${isDark ? "text-dark-text-secondary" : "text-gray-400"}`}>({tags.length}/10 - opcional)</span>
-            </label>
-            <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl ${isDark ? "bg-[#15151f] border border-dark-border" : "bg-gray-50 border border-gray-200"}`}>
-              <Hash className={`w-4 h-4 ${isDark ? "text-dark-text-secondary" : "text-gray-400"}`} />
-              <input type="text" value={tagInput} onChange={e => setTagInput(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addTag(tagInput); } }}
-                placeholder="Escribe y presiona Enter para añadir"
-                className={`flex-1 bg-transparent text-sm focus:outline-none ${isDark ? "text-dark-text placeholder-dark-text-secondary" : "text-gray-700 placeholder-gray-400"}`} />
+          <div className="p-5 space-y-5">
+            <div><label className={`block text-sm font-medium mb-2 ${isDark?"text-dark-text":"text-gray-700"}`}>Título <span className="text-rose-500">*</span></label>
+              <input type="text" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Escribe un título descriptivo..."
+                className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all ${isDark?"bg-[#15151f] border border-dark-border text-dark-text placeholder-dark-text-secondary":"bg-gray-50 border border-gray-200 text-gray-700 placeholder-gray-400"}`} />
+              {errors.title && <p className="text-xs text-rose-500 mt-1">{errors.title}</p>}
             </div>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {tags.map(tag => (
-                  <span key={tag} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm ${isDark ? "bg-rose-500/15 text-rose-300" : "bg-rose-50 text-rose-700"}`}>
-                    #{tag}
-                    <button onClick={() => removeTag(tag)} className="hover:text-rose-400 transition-colors"><X className="w-3 h-3" /></button>
-                  </span>
+
+            <div><label className={`block text-sm font-medium mb-2 ${isDark?"text-dark-text":"text-gray-700"}`}>Categoría <span className="text-rose-500">*</span></label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {CATEGORIES.map(cat => (
+                  <button key={cat.id} type="button" onClick={()=>setCategory(cat.id)}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${category===cat.id?`${cat.bg} ${cat.text} ring-2 ring-rose-500/50`:isDark?"bg-[#15151f] border border-dark-border text-dark-text-secondary hover:border-rose-500/30":"bg-gray-50 border border-gray-200 text-gray-600 hover:border-rose-300"}`}>
+                    <span>{cat.icon}</span><span className="truncate">{cat.label}</span>
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
-
-          {/* Images */}
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${isDark ? "text-dark-text" : "text-gray-700"}`}>
-              Imágenes <span className={`text-xs ml-2 ${isDark ? "text-dark-text-secondary" : "text-gray-400"}`}>(opcional, máx. 5)</span>
-            </label>
-            <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${isDark ? "border-dark-border hover:border-rose-500/30" : "border-gray-200 hover:border-rose-300 bg-gray-50/50"}`}>
-              <ImageIcon className={`w-8 h-8 mx-auto mb-2 ${isDark ? "text-dark-text-secondary" : "text-gray-400"}`} />
-              <p className={`text-sm font-medium ${isDark ? "text-dark-text" : "text-gray-700"}`}>Arrastra tus imágenes aquí</p>
-              <p className={`text-xs mt-1 ${isDark ? "text-dark-text-secondary" : "text-gray-500"}`}>o haz clic para seleccionar archivos</p>
+              {errors.category && <p className="text-xs text-rose-500 mt-1">{errors.category}</p>}
             </div>
-            {images.length > 0 && (
-              <div className="flex gap-2 mt-2">
-                {images.map((img, idx) => (
-                  <div key={idx} className="relative">
-                    <img src={img} alt="" className="w-16 h-16 rounded-lg object-cover" />
-                    <button onClick={() => setImages(images.filter((_, i) => i !== idx))}
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600">
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+
+            <div><label className={`block text-sm font-medium mb-2 ${isDark?"text-dark-text":"text-gray-700"}`}>Contenido <span className="text-rose-500">*</span></label>
+              <textarea value={content} onChange={e=>setContent(e.target.value)} rows="6" placeholder="Comparte detalles sobre esta publicación..."
+                className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all resize-none ${isDark?"bg-[#15151f] border border-dark-border text-dark-text placeholder-dark-text-secondary":"bg-gray-50 border border-gray-200 text-gray-700 placeholder-gray-400"}`} />
+              {errors.content && <p className="text-xs text-rose-500 mt-1">{errors.content}</p>}
+            </div>
+
+            <div><label className={`block text-sm font-medium mb-2 ${isDark?"text-dark-text":"text-gray-700"}`}>Etiquetas <span className={`text-xs ml-2 ${isDark?"text-dark-text-secondary":"text-gray-400"}`}>({tags.length}/10)</span></label>
+              <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl ${isDark?"bg-[#15151f] border border-dark-border":"bg-gray-50 border border-gray-200"}`}>
+                <Hash className={`w-4 h-4 ${isDark?"text-dark-text-secondary":"text-gray-400"}`} />
+                <input type="text" value={tagInput} onChange={e=>setTagInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();addTag(tagInput);}}} placeholder="Escribe y presiona Enter"
+                  className={`flex-1 bg-transparent text-sm focus:outline-none ${isDark?"text-dark-text placeholder-dark-text-secondary":"text-gray-700 placeholder-gray-400"}`} />
               </div>
-            )}
-          </div>
-        </div>
+              {tags.length>0 && <div className="flex flex-wrap gap-1.5 mt-2">{tags.map(tag=>(<span key={tag} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm ${isDark?"bg-rose-500/15 text-rose-300":"bg-rose-50 text-rose-700"}`}>#{tag}<button onClick={()=>removeTag(tag)} className="hover:text-rose-400"><X className="w-3 h-3" /></button></span>))}</div>}
+            </div>
 
-        {/* Footer */}
-        <div className={`flex items-center justify-between p-5 border-t ${isDark ? "border-dark-border" : "border-gray-100"}`}>
-          <div className="flex items-center gap-2">
-            <div className={`flex items-center gap-1 text-xs ${isDark ? "text-dark-text-secondary" : "text-gray-500"}`}>
-              <Eye className="w-3 h-3" />
-              Visible para todos
+            <div><label className={`block text-sm font-medium mb-2 ${isDark?"text-dark-text":"text-gray-700"}`}>Imágenes <span className={`text-xs ml-2 ${isDark?"text-dark-text-secondary":"text-gray-400"}`}>(máx. 5)</span></label>
+              <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${isDark?"border-dark-border hover:border-rose-500/30":"border-gray-200 hover:border-rose-300 bg-gray-50/50"}`}>
+                <ImageIcon className={`w-8 h-8 mx-auto mb-2 ${isDark?"text-dark-text-secondary":"text-gray-400"}`} />
+                <p className={`text-sm font-medium ${isDark?"text-dark-text":"text-gray-700"}`}>Arrastra tus imágenes aquí</p>
+                <p className={`text-xs mt-1 ${isDark?"text-dark-text-secondary":"text-gray-500"}`}>o haz clic para seleccionar</p>
+              </div>
+              {images.length>0 && <div className="flex gap-2 mt-2">{images.map((img,idx)=>(<div key={idx} className="relative"><img src={img} alt="" className="w-16 h-16 rounded-lg object-cover" /><button onClick={()=>setImages(images.filter((_,i)=>i!==idx))} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600"><X className="w-3 h-3" /></button></div>))}</div>}
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => { handleSubmit(true); }}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${isDark ? "text-dark-text-secondary hover:text-dark-text hover:bg-white/5" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`}>
-              <Save className="w-4 h-4" />
-              Guardar borrador
-            </button>
-            <button onClick={() => handleSubmit(false)}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg active:scale-95">
-              <Send className="w-4 h-4" />
-              {editPost ? "Actualizar" : "Publicar"}
-            </button>
+
+          <div className={`sticky bottom-0 flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border-t gap-3 bg-inherit ${isDark?"border-dark-border":"border-gray-100"}`}>
+            <div className={`flex items-center gap-1.5 text-xs ${isDark?"text-dark-text-secondary":"text-gray-500"}`}><Eye className="w-3.5 h-3.5" /> Visible para todos</div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {currentDraftId && <button onClick={delCurrent} className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${isDark?"text-red-400 hover:bg-red-500/10 border border-red-500/20":"text-red-600 hover:bg-red-50 border border-red-200"}`}><Trash2 className="w-4 h-4" /><span className="hidden sm:inline">Eliminar</span></button>}
+              <button onClick={cancel} className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${isDark?"text-dark-text-secondary hover:text-dark-text hover:bg-white/5":"text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`}><X className="w-4 h-4" /><span className="hidden sm:inline">Cancelar</span></button>
+              <button onClick={saveDraft} disabled={!hasContent} className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm ${hasContent?isDark?"text-amber-400 hover:bg-amber-500/10 border border-amber-500/20":"text-amber-700 hover:bg-amber-50 border border-amber-200":isDark?"text-dark-text-secondary cursor-not-allowed":"text-gray-400 cursor-not-allowed"}`}><Save className="w-4 h-4" />{saveFeedback?"¡Guardado!":<span className="hidden sm:inline">Guardar</span>}</button>
+              <button onClick={publish} disabled={!canPublish} className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all shadow-lg ${canPublish?"bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 active:scale-95":"bg-gray-300 cursor-not-allowed dark:bg-dark-border"}`}><Send className="w-4 h-4" />{editPost?"Actualizar":"Publicar"}</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <DraftsListModal isOpen={showDraftsModal} onClose={()=>setShowDraftsModal(false)} onSelect={selectDraft} onDelete={delDraft} drafts={drafts} isDark={isDark} />
+      <ConfirmModal isOpen={confirm.isOpen} onClose={()=>setConfirm(p=>({...p,isOpen:false}))} onConfirm={confirm.onConfirm} title={confirm.title} message={confirm.message} confirmText={confirm.confirmText} type={confirm.type} />
+    </>
   );
 }
 
@@ -535,6 +566,7 @@ function PostDetailModal({ post, isOpen, onClose, isDark, user, onDelete, onArch
   const [comments, setComments] = useState(post?.comments || []);
   const [replyTo, setReplyTo] = useState(null);
   const [replyText, setReplyText] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState({ isOpen: false });
 
   useEffect(() => {
     if (post) setComments(post.comments || []);
@@ -610,7 +642,7 @@ function PostDetailModal({ post, isOpen, onClose, isDark, user, onDelete, onArch
               </button>
             )}
             {onDelete && (
-              <button onClick={() => { if (window.confirm("¿Eliminar publicación?")) { onDelete(post.id); onClose(); } }} className={`p-2 rounded-lg transition-all ${isDark ? "text-dark-text-secondary hover:text-red-400 hover:bg-red-500/10" : "text-gray-400 hover:text-red-500 hover:bg-red-50"}`} title="Eliminar">
+              <button onClick={() => setConfirmDelete({ isOpen: true })} className={`p-2 rounded-lg transition-all ${isDark ? "text-dark-text-secondary hover:text-red-400 hover:bg-red-500/10" : "text-gray-400 hover:text-red-500 hover:bg-red-50"}`} title="Eliminar">
                 <Trash2 className="w-4 h-4" />
               </button>
             )}
@@ -737,6 +769,18 @@ function PostDetailModal({ post, isOpen, onClose, isDark, user, onDelete, onArch
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation */}
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false })}
+        onConfirm={() => { onDelete(post.id); onClose(); }}
+        title="¿Eliminar publicación?"
+        message="Esta acción no se puede deshacer. La publicación será eliminada permanentemente."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
     </div>
   );
 }
@@ -814,6 +858,7 @@ function PostCard({ post, isDark, onPostClick, onLike, onSave, onEdit, onDelete,
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes || 0);
+  const [confirmDelete, setConfirmDelete] = useState({ isOpen: false });
 
   const displayUser = propUser || { name: "Mi Refugio" };
 
@@ -890,7 +935,7 @@ function PostCard({ post, isDark, onPostClick, onLike, onSave, onEdit, onDelete,
                     </button>
                   )}
                   <div className={`border-t ${isDark ? "border-dark-border" : "border-gray-100"}`}></div>
-                  <button onClick={() => { if (window.confirm("¿Eliminar esta publicación?")) { onDelete(post.id); } setShowOptions(false); }} className={`flex items-center gap-3 px-4 py-3 text-sm w-full transition-colors ${isDark ? "text-red-400 hover:text-red-300 hover:bg-red-500/10" : "text-red-600 hover:bg-red-50"}`}>
+                  <button onClick={() => { setConfirmDelete({ isOpen: true }); setShowOptions(false); }} className={`flex items-center gap-3 px-4 py-3 text-sm w-full transition-colors ${isDark ? "text-red-400 hover:text-red-300 hover:bg-red-500/10" : "text-red-600 hover:bg-red-50"}`}>
                     <Trash2 className="w-4 h-4" /> Eliminar
                   </button>
                 </div>
@@ -928,6 +973,18 @@ function PostCard({ post, isDark, onPostClick, onLike, onSave, onEdit, onDelete,
             ))}
           </div>
         )}
+
+        {/* Delete Confirmation */}
+        <ConfirmModal
+          isOpen={confirmDelete.isOpen}
+          onClose={() => setConfirmDelete({ isOpen: false })}
+          onConfirm={() => { onDelete(post.id); }}
+          title="¿Eliminar publicación?"
+          message="Esta acción no se puede deshacer. La publicación será eliminada permanentemente."
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          type="danger"
+        />
 
         {/* Divider */}
         <div className={`border-t my-4 ${isDark ? "border-dark-border" : "border-gray-100"}`}></div>
@@ -1001,33 +1058,6 @@ function ForumRightPanel({ isDark, onCreatePost }) {
 
   return (
     <aside className="space-y-5">
-      {/* Quick Actions */}
-      <div className={cardClass}>
-        <h3 className={sectionTitleClass}>Acceso rápido</h3>
-        <button onClick={onCreatePost}
-          className="w-full flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold text-sm hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg active:scale-[0.98]">
-          <Plus className="w-5 h-5" />
-          Crear nueva publicación
-        </button>
-        <div className="mt-3 space-y-1">
-          {[
-            { icon: FileText, label: "Ver borradores", color: "text-amber-500", bg: "bg-amber-100 dark:bg-amber-500/10" },
-            { icon: Pin, label: "Publicaciones fijadas", color: "text-rose-500", bg: "bg-rose-100 dark:bg-rose-500/10" },
-            { icon: TrendingUp, label: "Estadísticas del foro", color: "text-violet-500", bg: "bg-violet-100 dark:bg-violet-500/10" },
-          ].map((link, idx) => {
-            const Icon = link.icon;
-            return (
-              <button key={idx} className={`w-full flex items-center gap-3 p-3 rounded-xl text-sm transition-all ${isDark ? "text-dark-text-secondary hover:text-dark-text hover:bg-white/5" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"}`}>
-                <div className={`w-8 h-8 rounded-lg ${link.bg} flex items-center justify-center`}>
-                  <Icon className={`w-4 h-4 ${link.color}`} />
-                </div>
-                <span className="font-medium">{link.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Tips */}
       <div className={cardClass}>
         <div className="flex items-center gap-2 mb-4">
@@ -1112,62 +1142,6 @@ function ForumRightPanel({ isDark, onCreatePost }) {
 // NOTIFICATIONS PANEL
 // ============================================================
 
-function NotificationBell({ isDark, notifications, onClear }) {
-  const [show, setShow] = useState(false);
-  const unread = notifications.filter(n => !n.read).length;
-
-  return (
-    <div className="relative">
-      <button onClick={() => setShow(!show)} className={`relative p-2 rounded-xl transition-all ${isDark ? "text-dark-text-secondary hover:text-dark-text hover:bg-white/5" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}>
-        <Bell className="w-5 h-5" />
-        {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-            {unread}
-          </span>
-        )}
-      </button>
-      {show && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setShow(false)}></div>
-          <div className={`absolute right-0 top-full mt-2 w-80 rounded-2xl shadow-xl z-20 overflow-hidden ${isDark ? "bg-dark-card border border-dark-border" : "bg-white border border-gray-100"}`}>
-            <div className={`px-4 py-3 border-b flex items-center justify-between ${isDark ? "border-dark-border" : "border-gray-100"}`}>
-              <h3 className={`text-sm font-bold ${isDark ? "text-dark-text" : "text-gray-900"}`}>Notificaciones</h3>
-              {unread > 0 && (
-                <button onClick={onClear} className={`text-xs font-medium ${isDark ? "text-rose-400 hover:text-rose-300" : "text-rose-600 hover:text-rose-700"}`}>
-                  Marcar todas leídas
-                </button>
-              )}
-            </div>
-            <div className="max-h-72 overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className={`p-6 text-center ${isDark ? "text-dark-text-secondary" : "text-gray-500"}`}>
-                  <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Sin notificaciones</p>
-                </div>
-              ) : (
-                notifications.map((n, idx) => (
-                  <div key={idx} className={`px-4 py-3 flex gap-3 ${!n.read ? (isDark ? "bg-rose-500/5" : "bg-rose-50/50") : ""} ${isDark ? "hover:bg-white/5" : "hover:bg-gray-50"} transition-all cursor-pointer`}>
-                    <div className={`w-8 h-8 rounded-full ${n.type === "like" ? "bg-rose-100 dark:bg-rose-500/15" : n.type === "comment" ? "bg-blue-100 dark:bg-blue-500/15" : "bg-amber-100 dark:bg-amber-500/15"} flex items-center justify-center`}>
-                      {n.type === "like" ? <ThumbsUp className="w-4 h-4 text-rose-500" /> :
-                       n.type === "comment" ? <MessageCircle className="w-4 h-4 text-blue-500" /> :
-                       <Heart className="w-4 h-4 text-amber-500" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${isDark ? "text-dark-text" : "text-gray-900"}`}>{n.message}</p>
-                      <p className={`text-xs mt-0.5 ${isDark ? "text-dark-text-secondary" : "text-gray-400"}`}>{n.time}</p>
-                    </div>
-                    {!n.read && <span className="w-2 h-2 rounded-full bg-rose-500 mt-1.5"></span>}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
@@ -1197,13 +1171,6 @@ export default function ShelterForum() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
 
-  // Notifications
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: "like", message: "A María García le gustó tu publicación", time: "hace 5 min", read: false },
-    { id: 2, type: "comment", message: "Carlos Ruiz comentó en tu publicación", time: "hace 1 hora", read: false },
-    { id: 3, type: "like", message: "A Laura Sánchez le gustó tu publicación", time: "hace 3 horas", read: true },
-    { id: 4, type: "share", message: "Pedro Martínez compartió tu publicación", time: "hace 1 día", read: true },
-  ]);
 
   // Simulate loading
   useEffect(() => {
@@ -1315,10 +1282,6 @@ export default function ShelterForum() {
     setSortBy("newest");
   };
 
-  const handleMarkAllRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
-  };
-
   const activeFiltersCount = [
     selectedCategory !== "all",
     showOnlyMine,
@@ -1368,7 +1331,6 @@ export default function ShelterForum() {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3">
-              <NotificationBell isDark={isDark} notifications={notifications} onClear={handleMarkAllRead} />
               <button
                 onClick={() => { setEditingPost(null); setShowCreateModal(true); }}
                 className="relative inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg hover:shadow-xl active:scale-95 group"

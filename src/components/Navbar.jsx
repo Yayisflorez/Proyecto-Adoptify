@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings, Bell, ShoppingCart, Sun, Moon, Building2, ClipboardList, Store, LayoutDashboard } from "lucide-react";
+import { Heart, Menu, X, Sparkles, User, ChevronDown, LogOut, PawPrint, ShoppingBag, MessageSquare, Home as HomeIcon, Settings, Bell, ShoppingCart, Sun, Moon, Building2, ClipboardList, Store, LayoutDashboard, PackageSearch } from "lucide-react";
 import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../context/I18nContext";
 import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
+import NotificationPanel from "./NotificationPanel";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -213,6 +214,15 @@ export default function Navbar() {
                         Mi tienda
                       </Link>
                     )}
+                    {isStoreEnabled && (
+                      <Link
+                        to="/refugio/pedidos"
+                        className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/refugio/pedidos") || isActive("/refugio/pedidos/"))}`}
+                      >
+                        <PackageSearch className="w-4 h-4" />
+                        Pedidos
+                      </Link>
+                    )}
                     <Link
                       to="/refugio/foro"
                       className={`nav-link text-sm font-medium transition-all flex items-center gap-1.5 px-3 py-2 rounded-xl ${getLinkClasses(isActive("/refugio/foro"))}`}
@@ -328,7 +338,11 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 {/* Notifications */}
-                {!isShelter && (
+                {isShelter ? (
+                  <div className="relative">
+                    <NotificationPanel />
+                  </div>
+                ) : (
                   <button className={`relative p-2 rounded-xl transition-colors ${
                     isDark
                       ? "text-gray-300 hover:text-orange-400 hover:bg-white/5"
@@ -684,6 +698,13 @@ export default function Navbar() {
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/refugio/tienda"))}`}>
                       <Store className="w-4 h-4" />
                       Mi tienda
+                    </Link>
+                  )}
+                  {isStoreEnabled && (
+                    <Link to="/refugio/pedidos" onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium ${getMobileClasses(isActive("/refugio/pedidos") || isActive("/refugio/pedidos/"))}`}>
+                      <PackageSearch className="w-4 h-4" />
+                      Pedidos
                     </Link>
                   )}
                   <Link to="/refugio/foro" onClick={() => setIsOpen(false)}

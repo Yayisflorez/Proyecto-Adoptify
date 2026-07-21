@@ -10,7 +10,7 @@ import loginDog from "../../assets/loginDog.jpg";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, adminLogin, storeLogin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -99,12 +99,33 @@ export default function Login() {
 
     setTimeout(() => {
       setIsLoading(false);
-      setSuccess(true);
+
+      // ========================================================
+      // VERIFICACIÓN DE ADMINISTRADOR PRINCIPAL
+      // ========================================================
+      const adminResult = adminLogin(email, password);
+      if (adminResult.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate("/admin/dashboard");
+        }, 2000);
+        return;
+      }
+
+      // ========================================================
+      // VERIFICACIÓN DE TIENDA ALIADA (kanupets@gmail.com)
+      // ========================================================
+      const storeResult = storeLogin(email, password);
+      if (storeResult.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate("/tienda/dashboard");
+        }, 2000);
+        return;
+      }
 
       // ========================================================
       // VERIFICACIÓN DE ROL REFUGIO (SIN BASE DE DATOS AÚN)
-      // Se valida con credenciales hardcodeadas mientras se integra
-      // la base de datos real.
       // ========================================================
       const isShelterEmail = email === "pruebaRefugio@gmail.com";
       const isShelterPassword = password === "RefugiosVistas123#";
@@ -113,7 +134,6 @@ export default function Login() {
       let userData;
 
       if (isShelter) {
-        // Datos para rol refugio
         userData = {
           name: "Refugio Patitas Felices",
           email: email,
@@ -141,6 +161,7 @@ export default function Login() {
       }
 
       login(userData);
+      setSuccess(true);
 
       setTimeout(() => {
         if (isShelter) {
